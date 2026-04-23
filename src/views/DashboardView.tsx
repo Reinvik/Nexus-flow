@@ -166,12 +166,12 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-white/10">
-                <Zap size={20} className="text-black" fill="currentColor" />
+             <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+                <Zap size={20} className="text-white" fill="currentColor" />
              </div>
              <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Nexus Intelligence</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Dashboard <span className="text-slate-400 dark:text-slate-800">Maestro</span></h2>
+          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Dashboard <span className="text-slate-400 dark:text-slate-800">Operativo</span></h2>
         </div>
         
         <div className="flex items-center gap-4 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-4 rounded-3xl backdrop-blur-3xl">
@@ -181,9 +181,9 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                 Sincronizado <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
               </span>
            </div>
-           <button onClick={() => window.location.reload()} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-primary transition-all active:scale-95">
+            <button onClick={() => window.location.reload()} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-200 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-primary transition-all active:scale-95 shadow-sm">
               <Activity size={20} />
-           </button>
+            </button>
         </div>
       </div>
 
@@ -198,7 +198,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                  <div className={`w-14 h-14 rounded-2xl bg-slate-200/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform duration-700`}>
                    <stat.icon size={24} />
                  </div>
-                 <span className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/5 bg-slate-200/30 dark:bg-white/[0.02] text-slate-500`}>
+                 <span className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.02] text-slate-500`}>
                    {stat.trend}
                  </span>
               </div>
@@ -248,8 +248,8 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                     <div key={item.commune} className="group">
                       <div className="flex justify-between items-end mb-5 px-3">
                         <div className="flex items-center gap-6">
-                            <span className="text-[11px] font-black text-slate-600 tabular-nums">0{idx + 1}</span>
-                            <span className="text-base font-black text-slate-500 dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
+                            <span className="text-[11px] font-black text-slate-400 dark:text-slate-600 tabular-nums">0{idx + 1}</span>
+                            <span className="text-base font-black text-foreground dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
                          </div>
                          <span className="text-2xl font-black text-foreground tracking-tighter">{formatCurrency(item.amount)}</span>
                        </div>
@@ -288,7 +288,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                     <button 
                       key={action.view}
                       onClick={() => onNavigate?.(action.view)}
-                      className="w-full h-24 bg-slate-200/30 dark:bg-white/[0.01] hover:bg-white dark:hover:bg-white/5 text-slate-500 hover:text-black dark:hover:text-white rounded-[2.5rem] border border-slate-200 dark:border-white/5 hover:border-transparent flex items-center justify-between px-10 transition-all duration-700 group active:scale-[0.98] shadow-sm hover:shadow-2xl hover:shadow-primary/20"
+                      className="w-full h-24 bg-slate-100/50 dark:bg-white/[0.01] hover:bg-white dark:hover:bg-white/5 text-slate-500 hover:text-primary dark:hover:text-white rounded-[2.5rem] border border-slate-200 dark:border-white/5 hover:border-primary/20 flex items-center justify-between px-10 transition-all duration-700 group active:scale-[0.98] shadow-sm hover:shadow-2xl hover:shadow-primary/20"
                     >
                      <div className="flex items-center gap-6">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${action.color} group-hover:bg-primary/20 group-hover:text-primary`}>
