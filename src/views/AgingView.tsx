@@ -304,10 +304,10 @@ export default function AgingView() {
       <div className="flex flex-col lg:flex-row justify-between items-end gap-10 px-4">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-             <span className="w-8 h-px bg-cyan-500" />
+             <span className="w-8 h-px bg-primary" />
              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Financial Tracking</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tight text-white uppercase">Recaudación <span className="text-slate-700">{selectedYear}</span></h2>
+          <h2 className="text-5xl font-black tracking-tight text-white uppercase">Recaudación <span className="text-slate-500">{selectedYear}</span></h2>
           
           <div className="flex items-center gap-6">
             <div className="relative group">
@@ -335,7 +335,7 @@ export default function AgingView() {
           <div className="glass-card p-8 rounded-[2.5rem] min-w-[280px] relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 blur-3xl -mr-12 -mt-12 group-hover:opacity-100 opacity-50 transition-opacity" />
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Cartera Pendiente</p>
-            <h3 className="text-4xl font-black text-white tracking-tighter">{formatCurrency(totalToCollect)}</h3>
+            <h3 className="text-4xl font-black text-foreground tracking-tighter">{formatCurrency(totalToCollect)}</h3>
           </div>
         </div>
       </div>

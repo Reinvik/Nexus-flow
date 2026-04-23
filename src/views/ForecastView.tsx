@@ -191,39 +191,39 @@ export default function ForecastView() {
       <div className="flex flex-col lg:flex-row justify-between items-end gap-10 px-4">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-             <span className="w-8 h-px bg-cyan-500" />
+             <span className="w-8 h-px bg-primary" />
              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Predictive Analysis</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tight text-white uppercase">Forecast <span className="text-slate-700">& Tendencias</span></h2>
+          <h2 className="text-5xl font-black tracking-tight text-foreground uppercase">Forecast <span className="text-slate-400 dark:text-slate-700">& Tendencias</span></h2>
           <div className="flex items-center gap-6">
              <p className="text-xs font-bold text-slate-600 uppercase tracking-widest max-w-[300px] leading-relaxed">
                Inteligencia basada en el historial operativo de los últimos 180 días
              </p>
-             <button onClick={fetchData} className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl text-slate-500 hover:text-white transition-all"><RefreshCcw size={18} /></button>
+             <button onClick={fetchData} className="w-12 h-12 flex items-center justify-center bg-slate-200/50 dark:bg-white/5 rounded-2xl text-slate-500 hover:text-primary dark:hover:text-white transition-all"><RefreshCcw size={18} /></button>
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto">
-          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+          <div className="glass-card p-6 rounded-[2rem] border-slate-200 dark:border-white/5">
             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Venta Proyectada</p>
-            <p className="text-xl font-black text-white">{formatCurrency(historicalSales[historicalSales.length - 1]?.total || 0)}</p>
+            <p className="text-xl font-black text-foreground">{formatCurrency(historicalSales[historicalSales.length - 1]?.total || 0)}</p>
             <p className={`text-[8px] font-black uppercase mt-1 ${growthRate >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
               {growthRate >= 0 ? '+' : ''}{growthRate.toFixed(1)}% vs Last Month
             </p>
           </div>
-          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+          <div className="glass-card p-6 rounded-[2rem] border-slate-200 dark:border-white/5">
             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Riesgo Stock</p>
-            <p className={`text-xl font-black ${stockAlerts > 0 ? 'text-rose-500' : 'text-white'}`}>{stockAlerts} Items</p>
+            <p className={`text-xl font-black ${stockAlerts > 0 ? 'text-rose-500' : 'text-foreground'}`}>{stockAlerts} Items</p>
             <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Cobertura {"<"} 15 Días</p>
           </div>
-          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+          <div className="glass-card p-6 rounded-[2rem] border-slate-200 dark:border-white/5">
             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Ticket Promedio</p>
-            <p className="text-xl font-black text-white">{formatCurrency(clientForecasts.reduce((acc, c) => acc + c.avgPurchaseValue, 0) / (clientForecasts.length || 1))}</p>
+            <p className="text-xl font-black text-foreground">{formatCurrency(clientForecasts.reduce((acc, c) => acc + c.avgPurchaseValue, 0) / (clientForecasts.length || 1))}</p>
             <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Valor Unitario Mensual</p>
           </div>
-          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+          <div className="glass-card p-6 rounded-[2rem] border-slate-200 dark:border-white/5">
             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Demanda Items</p>
-            <p className="text-xl font-black text-white">{Math.round(historicalSales[historicalSales.length - 1]?.quantity || 0).toLocaleString()}</p>
+            <p className="text-xl font-black text-foreground">{Math.round(historicalSales[historicalSales.length - 1]?.quantity || 0).toLocaleString()}</p>
             <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Unidades Proyectadas</p>
           </div>
         </div>

@@ -240,20 +240,20 @@ export default function SalesView() {
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-white/10">
-                <ShoppingCart size={20} className="text-black" fill="currentColor" />
+             <div className="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-white flex items-center justify-center shadow-xl shadow-primary/10">
+                <ShoppingCart size={20} className="text-primary dark:text-black" fill="currentColor" />
              </div>
-             <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Terminal de Ventas</p>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Terminal de Ventas</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none">Punto <span className="text-slate-800">Operativo</span></h2>
+          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Punto <span className="text-slate-400 dark:text-slate-800">Operativo</span></h2>
         </div>
         
         <div className="hidden lg:flex items-center gap-8 pr-4">
-           <div className="text-right">
-              <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">Cajero Activo</p>
-              <p className="text-sm font-black text-white uppercase tracking-tighter">{user?.email?.split('@')[0]}</p>
-           </div>
-           <div className="w-px h-10 bg-white/5" />
+            <div className="text-right">
+               <p className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-[0.3em]">Cajero Activo</p>
+               <p className="text-sm font-black text-foreground uppercase tracking-tighter">{user?.email?.split('@')[0]}</p>
+            </div>
+            <div className="w-px h-10 bg-slate-200 dark:bg-white/5" />
            <div className="text-right">
               <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">Estado</p>
               <p className="text-sm font-black text-emerald-500 uppercase tracking-tighter">En Línea</p>
@@ -286,7 +286,7 @@ export default function SalesView() {
             placeholder="ESCANEANDO PRODUCTOS..." 
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="flex-1 bg-transparent border-none outline-none text-white font-black placeholder:text-slate-800 uppercase text-xs tracking-[0.2em]"
+            className="flex-1 bg-transparent border-none outline-none text-foreground font-black placeholder:text-slate-400 dark:placeholder:text-slate-800 uppercase text-xs tracking-[0.2em]"
           />
           {searchTerm && (
             <button onClick={() => setSearchTerm('')} className="p-2 hover:text-white text-slate-700 transition-colors">
@@ -300,7 +300,7 @@ export default function SalesView() {
             <div 
               key={product.id}
               onClick={() => addToCart(product)}
-              className="glass-card p-8 rounded-[3rem] group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.02] border-white/5 hover:border-cyan-500/20 flex flex-col items-center text-center gap-6 relative overflow-hidden"
+              className="glass-card p-5 rounded-[2.5rem] group cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200/50 dark:hover:bg-white/[0.02] border-slate-200 dark:border-white/5 hover:border-primary/20 flex flex-col items-center text-center gap-4 relative overflow-hidden"
             >
               <div className="absolute top-6 right-6">
                  {product.stock <= 0 ? (
@@ -310,12 +310,12 @@ export default function SalesView() {
                  )}
               </div>
 
-              <div className="w-24 h-24 rounded-[2rem] bg-white/[0.01] border border-white/5 flex items-center justify-center text-4xl font-black text-slate-800 group-hover:text-cyan-400 group-hover:bg-cyan-500/5 group-hover:border-cyan-500/20 transition-all duration-1000">
+              <div className="w-16 h-16 rounded-2xl bg-slate-200/50 dark:bg-white/[0.01] border border-slate-200 dark:border-white/5 flex items-center justify-center text-2xl font-black text-slate-400 dark:text-slate-800 group-hover:text-primary group-hover:bg-primary/5 group-hover:border-primary/20 transition-all duration-700">
                 {product.name.charAt(0)}
               </div>
               
               <div className="space-y-2 px-2">
-                <h4 className="text-sm font-black text-white line-clamp-2 uppercase tracking-tight leading-snug group-hover:text-cyan-400 transition-colors">{product.name}</h4>
+                <h4 className="text-[12px] font-black text-foreground line-clamp-2 uppercase tracking-tight leading-tight group-hover:text-primary transition-colors">{product.name}</h4>
                 <div className="flex flex-col items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{product.sku || 'SIN SKU'}</span>
                   <span className={`text-[9px] font-black uppercase ${product.stock <= 0 ? 'text-amber-500/70' : 'text-slate-600'}`}>
@@ -324,8 +324,8 @@ export default function SalesView() {
                 </div>
               </div>
 
-              <div className="mt-2 pt-4 border-t border-white/5 w-full">
-                <p className="text-2xl font-black text-white tracking-tighter">{formatCurrency(product.net_price)}</p>
+              <div className="mt-1 pt-3 border-t border-slate-200 dark:border-white/5 w-full">
+                <p className="text-xl font-black text-foreground tracking-tighter">{formatCurrency(product.net_price)}</p>
               </div>
             </div>
           ))}
@@ -335,20 +335,20 @@ export default function SalesView() {
       {/* Cart & Checkout Section */}
       <div className={`
         ${showCart ? 'fixed inset-0 z-[100] lg:relative lg:inset-auto' : 'hidden lg:flex'}
-        w-full lg:w-[460px] flex flex-col bg-[#020617] lg:bg-transparent transition-all duration-700
+        w-full lg:w-[420px] flex flex-col bg-background lg:bg-transparent transition-all duration-700
       `}>
         {/* Mobile Header */}
         <div className="lg:hidden h-28 flex items-center justify-between px-10 border-b border-white/5 bg-white/[0.01] backdrop-blur-3xl">
           <div className="space-y-1">
-            <h3 className="text-3xl font-black tracking-tighter text-white uppercase">Operación</h3>
-            <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em]">Checkpoint de Venta</p>
+            <h3 className="text-3xl font-black tracking-tighter text-foreground uppercase">Operación</h3>
+            <p className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-[0.4em]">Checkpoint de Venta</p>
           </div>
           <button onClick={() => setShowCart(false)} className="w-14 h-14 flex items-center justify-center bg-white/5 rounded-2xl text-slate-500 hover:text-white transition-all">
             <X size={28} />
           </button>
         </div>
 
-        <div className="flex-1 flex flex-col glass-card lg:rounded-[4rem] overflow-hidden m-6 lg:m-0 border-white/5 shadow-2xl relative">
+        <div className="flex-1 flex flex-col glass-card lg:rounded-[3rem] overflow-hidden m-4 lg:m-0 border-slate-200 dark:border-white/5 shadow-2xl relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[100px] -mr-32 -mt-32" />
           
           <div className="p-10 border-b border-white/5 space-y-6 relative z-10" ref={clientSearchRef}>
@@ -368,11 +368,11 @@ export default function SalesView() {
                   <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-slate-600 group-hover:text-cyan-400 transition-colors">
                     <UserIcon size={18} />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-black text-white uppercase tracking-wider truncate max-w-[200px]">
+                   <div className="flex flex-col">
+                    <span className="text-[11px] font-black text-foreground uppercase tracking-wider truncate max-w-[180px]">
                       {selectedClientId ? clients.find(c => c.id === selectedClientId)?.name : 'Seleccionar Cliente'}
                     </span>
-                    <span className="text-[9px] font-bold text-slate-600 uppercase">
+                    <span className="text-[9px] font-bold text-slate-500 dark:text-slate-600 uppercase">
                       {selectedClientId ? clients.find(c => c.id === selectedClientId)?.rut : 'Búsqueda Inteligente'}
                     </span>
                   </div>
@@ -385,13 +385,13 @@ export default function SalesView() {
                    <div className="p-6 border-b border-white/5 bg-white/[0.02]">
                       <div className="flex items-center gap-4 bg-black/40 p-4 rounded-2xl border border-white/5 group focus-within:border-cyan-500/30 transition-all">
                         <Search size={16} className="text-slate-700 group-focus-within:text-cyan-500" />
-                        <input 
+                         <input 
                           autoFocus
                           type="text" 
                           placeholder="NOMBRE O RUT..."
                           value={clientSearchTerm}
                           onChange={e => setClientSearchTerm(e.target.value)}
-                          className="w-full bg-transparent text-[10px] font-black text-white outline-none uppercase placeholder:text-slate-800 tracking-widest"
+                          className="w-full bg-transparent text-[10px] font-black text-foreground outline-none uppercase placeholder:text-slate-400 dark:placeholder:text-slate-800 tracking-widest"
                         />
                       </div>
                    </div>
@@ -418,9 +418,9 @@ export default function SalesView() {
                          }}
                          className="px-8 py-5 hover:bg-white/[0.03] cursor-pointer flex items-center justify-between group transition-all"
                        >
-                         <div className="flex flex-col gap-1">
-                           <span className="text-[11px] font-black text-white uppercase group-hover:text-cyan-400 transition-colors tracking-tight">{client.name}</span>
-                           <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">{client.rut || 'CONSUMIDOR FINAL'}</span>
+                          <div className="flex flex-col gap-1">
+                           <span className="text-[11px] font-black text-foreground uppercase group-hover:text-primary transition-colors tracking-tight">{client.name}</span>
+                           <span className="text-[9px] font-bold text-slate-500 dark:text-slate-700 uppercase tracking-widest">{client.rut || 'CONSUMIDOR FINAL'}</span>
                          </div>
                          {selectedClientId === client.id && <div className="w-2.5 h-2.5 bg-cyan-500 rounded-full shadow-[0_0_15px_rgba(6,182,212,1)]" />}
                        </div>
@@ -441,30 +441,30 @@ export default function SalesView() {
               </div>
             ) : (
               cart.map(item => (
-                <div key={item.id} className="flex flex-col gap-5 p-6 bg-white/[0.01] rounded-[2.5rem] border border-white/5 group hover:border-white/10 transition-all duration-500">
+                <div key={item.id} className="flex flex-col gap-4 p-5 bg-slate-200/20 dark:bg-white/[0.01] rounded-[2rem] border border-slate-200 dark:border-white/5 group hover:border-primary/20 transition-all duration-500">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1 flex-1 pr-6">
-                      <h5 className="text-[11px] font-black text-white uppercase tracking-tight leading-relaxed group-hover:text-cyan-400 transition-colors">{item.name}</h5>
-                      <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{formatCurrency(item.net_price)} / UNIT</p>
+                       <h5 className="text-[11px] font-black text-foreground uppercase tracking-tight leading-relaxed group-hover:text-primary transition-colors">{item.name}</h5>
+                      <p className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">{formatCurrency(item.net_price)} / UNIT</p>
                     </div>
                     <button onClick={() => removeFromCart(item.id)} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/0 hover:bg-rose-500/10 text-slate-800 hover:text-rose-500 transition-all">
                       <Trash2 size={16} />
                     </button>
                   </div>
                   <div className="flex justify-between items-center pt-2">
-                    <div className="flex items-center gap-2 bg-black/40 rounded-2xl p-1.5 border border-white/5">
-                      <button onClick={() => updateQuantity(item.id, -1)} className="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-white transition-colors bg-white/0 hover:bg-white/5 rounded-xl"><Minus size={16} /></button>
-                      <span className="text-xs font-black w-10 text-center text-white">{item.cartQuantity}</span>
-                      <button onClick={() => updateQuantity(item.id, 1)} className="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-white transition-colors bg-white/0 hover:bg-white/5 rounded-xl"><Plus size={16} /></button>
+                     <div className="flex items-center gap-2 bg-slate-200/50 dark:bg-black/40 rounded-2xl p-1.5 border border-slate-200 dark:border-white/5">
+                      <button onClick={() => updateQuantity(item.id, -1)} className="w-10 h-10 flex items-center justify-center text-slate-500 dark:text-slate-600 hover:text-primary dark:hover:text-white transition-colors bg-white/0 hover:bg-slate-300 dark:hover:bg-white/5 rounded-xl"><Minus size={16} /></button>
+                      <span className="text-xs font-black w-10 text-center text-foreground">{item.cartQuantity}</span>
+                      <button onClick={() => updateQuantity(item.id, 1)} className="w-10 h-10 flex items-center justify-center text-slate-500 dark:text-slate-600 hover:text-primary dark:hover:text-white transition-colors bg-white/0 hover:bg-slate-300 dark:hover:bg-white/5 rounded-xl"><Plus size={16} /></button>
                     </div>
-                    <p className="text-lg font-black text-white tracking-tighter">{formatCurrency(item.net_price * item.cartQuantity)}</p>
+                    <p className="text-lg font-black text-foreground tracking-tighter">{formatCurrency(item.net_price * item.cartQuantity)}</p>
                   </div>
                 </div>
               ))
             )}
           </div>
 
-          <div className="p-10 bg-white/[0.01] border-t border-white/5 space-y-10 relative z-10">
+          <div className="p-10 bg-slate-50 dark:bg-white/[0.01] border-t border-slate-200 dark:border-white/5 space-y-8 relative z-10">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] ml-2">Folio Int.</span>
@@ -472,7 +472,7 @@ export default function SalesView() {
                   type="number"
                   value={invoiceFolio}
                   onChange={e => setInvoiceFolio(e.target.value)}
-                  className={`w-full bg-white/[0.02] border p-5 rounded-2xl text-xs font-black outline-none transition-all ${folioWarning ? 'border-rose-500/50 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.1)]' : 'border-white/5 text-white focus:border-cyan-500/30'}`}
+                   className={`w-full bg-slate-200/30 dark:bg-white/[0.02] border p-5 rounded-2xl text-xs font-black outline-none transition-all ${folioWarning ? 'border-rose-500/50 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.1)]' : 'border-slate-200 dark:border-white/5 text-foreground focus:border-primary/30'}`}
                 />
               </div>
               <div className="space-y-3">
@@ -482,7 +482,7 @@ export default function SalesView() {
                     type="number"
                     value={paymentDays}
                     onChange={e => setPaymentDays(parseInt(e.target.value, 10) || 0)}
-                    className="w-full bg-white/[0.02] border border-white/5 p-5 rounded-2xl text-xs font-black text-white outline-none focus:border-cyan-500/30 transition-all pr-12"
+                     className="w-full bg-slate-200/30 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-5 rounded-2xl text-xs font-black text-foreground outline-none focus:border-primary/30 transition-all pr-12"
                   />
                   <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-700 uppercase">Días</span>
                 </div>
@@ -490,27 +490,27 @@ export default function SalesView() {
             </div>
 
             <div className="space-y-4 pt-4">
-              <div className="flex justify-between text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">
+               <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 dark:text-slate-600 tracking-[0.3em]">
                 <span>Neto</span>
-                <span className="text-white">{formatCurrency(netSubtotal)}</span>
+                <span className="text-foreground">{formatCurrency(netSubtotal)}</span>
               </div>
-              <div className="flex justify-between text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">
+               <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 dark:text-slate-600 tracking-[0.3em]">
                 <span>I.V.A (19%)</span>
-                <span className="text-white">{formatCurrency(iva)}</span>
+                <span className="text-foreground">{formatCurrency(iva)}</span>
               </div>
               <div className="flex justify-between items-center pt-8 border-t border-white/10">
                 <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.5em]">Bruto</span>
-                <div className="flex items-baseline gap-1">
-                   <span className="text-[10px] font-black text-cyan-500 mr-2 uppercase">Total</span>
-                   <span className="text-4xl font-black text-white tracking-tighter">{formatCurrency(totalWithTax)}</span>
-                </div>
+                 <div className="flex items-baseline gap-1">
+                    <span className="text-[10px] font-black text-primary mr-2 uppercase">Total</span>
+                    <span className="text-4xl font-black text-foreground tracking-tighter">{formatCurrency(totalWithTax)}</span>
+                 </div>
               </div>
             </div>
 
-            <button 
+             <button 
               onClick={handleSale}
               disabled={isProcessing || cart.length === 0 || !!folioWarning}
-              className="w-full h-24 bg-white text-black hover:bg-cyan-400 disabled:bg-slate-900/50 disabled:text-slate-700 rounded-[2rem] font-black text-[12px] uppercase tracking-[0.4em] active:scale-95 transition-all flex items-center justify-center gap-4 group/confirm shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
+              className="w-full h-24 bg-primary text-white dark:bg-white dark:text-black hover:bg-primary/90 dark:hover:bg-primary disabled:bg-slate-200 dark:disabled:bg-slate-900/50 disabled:text-slate-400 dark:disabled:text-slate-700 rounded-[2.5rem] font-black text-[12px] uppercase tracking-[0.4em] active:scale-95 transition-all flex items-center justify-center gap-4 group/confirm shadow-2xl"
             >
               {isProcessing ? (
                 <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />

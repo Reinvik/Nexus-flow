@@ -132,12 +132,12 @@ export default function InventoryView() {
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-white/10">
-                <PackageSearch size={20} className="text-black" fill="currentColor" />
+             <div className="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-white flex items-center justify-center shadow-xl shadow-primary/10">
+                <PackageSearch size={20} className="text-primary dark:text-black" fill="currentColor" />
              </div>
-             <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Logística & Stock</p>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Logística & Stock</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none">Inventario <span className="text-slate-800">Maestro</span></h2>
+          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Inventario <span className="text-slate-400 dark:text-slate-800">Maestro</span></h2>
         </div>
         
         <div className="flex items-center gap-4 w-full lg:w-auto">
