@@ -28,3 +28,6 @@ dist-ssr
 *.json
 scratch/
 
+!package.json
+!package-lock.json
+!tsconfig*.json
