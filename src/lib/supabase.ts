@@ -22,6 +22,6 @@ try {
 // Usamos el esquema 'flow' donde residen las tablas de producción.
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   db: {
-    schema: 'flow'
+    schema: 'public'
   }
 });

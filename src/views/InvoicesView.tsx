@@ -2,8 +2,26 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Invoice } from '@/types';
 import toast from 'react-hot-toast';
-import { Search, FileText, Calendar, DollarSign, Download, Eye, Edit2, X, Save } from 'lucide-react';
-import { formatDate } from '@/lib/formatters';
+import { 
+  Search, 
+  FileText, 
+  Calendar, 
+  DollarSign, 
+  Download, 
+  Edit2, 
+  X, 
+  Save, 
+  Filter, 
+  ChevronRight, 
+  CheckCircle2, 
+  Clock, 
+  AlertCircle,
+  MapPin,
+  ArrowUpRight,
+  MoreVertical,
+  ChevronDown
+} from 'lucide-react';
+import { formatDate, formatCurrency } from '@/lib/formatters';
 
 export default function InvoicesView() {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -13,11 +31,14 @@ export default function InvoicesView() {
   const [selectedCommune, setSelectedCommune] = useState<string>('Todas');
   const [editingInvoice, setEditingInvoice] = useState<any | null>(null);
   
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'folio', direction: 'desc' });
+  
   // Edit Form State
   const [editFolio, setEditFolio] = useState<string>('');
   const [editIssuedAt, setEditIssuedAt] = useState<string>('');
   const [editDueDate, setEditDueDate] = useState<string>('');
   const [editPaidAmount, setEditPaidAmount] = useState<string>('');
+  const [editTotalAmount, setEditTotalAmount] = useState<string>('');
 
   useEffect(() => {
     fetchInvoices();
@@ -25,59 +46,46 @@ export default function InvoicesView() {
 
   const fetchInvoices = async () => {
     setLoading(true);
-    let query = supabase
-      .from('invoices')
-      .select(`
-        *,
-        sales!invoices_sale_id_fkey (
-          id,
-          total_tax,
-          created_at
-        ),
-        client:clients!invoices_client_id_fkey (
-          id,
-          name,
-          commune
-        )
-      `);
-    
-    // Si no queremos ver las pagadas, las filtramos en el servidor
-    if (!showPaid) {
-      query = query.neq('status', 'Pagada');
-    }
-
-    const { data, error } = await query.order('folio', { ascending: false });
+    try {
+      let query = supabase
+        .from('nf_invoices')
+        .select(`
+          *,
+          client:nf_clients!nf_invoices_client_id_fkey (*)
+        `);
       
-    if (error) {
-      toast.error('Error al cargar facturas');
-      console.error(error);
-    } else {
+      if (!showPaid) {
+        query = query.neq('status', 'Pagada');
+      }
+
+      const { data, error } = await query.order('folio', { ascending: false });
+        
+      if (error) throw error;
       setInvoices(data || []);
+    } catch (error: any) {
+      toast.error('Error al cargar facturas');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleUpdateInvoice = async () => {
     if (!editingInvoice) return;
-
     try {
       const folio = parseInt(editFolio, 10);
+      const total = parseFloat(editTotalAmount) || 0;
       const paid = parseFloat(editPaidAmount) || 0;
       
-      if (isNaN(folio)) {
-        toast.error('Folio inválido');
-        return;
-      }
-
-      const isFullyPaid = paid >= Number(editingInvoice.total_amount);
-      const isPartial = paid > 0 && paid < Number(editingInvoice.total_amount);
+      const isFullyPaid = paid >= total;
+      const isPartial = paid > 0 && paid < total;
 
       const { error } = await supabase
-        .from('invoices')
+        .from('nf_invoices')
         .update({
           folio: folio,
           issued_at: editIssuedAt,
           payment_due_date: editDueDate || null,
+          total_amount: total,
           paid_amount: paid,
           status: isFullyPaid ? 'Pagada' : (isPartial ? 'Parcial' : 'Pendiente')
         })
@@ -85,282 +93,314 @@ export default function InvoicesView() {
 
       if (error) throw error;
 
-      toast.success('Factura actualizada');
+      toast.success('Registro actualizado', {
+        style: { background: '#020617', color: '#fff', fontSize: '10px', fontWeight: 'bold' }
+      });
       setEditingInvoice(null);
       fetchInvoices();
     } catch (error: any) {
-      toast.error('Error al actualizar: ' + error.message);
+      toast.error('Error al actualizar');
     }
   };
 
-  const filtered = invoices.filter(inv => {
-    const matchesSearch = 
-      inv.folio?.toString().includes(searchTerm) || 
-      inv.client?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = showPaid || inv.status !== 'Pagada';
-    const matchesCommune = selectedCommune === 'Todas' || inv.client?.commune === selectedCommune;
-    return matchesSearch && matchesStatus && matchesCommune;
-  });
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const filtered = useMemo(() => {
+    let result = invoices.filter(inv => {
+      const matchesSearch = 
+        inv.folio?.toString().includes(searchTerm) || 
+        inv.client?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCommune = selectedCommune === 'Todas' || inv.client?.commune === selectedCommune;
+      return matchesSearch && matchesCommune;
+    });
+
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        let aValue: any = a[sortConfig.key];
+        let bValue: any = b[sortConfig.key];
+
+        if (sortConfig.key === 'client') {
+          aValue = a.client?.name || '';
+          bValue = b.client?.name || '';
+        }
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [invoices, searchTerm, selectedCommune, sortConfig]);
 
   const communes = useMemo(() => {
     const set = new Set(invoices.map(inv => inv.client?.commune).filter(Boolean));
     return ['Todas', ...Array.from(set).sort()];
   }, [invoices]);
 
+  const getStatusColor = (status: string, dueDate?: string) => {
+    const isOverdue = dueDate && new Date(dueDate) < new Date() && status !== 'Pagada';
+    if (isOverdue) return 'text-rose-500 bg-rose-500/5 border-rose-500/10';
+    if (status === 'Pagada') return 'text-emerald-400 bg-emerald-400/5 border-emerald-400/10';
+    if (status === 'Parcial') return 'text-cyan-400 bg-cyan-400/5 border-cyan-400/10';
+    return 'text-slate-400 bg-white/5 border-white/5';
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Historial de Facturas</h2>
+    <div className="space-y-8 lg:h-[calc(100vh-180px)] flex flex-col font-outfit">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
+        <div className="space-y-2">
+          <h2 className="text-5xl font-black tracking-tight text-white uppercase">Cuentas</h2>
+          <div className="flex items-center gap-2">
+             <span className="w-8 h-px bg-cyan-500" />
+             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Libro de Cobranzas</p>
+          </div>
+        </div>
+        
+        <div className="flex bg-white/[0.03] p-1.5 rounded-[1.25rem] border border-white/5 w-full md:w-auto shadow-2xl">
+          <button 
+            onClick={() => setShowPaid(false)}
+            className={`flex-1 md:px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${!showPaid ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}
+          >
+            Pendientes
+          </button>
+          <button 
+            onClick={() => setShowPaid(true)}
+            className={`flex-1 md:px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${showPaid ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}
+          >
+            Historial
+          </button>
+        </div>
       </div>
 
-      <div className="glass-card rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-card-border">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-            <input 
-              type="text" 
-              placeholder="Buscar por folio o cliente..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-background border border-card-border rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
-            />
-          </div>
-          <div className="mt-4 flex items-center gap-2">
-            <button 
-              onClick={() => setShowPaid(!showPaid)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                showPaid 
-                  ? 'bg-primary text-white shadow-lg' 
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-card-border'
-              }`}
+      {/* Filter & Sort Bar */}
+      <div className="flex flex-col md:flex-row gap-4 px-4">
+        <div className="flex-1 glass-card p-5 rounded-3xl flex items-center gap-4 group">
+          <Search size={18} className="text-slate-600 group-focus-within:text-cyan-400 transition-colors" />
+          <input 
+            type="text" 
+            placeholder="Buscar por folio o razón social..." 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="flex-1 bg-transparent border-none outline-none text-white font-medium uppercase text-xs tracking-wider placeholder:text-slate-700"
+          />
+        </div>
+        
+        <div className="flex gap-4">
+          <div className="glass-card px-6 py-5 rounded-3xl flex items-center gap-3 min-w-[200px] group">
+            <MapPin size={16} className="text-cyan-500/50 group-hover:text-cyan-400 transition-colors" />
+            <select 
+              value={selectedCommune}
+              onChange={e => setSelectedCommune(e.target.value)}
+              className="flex-1 bg-transparent border-none outline-none text-[10px] font-black uppercase text-white appearance-none cursor-pointer"
             >
-              {showPaid ? 'Ocultar Pagadas' : 'Mostrar Pagadas'}
-            </button>
-            <span className="text-[10px] text-slate-400 font-medium">
-              {!showPaid && `Filtrando: Solo Pendientes y Parciales`}
-            </span>
+              {communes.map(c => <option key={c} value={c} className="bg-slate-900">{c === 'Todas' ? 'Todas las Comunas' : c}</option>)}
+            </select>
+            <ChevronDown size={14} className="text-slate-600" />
           </div>
-          
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
-            <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest ml-1">Comuna:</label>
-            <div className="flex flex-wrap gap-1 mt-1 sm:mt-0">
-              <select
-                value={selectedCommune}
-                onChange={(e) => setSelectedCommune(e.target.value)}
-                className="bg-background border border-card-border rounded-lg px-3 py-1 text-xs font-bold focus:ring-2 focus:ring-primary outline-none"
-              >
-                {communes.map(commune => (
-                  <option key={commune} value={commune}>{commune}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-100/50 dark:bg-slate-800/50 text-sm">
-              <tr>
-                <th className="p-4 font-medium uppercase tracking-widest text-[10px]">Folio</th>
-                <th className="p-4 font-medium uppercase tracking-widest text-[10px]">Fecha</th>
-                <th className="p-4 font-medium uppercase tracking-widest text-[10px]">Total</th>
-                <th className="p-4 font-medium uppercase tracking-widest text-[10px]">Abonado</th>
-                <th className="p-4 font-medium uppercase tracking-widest text-[10px]">Saldo</th>
-                <th className="p-4 font-medium uppercase tracking-widest text-[10px]">Estado</th>
-                <th className="p-4 font-medium uppercase tracking-widest text-[10px] text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-card-border">
-              {loading ? (
-                <tr><td colSpan={5} className="p-10 text-center text-slate-500">Cargando facturas...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={5} className="p-10 text-center text-slate-500">No se encontraron facturas.</td></tr>
-              ) : (
-                filtered.map(inv => (
-                  <tr key={inv.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
-                          <FileText size={18} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-bold text-lg">#{inv.folio}</p>
-                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-                              {inv.client?.name || 'Cargando...'}
-                            </span>
-                          </div>
-                          <p className="text-[9px] text-slate-400 uppercase tracking-tighter">{inv.client?.commune || 'Sin Comuna'}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-sm font-medium flex items-center gap-2">
-                        <Calendar size={14} className="text-slate-400"/>
-                        {inv.issued_at ? formatDate(inv.issued_at) : 'N/A'}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-sm font-bold flex items-center gap-1 text-emerald-500">
-                        <DollarSign size={14}/>
-                        {inv.total_amount.toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-sm font-medium flex items-center gap-1 text-slate-500">
-                        <DollarSign size={14}/>
-                        {(inv.paid_amount || 0).toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-sm font-bold flex items-center gap-1 text-rose-500">
-                        <DollarSign size={14}/>
-                        {(Number(inv.total_amount) - Number(inv.paid_amount || 0)).toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                        inv.status === 'Pagada' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
-                        inv.status === 'Parcial' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' :
-                        inv.status === 'Pendiente' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
-                        'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400'
-                      }`}>
-                        {inv.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button 
-                          onClick={() => {
-                            setEditingInvoice(inv);
-                            setEditFolio((inv.folio || '').toString());
-                            setEditIssuedAt(inv.issued_at ? inv.issued_at.split('T')[0] : '');
-                            setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : '');
-                            setEditPaidAmount((inv.paid_amount ?? 0).toString());
-                          }}
-                          className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-400 hover:text-primary transition-colors"
-                          title="Editar Factura"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        {inv.status !== 'Pagada' && (
-                          <button 
-                            onClick={async () => {
-                              const { error } = await supabase
-                                .from('invoices')
-                                .update({ 
-                                  paid_amount: inv.total_amount,
-                                  status: 'Pagada'
-                                })
-                                .eq('id', inv.id);
-                              if (!error) {
-                                toast.success('Factura pagada');
-                                fetchInvoices();
-                              }
-                            }}
-                            className="p-2 hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-500 rounded-lg transition-colors"
-                            title="Marcar como Pagado"
-                          >
-                            <DollarSign size={18} />
-                          </button>
-                        )}
-                        <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-400 hover:text-primary transition-colors">
-                          <Download size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              ))}
-            </tbody>
-          </table>
+          <div className="glass-card p-1.5 rounded-3xl flex items-center gap-1.5">
+             <button 
+               onClick={() => requestSort('total_amount')}
+               className={`px-5 py-3 rounded-2xl text-[9px] font-black uppercase transition-all duration-300 ${sortConfig.key === 'total_amount' ? 'bg-white/10 text-cyan-400' : 'text-slate-600 hover:text-slate-400'}`}
+             >
+               Monto {sortConfig.key === 'total_amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+             </button>
+             <button 
+               onClick={() => requestSort('folio')}
+               className={`px-5 py-3 rounded-2xl text-[9px] font-black uppercase transition-all duration-300 ${sortConfig.key === 'folio' ? 'bg-white/10 text-cyan-400' : 'text-slate-600 hover:text-slate-400'}`}
+             >
+               Folio {sortConfig.key === 'folio' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+             </button>
+          </div>
         </div>
       </div>
 
-      {/* Edit Modal */}
-      {editingInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-md rounded-[2rem] p-8 border-primary/30 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h3 className="text-2xl font-black">Editar Factura <span className="text-primary">#{editingInvoice.folio}</span></h3>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">{editingInvoice.client?.name}</p>
-              </div>
-              <button onClick={() => setEditingInvoice(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                <X size={20} />
-              </button>
-            </div>
+      {/* Main List */}
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-24">
+        <div className="grid grid-cols-1 gap-4">
+          {loading ? (
+             <div className="py-32 flex flex-col items-center gap-6 opacity-20">
+                <div className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                <p className="text-[10px] font-black uppercase tracking-[0.5em]">Actualizando Registros</p>
+             </div>
+          ) : filtered.length === 0 ? (
+             <div className="py-32 text-center opacity-10 space-y-6">
+                <FileText size={64} strokeWidth={1} className="mx-auto" />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em]">Sin movimientos pendientes</p>
+             </div>
+          ) : filtered.map(inv => {
+            const balance = Number(inv.total_amount) - Number(inv.paid_amount || 0);
+            const isOverdue = inv.payment_due_date && new Date(inv.payment_due_date) < new Date() && inv.status !== 'Pagada';
             
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Número de Folio</label>
-                <input 
-                  type="number" 
-                  value={editFolio}
-                  onChange={(e) => setEditFolio(e.target.value)}
-                  className="w-full bg-background border border-card-border rounded-xl px-4 py-3 mt-1 focus:ring-2 focus:ring-primary outline-none text-foreground font-bold"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Fecha Emisión</label>
-                <input 
-                  type="date" 
-                  value={editIssuedAt}
-                  onChange={(e) => setEditIssuedAt(e.target.value)}
-                  className="w-full bg-background border border-card-border rounded-xl px-4 py-3 mt-1 focus:ring-2 focus:ring-primary outline-none text-foreground"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1 text-rose-500">Fecha Vencimiento</label>
-                <input 
-                  type="date" 
-                  value={editDueDate}
-                  onChange={(e) => setEditDueDate(e.target.value)}
-                  className="w-full bg-background border border-card-border rounded-xl px-4 py-3 mt-1 focus:ring-2 focus:ring-rose-500 outline-none text-foreground font-bold"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Monto Pagado / Abonado</label>
-                <div className="relative mt-1">
-                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input 
-                    type="number" 
-                    value={editPaidAmount}
-                    onChange={(e) => setEditPaidAmount(e.target.value)}
-                    className="w-full bg-background border border-card-border rounded-xl pl-10 pr-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none text-xl font-black text-foreground"
-                  />
-                  <button 
-                    onClick={() => setEditPaidAmount(editingInvoice.total_amount.toString())}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-emerald-500 text-white text-[9px] font-black uppercase px-2 py-1 rounded-md hover:bg-emerald-600 transition-colors"
-                  >
-                    Pagar Todo
-                  </button>
-                </div>
-                <div className="flex justify-between mt-2 px-1">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">Total: ${Number(editingInvoice.total_amount).toLocaleString()}</p>
-                  <p className="text-[10px] text-rose-500 font-bold uppercase">Saldo: ${(Number(editingInvoice.total_amount) - Number(editPaidAmount || 0)).toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
+            return (
+              <div key={inv.id} className="glass-card p-8 rounded-[2.5rem] group hover:bg-white/[0.01] transition-all duration-500 border-white/5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                  <div className="flex items-center gap-8">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-[2rem] bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center text-slate-400 group-hover:border-cyan-500/30 transition-all duration-700">
+                        <span className="text-[9px] font-black opacity-40 uppercase tracking-tighter">Folio</span>
+                        <span className="text-2xl font-black text-white group-hover:text-cyan-400 transition-colors">#{inv.folio}</span>
+                      </div>
+                      {isOverdue && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full border-[6px] border-[#020617] shadow-[0_0_20px_rgba(244,63,94,0.6)] animate-pulse" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-xl font-black text-white uppercase tracking-tight group-hover:text-cyan-500/90 transition-colors leading-none">{inv.client?.name || 'Venta Directa'}</h3>
+                        {isOverdue && (
+                           <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4">
+                         <div className="flex items-center gap-2">
+                            <Calendar size={12} className="text-slate-600" />
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{formatDate(inv.issued_at)}</span>
+                         </div>
+                         <span className="w-1.5 h-1.5 bg-white/5 rounded-full" />
+                         <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase border transition-colors duration-500 ${getStatusColor(inv.status, inv.payment_due_date)}`}>
+                            {inv.status}
+                         </span>
+                      </div>
+                    </div>
+                  </div>
 
-            <div className="mt-8 flex gap-3">
-              <button 
-                onClick={handleUpdateInvoice}
-                className="flex-1 bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors shadow-lg shadow-primary/20"
-              >
-                <Save size={18} /> Guardar Cambios
-              </button>
-              <button 
-                onClick={() => setEditingInvoice(null)}
-                className="px-6 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold hover:bg-slate-200 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
+                  <div className="flex flex-col md:items-end gap-2">
+                    <div className="flex items-center gap-6">
+                       <div className="text-right space-y-1">
+                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Deuda Actual</p>
+                          <p className={`text-3xl font-black tracking-tighter ${balance > 0 ? 'text-white' : 'text-emerald-400'}`}>{formatCurrency(balance)}</p>
+                       </div>
+                       <div className="flex gap-2">
+                          <button 
+                            onClick={() => {
+                              setEditingInvoice(inv);
+                              setEditFolio(inv.folio.toString());
+                              setEditIssuedAt(inv.issued_at?.split('T')[0] || '');
+                              setEditDueDate(inv.payment_due_date?.split('T')[0] || '');
+                              setEditTotalAmount((inv.total_amount || 0).toString());
+                              setEditPaidAmount((inv.paid_amount || 0).toString());
+                            }}
+                            className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-white text-slate-500 hover:text-black rounded-2xl transition-all duration-500 active:scale-90"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button className="w-12 h-12 flex items-center justify-center bg-white/5 hover:bg-white/10 text-slate-500 rounded-2xl transition-all active:scale-90">
+                            <Download size={16} />
+                          </button>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Edit Modal - Ultra Minimalist Redesign */}
+      {editingInvoice && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/90 backdrop-blur-3xl animate-in fade-in duration-500">
+          <div className="glass-card w-full max-w-lg p-12 rounded-[3.5rem] space-y-10 relative border-white/10 overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
+             <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                   <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Modificar Obligación</p>
+                   <h3 className="text-4xl font-black text-white uppercase tracking-tighter">Folio #{editingInvoice.folio}</h3>
+                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{editingInvoice.client?.name}</p>
+                </div>
+                <button onClick={() => setEditingInvoice(null)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 text-slate-500 hover:text-white transition-colors"><X size={28} /></button>
+             </div>
+
+             <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-6">
+                   <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1">Numeración</label>
+                      <input 
+                        type="number"
+                        value={editFolio}
+                        onChange={e => setEditFolio(e.target.value)}
+                        className="w-full bg-white/[0.02] border border-white/5 p-5 rounded-2xl text-xl font-black outline-none focus:border-cyan-500/30 text-white transition-all"
+                      />
+                   </div>
+                   <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1">Emisión</label>
+                      <input 
+                        type="date"
+                        value={editIssuedAt}
+                        onChange={e => setEditIssuedAt(e.target.value)}
+                        className="w-full bg-white/[0.02] border border-white/5 p-5 rounded-2xl text-[11px] font-black outline-none focus:border-cyan-500/30 text-white transition-all"
+                      />
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex justify-between items-end px-1">
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Valor Documento</label>
+                       <button 
+                         onClick={() => setEditTotalAmount((parseFloat(editTotalAmount) / 1000).toString())}
+                         className="text-cyan-500 text-[10px] font-black uppercase hover:text-cyan-400 transition-colors"
+                       >
+                         Normalizar (÷ 1000)
+                       </button>
+                    </div>
+                    <div className="relative">
+                       <div className="absolute left-8 top-1/2 -translate-y-1/2 text-cyan-500 text-xl font-black">$</div>
+                       <input 
+                         type="number"
+                         value={editTotalAmount}
+                         onChange={e => setEditTotalAmount(e.target.value)}
+                         className="w-full bg-white/[0.02] border border-white/5 p-8 rounded-3xl text-4xl font-black text-white outline-none focus:border-cyan-500/30 transition-all tracking-tighter"
+                       />
+                    </div>
+                 </div>
+
+                 <div className="space-y-4">
+                    <div className="flex justify-between items-end px-1">
+                       <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Pago Recibido</label>
+                       <button 
+                         onClick={() => setEditPaidAmount(editTotalAmount)}
+                         className="text-emerald-500 text-[10px] font-black uppercase hover:text-emerald-400 transition-colors"
+                       >
+                         Liquidar Total
+                       </button>
+                    </div>
+                    <div className="relative">
+                       <div className="absolute left-8 top-1/2 -translate-y-1/2 text-emerald-500 text-xl font-black">$</div>
+                       <input 
+                         type="number"
+                         value={editPaidAmount}
+                         onChange={e => setEditPaidAmount(e.target.value)}
+                         className="w-full bg-white/[0.02] border border-white/5 p-8 rounded-3xl text-4xl font-black text-white outline-none focus:border-cyan-500/30 transition-all tracking-tighter"
+                       />
+                    </div>
+                 </div>
+             </div>
+
+             <div className="flex gap-4 pt-4">
+                <button 
+                  onClick={handleUpdateInvoice}
+                  className="flex-1 h-20 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-[0.3em] hover:bg-cyan-400 transition-all duration-500 active:scale-95"
+                >
+                  Guardar Cambios
+                </button>
+                <button 
+                  onClick={() => setEditingInvoice(null)}
+                  className="px-10 h-20 bg-white/5 text-slate-500 hover:text-white rounded-3xl font-black text-xs uppercase tracking-widest transition-all"
+                >
+                  Cerrar
+                </button>
+             </div>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
-

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Product } from '@/types';
 import toast from 'react-hot-toast';
-import { Search, Plus, Save, Trash2, X, Edit3 } from 'lucide-react';
+import { Search, Plus, Save, Trash2, X, Edit3, AlertCircle, Package, DollarSign, TrendingUp, Box, Layers, ArrowRight, RefreshCcw, ChevronRight, PackageSearch } from 'lucide-react';
+import { formatCurrency } from '@/lib/formatters';
 
 export default function InventoryView() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,18 +24,19 @@ export default function InventoryView() {
 
   const fetchProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('name');
-      
-    if (error) {
-      toast.error('Error al cargar inventario: ' + error.message);
-      console.error(error);
-    } else {
+    try {
+      const { data, error } = await supabase
+        .from('nf_products')
+        .select('*')
+        .order('name');
+        
+      if (error) throw error;
       setProducts(data || []);
+    } catch (error: any) {
+      toast.error('Error al sincronizar inventario');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSave = async () => {
@@ -50,26 +52,27 @@ export default function InventoryView() {
       stock: parseInt(stock, 10)
     };
 
-    let result;
-    if (editingId) {
-      result = await supabase.from('products').update(productData).eq('id', editingId);
-    } else {
-      result = await supabase.from('products').insert(productData);
+    try {
+      let result;
+      if (editingId) {
+        result = await supabase.from('nf_products').update(productData).eq('id', editingId);
+      } else {
+        result = await supabase.from('nf_products').insert(productData);
+      }
+
+      if (result.error) {
+        if (result.error.code === '23505') throw new Error('Ya existe un producto con ese SKU');
+        throw result.error;
+      }
+
+      toast.success(editingId ? 'Maestro actualizado' : 'Producto registrado');
+      setIsAdding(false);
+      setEditingId(null);
+      setName(''); setSku(''); setNetPrice(''); setStock('');
+      fetchProducts();
+    } catch (error: any) {
+      toast.error(error.message || 'Error al persistir cambios');
     }
-
-    const { error } = result;
-
-    if (error) {
-      if (error.code === '23505') toast.error('Ya existe un producto con ese SKU');
-      else toast.error('Error al guardar producto');
-      return;
-    }
-
-    toast.success(editingId ? 'Producto actualizado' : 'Producto agregado');
-    setIsAdding(false);
-    setEditingId(null);
-    setName(''); setSku(''); setNetPrice(''); setStock('');
-    fetchProducts();
   };
 
   const handleEdit = (product: Product) => {
@@ -88,19 +91,20 @@ export default function InventoryView() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Realmente desea eliminar este producto? Si tiene ventas asociadas, la base de datos lo impedirá por seguridad.')) return;
-    const { error, status } = await supabase.from('products').delete().eq('id', id);
-    
-    if (error) {
-      if (error.code === '23503' || status === 409) {
-        toast.error('No se puede eliminar: El producto tiene ventas o registros asociados. Considere desactivarlo o cambiar su nombre en lugar de borrarlo.');
-      } else {
-        toast.error(`Error al eliminar (${status}): ${error.message}`);
+    if (!confirm('¿Realmente desea eliminar este producto?')) return;
+    try {
+      const { error, status } = await supabase.from('nf_products').delete().eq('id', id);
+      
+      if (error) {
+        if (error.code === '23503' || status === 409) {
+          throw new Error('Producto con historial activo (Ventas)');
+        }
+        throw error;
       }
-      console.error('Delete error:', error, 'Status:', status);
-    } else {
-      toast.success('Producto eliminado correctamente');
+      toast.success('Producto removido');
       fetchProducts();
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -111,132 +115,191 @@ export default function InventoryView() {
 
   const totalValue = products.reduce((acc, p) => acc + (p.net_price * p.stock), 0);
   const criticalStock = products.filter(p => p.stock <= 5).length;
+  const negativeStock = products.filter(p => p.stock < 0).length;
+
+  if (loading && products.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] space-y-8 opacity-20">
+        <div className="w-16 h-16 border-2 border-white/20 border-t-cyan-500 rounded-full animate-spin"></div>
+        <p className="text-[10px] font-black uppercase tracking-[0.5em]">Escaneando Base de Datos</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Inventario</h2>
-        <button 
-          onClick={() => setIsAdding(true)}
-          className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 transition-colors"
-        >
-          <Plus size={20} /> Nuevo Producto
-        </button>
+    <div className="space-y-12 lg:h-[calc(100vh-180px)] flex flex-col font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-white/10">
+                <PackageSearch size={20} className="text-black" fill="currentColor" />
+             </div>
+             <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Logística & Stock</p>
+          </div>
+          <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none">Inventario <span className="text-slate-800">Maestro</span></h2>
+        </div>
+        
+        <div className="flex items-center gap-4 w-full lg:w-auto">
+           <div className="relative group flex-1 lg:flex-none">
+             <Search size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 group-focus-within:text-cyan-400 transition-colors" />
+             <input
+               type="text"
+               placeholder="BUSCAR SKU..."
+               value={searchTerm}
+               onChange={(e) => setSearchTerm(e.target.value)}
+               className="pl-14 pr-6 h-16 bg-white/[0.02] border border-white/5 rounded-2xl text-[10px] font-black text-white focus:border-cyan-500/30 outline-none w-full lg:w-80 uppercase tracking-widest"
+             />
+           </div>
+           <button 
+             onClick={() => setIsAdding(true)}
+             className="h-16 px-10 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-2xl"
+           >
+             <Plus size={18} /> Registrar Item
+           </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card p-6 rounded-xl">
-          <p className="text-slate-400 text-sm">Total SKUs</p>
-          <p className="text-2xl font-bold mt-1">{products.length}</p>
-        </div>
-        <div className="glass-card p-6 rounded-xl">
-          <p className="text-slate-400 text-sm">Valor Total Inventario (Neto)</p>
-          <p className="text-2xl font-bold mt-1">${totalValue.toLocaleString()}</p>
-        </div>
-        <div className="glass-card p-6 rounded-xl border-amber-500/30">
-          <p className="text-amber-400 text-sm">Stock Crítico (≤ 5)</p>
-          <p className="text-2xl font-bold text-amber-500 mt-1">{criticalStock}</p>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Catálogo Total</p>
+            <p className="text-xl font-black text-white">{products.length} Items</p>
+            <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Existencias Únicas</p>
+          </div>
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Valorización</p>
+            <p className="text-xl font-black text-emerald-500">{formatCurrency(totalValue)}</p>
+            <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Capital en Bodega</p>
+          </div>
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Quiebre Stock</p>
+            <p className={`text-xl font-black ${criticalStock > 0 ? 'text-amber-500' : 'text-white'}`}>{criticalStock} Alert</p>
+            <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Stock {"<="} 5 Units</p>
+          </div>
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Stock Crítico</p>
+            <p className={`text-xl font-black ${negativeStock > 0 ? 'text-rose-500 animate-pulse' : 'text-white'}`}>{negativeStock} Items</p>
+            <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Existencias Negativas</p>
+          </div>
       </div>
 
-      <div className="glass-card rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-card-border flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre o SKU..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-background border border-card-border rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
-            />
-          </div>
-        </div>
+      {/* Main Table Area */}
+      <div className="px-4">
+        <div className="glass-card rounded-[3.5rem] overflow-hidden border-white/5 shadow-2xl relative">
+          {/* Add Form Overlay */}
+          {isAdding && (
+            <div className="p-10 border-b border-white/5 bg-cyan-500/[0.02] space-y-10 animate-in slide-in-from-top-4 duration-500 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[80px] -mr-32 -mt-32" />
+               <div className="flex justify-between items-center relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400"><Edit3 size={18} /></div>
+                    <h3 className="text-xl font-black text-white uppercase tracking-tighter">{editingId ? 'Editar Maestro' : 'Nuevo Registro'}</h3>
+                  </div>
+                  <button onClick={handleCancel} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-500 hover:text-white transition-all"><X size={18}/></button>
+               </div>
 
-        {isAdding && (
-          <div className="p-4 border-b border-card-border bg-slate-800/10 dark:bg-slate-800/30 flex gap-4 flex-wrap items-end">
-            <div className="flex-1 min-w-[200px]">
-              <label className="text-xs text-slate-400 ml-1">Nombre *</label>
-              <input type="text" value={name} onChange={e=>setName(e.target.value)} className="w-full bg-background border border-card-border rounded-lg px-3 py-2 text-foreground" />
-            </div>
-            <div className="w-32">
-              <label className="text-xs text-slate-400 ml-1">SKU (Opcional)</label>
-              <input type="text" value={sku} onChange={e=>setSku(e.target.value)} className="w-full bg-background border border-card-border rounded-lg px-3 py-2 text-foreground" />
-            </div>
-            <div className="w-32">
-              <label className="text-xs text-slate-400 ml-1">Neto ($) *</label>
-              <input type="number" value={netPrice} onChange={e=>setNetPrice(e.target.value)} className="w-full bg-background border border-card-border rounded-lg px-3 py-2 text-foreground" />
-            </div>
-            <div className="w-24">
-              <label className="text-xs text-slate-400 ml-1">Stock *</label>
-              <input type="number" value={stock} onChange={e=>setStock(e.target.value)} className="w-full bg-background border border-card-border rounded-lg px-3 py-2 text-foreground" />
-            </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={handleSave} 
-                title={editingId ? "Guardar Cambios" : "Agregar Producto"}
-                className="bg-emerald-600 text-white p-2 rounded-lg hover:bg-emerald-500"
-              >
-                <Save size={20}/>
-              </button>
-              <button onClick={handleCancel} className="bg-slate-700 text-white p-2 rounded-lg hover:bg-slate-600">
-                <X size={20}/>
-              </button>
-            </div>
-          </div>
-        )}
+               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+                  <div className="md:col-span-2 space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Nombre del Producto</label>
+                    <input 
+                      type="text" 
+                      value={name} 
+                      onChange={e=>setName(e.target.value)} 
+                      placeholder="DESCRIPCIÓN COMERCIAL..."
+                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">SKU / Identificador</label>
+                    <input 
+                      type="text" 
+                      value={sku} 
+                      onChange={e=>setSku(e.target.value)} 
+                      placeholder="REF-0000"
+                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Precio Neto</label>
+                    <div className="relative group">
+                       <DollarSign size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700" />
+                       <input 
+                         type="number" 
+                         value={netPrice} 
+                         onChange={e=>setNetPrice(e.target.value)} 
+                         className="w-full bg-white/[0.02] border border-white/5 rounded-2xl pl-14 pr-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all"
+                       />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Stock Inicial</label>
+                    <input 
+                      type="number" 
+                      value={stock} 
+                      onChange={e=>setStock(e.target.value)} 
+                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all"
+                    />
+                  </div>
+               </div>
 
-        <div className="overflow-x-auto">
+               <div className="flex justify-end gap-4 relative z-10">
+                  <button onClick={handleSave} className="px-10 py-5 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 flex items-center gap-3">
+                    <Save size={16} /> {editingId ? 'Actualizar Cambios' : 'Confirmar Alta'}
+                  </button>
+               </div>
+            </div>
+          )}
+
           <table className="w-full text-left">
-            <thead className="bg-slate-100/50 dark:bg-slate-800/50 text-sm">
-              <tr>
-                <th className="p-4 font-medium">Producto</th>
-                <th className="p-4 font-medium">SKU</th>
-                <th className="p-4 font-medium">Precio Neto</th>
-                <th className="p-4 font-medium">Stock</th>
-                <th className="p-4 font-medium">Valor Total</th>
-                <th className="p-4 font-medium"></th>
+            <thead>
+              <tr className="bg-white/[0.01] text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
+                <th className="p-8 pl-10">Descripción del Bien</th>
+                <th className="p-8">Identificador</th>
+                <th className="p-8">Costo Unitario</th>
+                <th className="p-8">Disponibilidad</th>
+                <th className="p-8 pr-10 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-card-border">
-              {loading ? (
-                <tr><td colSpan={6} className="p-4 text-center text-slate-500">Cargando...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} className="p-4 text-center text-slate-500">No se encontraron productos.</td></tr>
-              ) : (
-                filtered.map(p => (
-                  <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="p-4 font-medium">{p.name}</td>
-                    <td className="p-4 text-slate-500">{p.sku || '-'}</td>
-                    <td className="p-4">${p.net_price.toLocaleString()}</td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        p.stock < 0 ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' :
-                        p.stock <= 5 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' : 
-                        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
+            <tbody className="divide-y divide-white/[0.03]">
+              {filtered.map(p => (
+                <tr key={p.id} className="group hover:bg-white/[0.01] transition-all">
+                  <td className="p-8 pl-10">
+                    <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-700 group-hover:text-cyan-400 transition-colors"><Package size={16} /></div>
+                       <p className="text-sm font-black text-white uppercase tracking-tighter">{p.name}</p>
+                    </div>
+                  </td>
+                  <td className="p-8">
+                    <span className="text-[10px] font-black px-3 py-1 bg-white/5 rounded-lg text-slate-500 uppercase tracking-widest">{p.sku || 'N/A'}</span>
+                  </td>
+                  <td className="p-8 text-sm font-black text-white tracking-tighter">{formatCurrency(p.net_price)}</td>
+                  <td className="p-8">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        p.stock < 0 ? 'bg-rose-500 animate-pulse' :
+                        p.stock <= 5 ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`} />
+                      <span className={`text-[10px] font-black uppercase ${
+                        p.stock < 0 ? 'text-rose-500' :
+                        p.stock <= 5 ? 'text-amber-500' : 'text-slate-400'
                       }`}>
-                        {p.stock} unid.
+                        {p.stock} UNIDADES
                       </span>
-                    </td>
-                    <td className="p-4 text-slate-400">${(p.net_price * p.stock).toLocaleString()}</td>
-                    <td className="p-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => handleEdit(p)} className="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors">
-                          <Edit3 size={18} />
-                        </button>
-                        <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+                    </div>
+                  </td>
+                  <td className="p-8 pr-10 text-right">
+                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
+                      <button onClick={() => handleEdit(p)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-white transition-all"><Edit3 size={14}/></button>
+                      <button onClick={() => handleDelete(p.id)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-rose-500 transition-all"><Trash2 size={14}/></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

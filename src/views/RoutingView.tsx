@@ -3,7 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { geocodeAddress } from '@/lib/geocoding';
 import DynamicMap from '@/components/Routing/DynamicMap';
 import toast from 'react-hot-toast';
-import { Map as MapIcon, RefreshCw, AlertTriangle, Info, Play, Pause } from 'lucide-react';
+import { Map as MapIcon, RefreshCw, AlertTriangle, Play, Pause, Filter, MapPin, Phone, Wallet, Calendar } from 'lucide-react';
+import { formatCurrency } from '@/lib/formatters';
 
 interface ClientWithStatus {
   id: string;
@@ -27,29 +28,30 @@ export default function RoutingView() {
   const [selectedCommune, setSelectedCommune] = useState<string>('Todas');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'red' | 'yellow' | 'green' | 'gray'>('all');
   const [geocodingProgress, setGeocodingProgress] = useState({ current: 0, total: 0 });
+  const [searchQuery, setSearchQuery] = useState('');
 
   const isAutoGeocodeEnabledRef = useRef(isAutoGeocodeEnabled);
   useEffect(() => {
     isAutoGeocodeEnabledRef.current = isAutoGeocodeEnabled;
   }, [isAutoGeocodeEnabled]);
 
-  const failedAddresses = useState<Set<string>>(new Set())[0];
+  const failedAddresses = useRef<Set<string>>(new Set()).current;
 
   const fetchClientsAndInvoices = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch clients
       const { data: clientsData, error: clientsError } = await supabase
-        .from('clients')
+        .from('nf_clients')
         .select('id, name, address, commune, latitude, longitude, phone');
 
       if (clientsError) throw clientsError;
 
       // Fetch pending/active invoices
       const { data: invoicesData, error: invoicesError } = await supabase
-        .from('invoices')
+        .from('nf_invoices')
         .select('id, client_id, total_amount, paid_amount, payment_due_date, issued_at, status, folio')
-        .neq('status', 'Pagada'); // Only interested in unpaid ones
+        .neq('status', 'Pagada');
 
       if (invoicesError) throw invoicesError;
 
@@ -67,33 +69,35 @@ export default function RoutingView() {
         const clientInvoices = (invoicesData || []).filter(inv => inv.client_id === client.id);
         const totalDebt = clientInvoices.reduce((acc, inv) => acc + (Number(inv.total_amount) - Number(inv.paid_amount || 0)), 0);
         
-        let status: 'red' | 'yellow' | 'green' | 'gray' = 'green'; // Default to green
+        let status: 'red' | 'yellow' | 'green' | 'gray' = 'green';
         let debtInfo = '';
 
         if (totalDebt > 0) {
           const hasOverdue = clientInvoices.some(inv => {
-            const dueDate = inv.payment_due_date ? new Date(inv.payment_due_date) : null;
+            let dueDate: Date | null = null;
+            if (inv.payment_due_date) {
+              dueDate = new Date(inv.payment_due_date);
+            } else if (inv.issued_at) {
+              dueDate = new Date(inv.issued_at);
+              dueDate.setDate(dueDate.getDate() + 30);
+            }
+            
             if (dueDate) {
               dueDate.setHours(0, 0, 0, 0);
               return dueDate < today;
-            }
-            // Fallback: Si no hay fecha de vencimiento, usar issued_at + 30 días
-            const issuedAt = inv.issued_at ? new Date(inv.issued_at) : null;
-            if (issuedAt) {
-              const fallbackDue = new Date(issuedAt);
-              fallbackDue.setDate(fallbackDue.getDate() + 30);
-              fallbackDue.setHours(0, 0, 0, 0);
-              return fallbackDue < today;
             }
             return false;
           });
 
           const hasDueThisWeek = !hasOverdue && clientInvoices.some(inv => {
-            let dueDate = inv.payment_due_date ? new Date(inv.payment_due_date) : null;
-            if (!dueDate && inv.issued_at) {
+            let dueDate: Date | null = null;
+            if (inv.payment_due_date) {
+              dueDate = new Date(inv.payment_due_date);
+            } else if (inv.issued_at) {
               dueDate = new Date(inv.issued_at);
               dueDate.setDate(dueDate.getDate() + 30);
             }
+
             if (dueDate) {
               dueDate.setHours(0, 0, 0, 0);
               return dueDate >= today && dueDate <= endOfWeek;
@@ -103,17 +107,17 @@ export default function RoutingView() {
 
           if (hasOverdue) {
             status = 'red';
-            debtInfo = `Deuda Vencida: $${totalDebt.toLocaleString()}`;
+            debtInfo = `Vencido: ${formatCurrency(totalDebt)}`;
           } else if (hasDueThisWeek) {
             status = 'yellow';
-            debtInfo = `Vence esta semana: $${totalDebt.toLocaleString()}`;
+            debtInfo = `Esta semana: ${formatCurrency(totalDebt)}`;
           } else {
             status = 'green';
-            debtInfo = `Deuda al día: $${totalDebt.toLocaleString()}`;
+            debtInfo = `Al día: ${formatCurrency(totalDebt)}`;
           }
         } else {
           status = 'gray';
-          debtInfo = 'Sin deuda pendiente';
+          debtInfo = 'Sin deuda';
         }
 
         return {
@@ -136,8 +140,7 @@ export default function RoutingView() {
 
       setClients(processedClients.filter(c => c.latitude && c.longitude));
 
-      // Handle geocoding for clients missing coordinates
-      // We only process if they haven't failed in this session and if we're not already geocoding
+      // Auto geocoding logic
       const missingCoords = processedClients.filter(c => 
         (!c.latitude || !c.longitude) && 
         c.address && 
@@ -146,7 +149,6 @@ export default function RoutingView() {
       );
 
       if (missingCoords.length > 0 && !isGeocoding && isAutoGeocodeEnabled) {
-        // Limit to 5 per batch to avoid hitting the API too hard
         processMissingCoordinates(missingCoords.slice(0, 5));
       }
     } catch (error) {
@@ -155,7 +157,7 @@ export default function RoutingView() {
     } finally {
       setLoading(false);
     }
-  }, [isGeocoding, failedAddresses, isAutoGeocodeEnabled]);
+  }, [isGeocoding, isAutoGeocodeEnabled]);
 
   const processMissingCoordinates = async (missing: ClientWithStatus[]) => {
     setIsGeocoding(true);
@@ -163,24 +165,18 @@ export default function RoutingView() {
     let successCount = 0;
     
     for (let i = 0; i < missing.length; i++) {
-      // Check ref to see if user paused during the batch
-      if (!isAutoGeocodeEnabledRef.current) {
-        break;
-      }
+      if (!isAutoGeocodeEnabledRef.current) break;
 
       const client = missing[i];
       setGeocodingProgress(prev => ({ ...prev, current: i + 1 }));
       
-      // Safety check: skip if we already tried this address and it's empty or too short
       if (!client.address || client.address.length < 5) continue;
-
-      toast.loading(`Ubicando: ${client.name} (${i + 1}/${missing.length})...`, { id: 'geocoding' });
 
       try {
         const coords = await geocodeAddress(client.address);
         if (coords) {
           const { error } = await supabase
-            .from('clients')
+            .from('nf_clients')
             .update({ latitude: coords.lat, longitude: coords.lon })
             .eq('id', client.id);
 
@@ -195,8 +191,6 @@ export default function RoutingView() {
             });
           }
         } else {
-          // If coords is null, geocoding failed (maybe address not found)
-          // Store in failedAddresses to avoid retrying in this session
           failedAddresses.add(client.id);
         }
       } catch (err) {
@@ -206,49 +200,36 @@ export default function RoutingView() {
     }
 
     if (successCount > 0) {
-      toast.success(`Se ubicaron ${successCount} clientes nuevos`, { id: 'geocoding' });
-    } else {
-      toast.dismiss('geocoding');
+      toast.success(`Se ubicaron ${successCount} clientes nuevos`);
     }
     setIsGeocoding(false);
-  };;
+  };
 
   const handleMarkerDrag = async (id: string, lat: number, lon: number) => {
     try {
       const { error } = await supabase
-        .from('clients')
+        .from('nf_clients')
         .update({ latitude: lat, longitude: lon })
         .eq('id', id);
 
       if (error) throw error;
 
       setClients(prev => prev.map(c => c.id === id ? { ...c, latitude: lat, longitude: lon } : c));
-      toast.success('Ubicación actualizada manualmente', { duration: 2000 });
+      toast.success('Ubicación actualizada');
     } catch (error) {
       console.error('Error updating location:', error);
-      toast.error('No se pudo guardar la nueva ubicación');
+      toast.error('Error al guardar ubicación');
     }
   };
 
   const filteredClients = useMemo(() => {
-    let filtered = clients;
-
-    // Filter by Commune
-    if (selectedCommune !== 'Todas') {
-      if (selectedCommune === 'Sin Comuna') {
-        filtered = filtered.filter(c => !c.commune);
-      } else {
-        filtered = filtered.filter(c => c.commune === selectedCommune);
-      }
-    }
-
-    // Filter by Status
-    if (selectedStatus !== 'all') {
-      filtered = filtered.filter(c => c.status === selectedStatus);
-    }
-
-    return filtered;
-  }, [clients, selectedCommune, selectedStatus]);
+    return clients.filter(c => {
+      const matchesCommune = selectedCommune === 'Todas' || (selectedCommune === 'Sin Comuna' ? !c.commune : c.commune === selectedCommune);
+      const matchesStatus = selectedStatus === 'all' || c.status === selectedStatus;
+      const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.address.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCommune && matchesStatus && matchesSearch;
+    });
+  }, [clients, selectedCommune, selectedStatus, searchQuery]);
 
   const communes = useMemo(() => {
     const list = new Set<string>();
@@ -267,131 +248,225 @@ export default function RoutingView() {
   }, [fetchClientsAndInvoices]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
-      <div className="flex justify-between items-center px-2">
-        <div>
-          <h2 className="text-3xl font-bold flex items-center gap-2">
-            <MapIcon className="text-primary" /> Routing
-          </h2>
-          <p className="text-slate-500 text-sm">Visualización de ruta de cobranza</p>
+    <div className="flex flex-col h-[calc(100vh-140px)] space-y-6 animate-in fade-in duration-700">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-2xl">
+              <MapIcon className="text-primary w-8 h-8" />
+            </div>
+            <div>
+              <h2 className="text-4xl font-black tracking-tight text-white">Logística & Rutas</h2>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Geolocalización de Cobranza en Tiempo Real</p>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Play/Pause Button */}
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary transition-colors">
+              <Filter size={18} />
+            </div>
+            <input
+              type="text"
+              placeholder="Buscar cliente o dirección..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all w-64 md:w-80 backdrop-blur-md"
+            />
+          </div>
+
           <button
             onClick={() => setIsAutoGeocodeEnabled(!isAutoGeocodeEnabled)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${
+            className={`flex items-center gap-3 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
               isAutoGeocodeEnabled 
-                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' 
-                : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/20' 
+                : 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95'
             }`}
           >
             {isAutoGeocodeEnabled ? (
-              <><Pause size={16} /> Detener Actualización</>
+              <><Pause size={18} /> Detener Scan</>
             ) : (
-              <><Play size={16} /> Actualizar Ubicaciones</>
+              <><Play size={18} /> Iniciar Scan</>
             )}
           </button>
 
-          <select
-            value={selectedCommune}
-            onChange={(e) => setSelectedCommune(e.target.value)}
-            className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-primary outline-none"
-          >
-            {communes.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
           <button 
             onClick={() => fetchClientsAndInvoices()}
             disabled={loading || isGeocoding}
-            className="p-2 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 transition-colors disabled:opacity-50"
+            className="p-3.5 bg-white/5 border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 active:scale-90"
           >
             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-2">
+      {/* Filters Bar */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 px-2">
+        <div className="lg:col-span-1">
+          <select
+            value={selectedCommune}
+            onChange={(e) => setSelectedCommune(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-black text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md appearance-none cursor-pointer hover:bg-white/10 transition-all"
+          >
+            {communes.map(c => <option key={c} value={c} className="bg-slate-900">{c}</option>)}
+          </select>
+        </div>
+
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'red' ? 'all' : 'red')}
-          className={`p-3 rounded-xl flex items-center gap-3 transition-all border ${
+          className={`p-4 rounded-2xl flex items-center justify-between transition-all border group ${
             selectedStatus === 'red' 
-              ? 'bg-red-500 text-white border-red-600 shadow-lg shadow-red-500/20' 
-              : 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20'
+              ? 'bg-rose-500 text-white border-rose-600 shadow-xl shadow-rose-500/20' 
+              : 'bg-white/5 border-white/10 text-rose-500 hover:bg-rose-500/10'
           }`}
         >
-          <div className={`w-3 h-3 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)] ${selectedStatus === 'red' ? 'bg-white' : 'bg-red-500'}`}></div>
-          <span className="text-xs font-semibold uppercase tracking-wider">Vencidos</span>
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full relative ${selectedStatus === 'red' ? 'bg-white' : 'bg-rose-500'}`}>
+              <div className={`absolute inset-0 rounded-full animate-ping opacity-75 ${selectedStatus === 'red' ? 'bg-white' : 'bg-rose-500'}`} />
+            </div>
+            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Vencidos</span>
+          </div>
+          <span className={`text-xs font-black ${selectedStatus === 'red' ? 'text-white/70' : 'text-slate-500'}`}>
+            {clients.filter(c => c.status === 'red').length}
+          </span>
         </button>
         
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'yellow' ? 'all' : 'yellow')}
-          className={`p-3 rounded-xl flex items-center gap-3 transition-all border ${
+          className={`p-4 rounded-2xl flex items-center justify-between transition-all border ${
             selectedStatus === 'yellow' 
-              ? 'bg-yellow-500 text-white border-yellow-600 shadow-lg shadow-yellow-500/20' 
-              : 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500 hover:bg-yellow-500/20'
+              ? 'bg-amber-500 text-white border-amber-600 shadow-xl shadow-amber-500/20' 
+              : 'bg-white/5 border-white/10 text-amber-500 hover:bg-amber-500/10'
           }`}
         >
-          <div className={`w-3 h-3 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)] ${selectedStatus === 'yellow' ? 'bg-white' : 'bg-yellow-500'}`}></div>
-          <span className="text-xs font-semibold uppercase tracking-wider">Esta Semana</span>
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${selectedStatus === 'yellow' ? 'bg-white' : 'bg-amber-500'}`} />
+            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Esta Semana</span>
+          </div>
+          <span className={`text-xs font-black ${selectedStatus === 'yellow' ? 'text-white/70' : 'text-slate-500'}`}>
+            {clients.filter(c => c.status === 'yellow').length}
+          </span>
         </button>
 
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'green' ? 'all' : 'green')}
-          className={`p-3 rounded-xl flex items-center gap-3 transition-all border ${
+          className={`p-4 rounded-2xl flex items-center justify-between transition-all border ${
             selectedStatus === 'green' 
-              ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg shadow-emerald-500/20' 
-              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20'
+              ? 'bg-emerald-500 text-white border-emerald-600 shadow-xl shadow-emerald-500/20' 
+              : 'bg-white/5 border-white/10 text-emerald-500 hover:bg-emerald-500/10'
           }`}
         >
-          <div className={`w-3 h-3 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)] ${selectedStatus === 'green' ? 'bg-white' : 'bg-emerald-500'}`}></div>
-          <span className="text-xs font-semibold uppercase tracking-wider">Al Día</span>
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${selectedStatus === 'green' ? 'bg-white' : 'bg-emerald-500'}`} />
+            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Al Día</span>
+          </div>
+          <span className={`text-xs font-black ${selectedStatus === 'green' ? 'text-white/70' : 'text-slate-500'}`}>
+            {clients.filter(c => c.status === 'green').length}
+          </span>
         </button>
 
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'gray' ? 'all' : 'gray')}
-          className={`p-3 rounded-xl flex items-center gap-3 transition-all border ${
+          className={`p-4 rounded-2xl flex items-center justify-between transition-all border ${
             selectedStatus === 'gray' 
-              ? 'bg-slate-500 text-white border-slate-600 shadow-lg shadow-slate-500/20' 
-              : 'bg-slate-500/10 border-slate-500/20 text-slate-400 hover:bg-slate-500/20'
+              ? 'bg-slate-500 text-white border-slate-600 shadow-xl shadow-slate-500/20' 
+              : 'bg-white/5 border-white/10 text-slate-400 hover:bg-slate-500/10'
           }`}
         >
-          <div className={`w-3 h-3 rounded-full ${selectedStatus === 'gray' ? 'bg-white' : 'bg-slate-400'}`}></div>
-          <span className="text-xs font-semibold uppercase tracking-wider">Sin Deuda</span>
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${selectedStatus === 'gray' ? 'bg-white' : 'bg-slate-400'}`} />
+            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Sin Deuda</span>
+          </div>
+          <span className={`text-xs font-black ${selectedStatus === 'gray' ? 'text-white/70' : 'text-slate-500'}`}>
+            {clients.filter(c => c.status === 'gray').length}
+          </span>
         </button>
       </div>
 
-      <div className="flex-1 min-h-[400px] relative rounded-2xl overflow-hidden glass-card shadow-2xl border border-card-border">
+      {/* Map Container */}
+      <div className="flex-1 min-h-[450px] relative rounded-[2.5rem] overflow-hidden glass-card shadow-2xl border border-white/10 group">
         {loading && clients.length === 0 ? (
-          <div className="absolute inset-0 z-10 bg-slate-900/50 backdrop-blur-sm flex flex-col items-center justify-center space-y-4">
-            <RefreshCw className="animate-spin text-primary" size={40} />
-            <p className="text-slate-300 font-medium">Cargando ubicaciones de clientes...</p>
-          </div>
-        ) : clients.length === 0 && !isGeocoding ? (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center space-y-4 p-8 text-center">
-            <div className="p-4 bg-amber-500/10 rounded-full">
-              <AlertTriangle className="text-amber-500" size={48} />
+          <div className="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center space-y-6">
+            <div className="relative">
+                <RefreshCw className="animate-spin text-primary" size={60} />
+                <div className="absolute inset-0 animate-ping bg-primary/20 rounded-full blur-xl" />
             </div>
-            <h3 className="text-xl font-bold">No hay clientes con ubicación</h3>
-            <p className="text-slate-400 max-w-md">
-              Asegúrate de que los clientes tengan dirección registrada. El sistema geocodificará las direcciones automáticamente la próxima vez que cargues esta vista.
-            </p>
+            <div className="text-center">
+                <p className="text-2xl font-black tracking-tight text-white">Sincronizando Coordenadas</p>
+                <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Accediendo a la base de datos maestra</p>
+            </div>
+          </div>
+        ) : filteredClients.length === 0 && !isGeocoding ? (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center space-y-8 p-12 text-center bg-slate-950/50 backdrop-blur-sm">
+            <div className="p-8 bg-amber-500/10 rounded-[2.5rem] border border-amber-500/20 animate-bounce">
+              <AlertTriangle className="text-amber-500" size={64} />
+            </div>
+            <div className="space-y-4">
+                <h3 className="text-3xl font-black tracking-tight text-white">No se encontraron clientes</h3>
+                <p className="text-slate-400 max-w-lg mx-auto font-medium text-lg leading-relaxed">
+                  Ajusta los filtros o busca otra dirección. El sistema solo muestra clientes con coordenadas válidas.
+                </p>
+            </div>
           </div>
         ) : null}
         
-        <DynamicMap clients={filteredClients} onMarkerDrag={handleMarkerDrag} />
+        <div className="absolute inset-0 grayscale-[0.2] brightness-[0.8] contrast-[1.2]">
+            <DynamicMap clients={filteredClients} onMarkerDrag={handleMarkerDrag} />
+        </div>
 
+        {/* Legend / Info Overlay */}
+        <div className="absolute top-6 left-6 z-10 hidden md:block">
+            <div className="glass-card p-6 rounded-3xl border border-white/10 backdrop-blur-xl shadow-2xl space-y-4 w-64">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
+                    <MapPin size={12} className="text-primary" /> Referencia de Ruta
+                </h4>
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-white">Clientes Totales</span>
+                        <span className="text-sm font-black text-primary">{clients.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-white">En el Mapa</span>
+                        <span className="text-sm font-black text-emerald-500">{filteredClients.length}</span>
+                    </div>
+                </div>
+                <div className="pt-4 border-t border-white/5 space-y-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />
+                        <span className="text-[10px] font-bold text-slate-400">Riesgo Alto (Vencido)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                        <span className="text-[10px] font-bold text-slate-400">Atención (Semana actual)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                        <span className="text-[10px] font-bold text-slate-400">Crédito Saludable</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Geocoding Progress */}
         {isGeocoding && (
-          <div className="absolute bottom-4 left-4 right-4 z-20 md:w-80 md:left-auto md:right-4">
-            <div className="bg-indigo-600 text-white px-4 py-3 rounded-xl shadow-xl space-y-2">
-              <div className="flex items-center gap-3">
-                <RefreshCw size={18} className="animate-spin" />
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-md px-6">
+            <div className="bg-primary border border-primary-light/30 text-white p-6 rounded-3xl shadow-2xl shadow-primary/30 backdrop-blur-md animate-in slide-in-from-bottom-4">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-white/20 rounded-2xl">
+                    <RefreshCw size={24} className="animate-spin" />
+                </div>
                 <div className="flex-1">
-                  <span className="text-sm font-semibold">Actualizando ubicaciones...</span>
-                  <p className="text-[10px] text-indigo-200">Procesando {geocodingProgress.current} de {geocodingProgress.total}</p>
+                  <span className="text-lg font-black tracking-tight block">Escaneando Direcciones</span>
+                  <p className="text-xs font-bold text-white/70 uppercase tracking-widest mt-1">
+                    Progreso: {geocodingProgress.current} de {geocodingProgress.total}
+                  </p>
                 </div>
               </div>
-              <div className="w-full bg-indigo-900/50 h-1.5 rounded-full overflow-hidden">
+              <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden p-0.5 border border-white/5">
                 <div 
-                  className="bg-white h-full transition-all duration-300" 
+                  className="bg-white h-full rounded-full transition-all duration-500 shadow-[0_0_15px_rgba(255,255,255,0.5)]" 
                   style={{ width: `${(geocodingProgress.current / geocodingProgress.total) * 100}%` }}
                 />
               </div>
@@ -402,4 +477,3 @@ export default function RoutingView() {
     </div>
   );
 }
-

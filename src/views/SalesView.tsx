@@ -1,23 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Product, Client } from '@/types';
 import toast from 'react-hot-toast';
-import { Search, Plus, Minus, Trash2, ShoppingCart, AlertTriangle, CheckCircle2, UserPlus, Calendar } from 'lucide-react';
-import { formatDate } from '@/lib/formatters';
+import { useAuth } from '@/context/AuthContext';
+import { 
+  Search, 
+  Plus, 
+  Minus, 
+  Trash2, 
+  ShoppingCart, 
+  UserPlus, 
+  Calendar,
+  User as UserIcon,
+  ChevronDown,
+  ChevronUp,
+  Package,
+  X,
+  TrendingUp,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  Hash,
+  Clock,
+  ChevronRight,
+  Sparkles,
+  Zap
+} from 'lucide-react';
+import { formatDate, formatRUT, validateRUT, formatCurrency } from '@/lib/formatters';
 
 interface CartItem extends Product {
   cartQuantity: number;
 }
 
 export default function SalesView() {
+  const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Cart & POS State
   const [cart, setCart] = useState<CartItem[]>([]);
   const [invoiceFolio, setInvoiceFolio] = useState<string>('');
   const [folioWarning, setFolioWarning] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showCart, setShowCart] = useState(false);
 
   // Client State
   const [clients, setClients] = useState<Client[]>([]);
@@ -27,6 +50,7 @@ export default function SalesView() {
   const [newClient, setNewClient] = useState({ name: '', rut: '', address: '', commune: '' });
   const [clientSearchTerm, setClientSearchTerm] = useState('');
   const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
+  const clientSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -35,12 +59,11 @@ export default function SalesView() {
   }, []);
 
   const fetchClients = async () => {
-    const { data, error } = await supabase.from('clients').select('*').order('name');
+    const { data, error } = await supabase.from('nf_clients').select('*').order('name');
     if (error) {
       toast.error('Error al cargar clientes');
     } else {
       setClients(data || []);
-      // Set default client: Público General
       const defaultClient = data?.find(c => c.name === 'Público General');
       if (defaultClient) {
         setSelectedClientId(defaultClient.id);
@@ -64,31 +87,23 @@ export default function SalesView() {
   }, [invoiceFolio]);
 
   const fetchProducts = async () => {
-    const { data, error } = await supabase.from('products').select('*').order('name');
+    const { data, error } = await supabase.from('nf_products').select('*').order('name');
     if (error) {
-      toast.error('Error al cargar productos en POS: ' + error.message);
-      console.error(error);
+      toast.error('Error al cargar productos');
     } else {
       setProducts(data || []);
     }
   };
 
   const fetchNextFolio = async () => {
-    const { data, error } = await supabase.from('settings').select('value').eq('key', 'next_invoice_number').maybeSingle();
-    if (error && error.code !== 'PGRST116') { // No error if not found (default to 1)
-      console.error('Error fetching folio:', error);
-    }
-    if (data && data.value) {
-      setInvoiceFolio(data.value);
-    }
+    const { data } = await supabase.from('nf_settings').select('value').eq('key', 'next_invoice_number').maybeSingle();
+    if (data?.value) setInvoiceFolio(data.value);
   };
 
   const checkFolio = async (folio: string) => {
     setFolioWarning(null);
-    const { data } = await supabase.from('invoices').select('id').eq('folio', parseInt(folio, 10)).maybeSingle();
-    if (data) {
-      setFolioWarning(`La Factura #${folio} ya existe en la base de datos.`);
-    }
+    const { data } = await supabase.from('nf_invoices').select('id').eq('folio', parseInt(folio, 10)).maybeSingle();
+    if (data) setFolioWarning(`Folio #${folio} duplicado.`);
   };
 
   const addToCart = (product: Product) => {
@@ -99,14 +114,18 @@ export default function SalesView() {
       }
       return [...prev, { ...product, cartQuantity: 1 }];
     });
+    toast.success(`${product.name} +1`, { 
+      duration: 1000,
+      position: 'bottom-center',
+      style: { background: '#020617', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }
+    });
   };
 
   const updateQuantity = (id: string, delta: number) => {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
         const newQ = item.cartQuantity + delta;
-        if (newQ <= 0) return item;
-        return { ...item, cartQuantity: newQ };
+        return newQ > 0 ? { ...item, cartQuantity: newQ } : item;
       }
       return item;
     }));
@@ -114,23 +133,27 @@ export default function SalesView() {
 
   const removeFromCart = (id: string) => setCart(prev => prev.filter(item => item.id !== id));
 
-  // Math
   const netSubtotal = cart.reduce((acc, item) => acc + (item.net_price * item.cartQuantity), 0);
   const iva = Math.round(netSubtotal * 0.19);
   const totalWithTax = netSubtotal + iva;
 
+  const getDueDate = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + paymentDays);
+    return d;
+  };
+
   const handleSale = async () => {
     if (cart.length === 0) return toast.error('El carrito está vacío');
-    if (!invoiceFolio) return toast.error('Ingrese un número de factura');
-    if (folioWarning) return toast.error('El número de factura es inválido (duplicado)');
+    if (!invoiceFolio) return toast.error('Ingrese folio');
+    if (folioWarning) return toast.error('Folio inválido');
 
     setIsProcessing(true);
     const folioNum = parseInt(invoiceFolio, 10);
 
     try {
-      // 1. Create Sale
       const { data: saleData, error: saleErr } = await supabase
-        .from('sales')
+        .from('nf_sales')
         .insert({ 
           subtotal_net: netSubtotal, 
           total_tax: iva, 
@@ -140,14 +163,11 @@ export default function SalesView() {
         .select('id').single();
       if (saleErr) throw saleErr;
 
-      // Calculate due date
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + paymentDays);
+      const dueDate = getDueDate();
       dueDate.setHours(0, 0, 0, 0);
 
-      // 2. Create Invoice
       const { error: invErr } = await supabase
-        .from('invoices')
+        .from('nf_invoices')
         .insert({ 
           folio: folioNum, 
           sale_id: saleData.id, 
@@ -155,13 +175,13 @@ export default function SalesView() {
           paid_amount: 0,
           status: 'Pendiente',
           client_id: selectedClientId || null,
-          payment_due_date: dueDate.toISOString()
+          payment_due_date: dueDate.toISOString(),
+          issued_at: new Date().toISOString()
         });
       if (invErr) throw invErr;
 
-      // 3. Insert Items and update stock
       for (const item of cart) {
-        await supabase.from('sale_items').insert({
+        await supabase.from('nf_sale_items').insert({
           sale_id: saleData.id,
           product_id: item.id,
           quantity: item.cartQuantity,
@@ -169,39 +189,35 @@ export default function SalesView() {
           subtotal_net: item.net_price * item.cartQuantity
         });
         
-        await supabase.from('products')
+        await supabase.from('nf_products')
           .update({ stock: item.stock - item.cartQuantity })
           .eq('id', item.id);
       }
 
-      // 4. Update sync folio
-      const { data: currentSettings } = await supabase.from('settings').select('value').eq('key', 'next_invoice_number').single();
-      const currentNextFolio = currentSettings ? parseInt(currentSettings.value, 10) : 1;
-      
-      if (folioNum >= currentNextFolio) {
-        await supabase.from('settings').update({ value: (folioNum + 1).toString() }).eq('key', 'next_invoice_number');
-      }
+      await supabase.from('nf_settings').update({ value: (folioNum + 1).toString() }).eq('key', 'next_invoice_number');
 
-      toast.success('Venta y Factura generadas con éxito');
+      toast.success('Venta finalizada');
       setCart([]);
+      setShowCart(false);
       fetchProducts();
       fetchNextFolio();
     } catch (e: any) {
-      toast.error('Error al procesar: ' + e.message);
+      toast.error('Error: ' + e.message);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleCreateClient = async () => {
-    if (!newClient.name) return toast.error('El nombre es obligatorio');
-    const { data, error } = await supabase.from('clients').insert(newClient).select().single();
+    if (!newClient.name) return toast.error('Nombre obligatorio');
+    const { data, error } = await supabase.from('nf_clients').insert(newClient).select().single();
     if (error) {
-      toast.error('Error al crear cliente: ' + error.message);
+      toast.error('Error: ' + error.message);
     } else {
       toast.success('Cliente creado');
       setClients(prev => [...prev, data]);
       setSelectedClientId(data.id);
+      setClientSearchTerm(data.name);
       setIsNewClientModalOpen(false);
       setNewClient({ name: '', rut: '', address: '', commune: '' });
     }
@@ -212,255 +228,364 @@ export default function SalesView() {
     (c.rut && c.rut.toLowerCase().includes(clientSearchTerm.toLowerCase()))
   );
 
-  const filteredProd = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase())));
+  const frequentClients = clients.slice(0, 3); // Predictive mockup
 
-  return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full">
-      {/* Products Column */}
-      <div className="flex-1 flex flex-col gap-4">
-        <h2 className="text-3xl font-bold">Punto de Venta</h2>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-          <input 
-            type="text" 
-            placeholder="Buscar producto por nombre o SKU..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full bg-card border border-card-border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
-          />
+  const filteredProd = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+    return (
+    <div className="flex flex-col gap-10 lg:h-[calc(100vh-180px)] font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-white/10">
+                <ShoppingCart size={20} className="text-black" fill="currentColor" />
+             </div>
+             <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Terminal de Ventas</p>
+          </div>
+          <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none">Punto <span className="text-slate-800">Operativo</span></h2>
         </div>
         
-        <div className="flex-1 overflow-y-auto space-y-3 pb-20">
+        <div className="hidden lg:flex items-center gap-8 pr-4">
+           <div className="text-right">
+              <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">Cajero Activo</p>
+              <p className="text-sm font-black text-white uppercase tracking-tighter">{user?.email?.split('@')[0]}</p>
+           </div>
+           <div className="w-px h-10 bg-white/5" />
+           <div className="text-right">
+              <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">Estado</p>
+              <p className="text-sm font-black text-emerald-500 uppercase tracking-tighter">En Línea</p>
+           </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8 flex-1 relative overflow-hidden">
+        {/* Mobile Cart Button */}
+      <button 
+        onClick={() => setShowCart(true)}
+        className="lg:hidden fixed bottom-8 right-8 w-20 h-20 bg-white text-black rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] flex items-center justify-center z-[80] active:scale-90 transition-all tap-highlight-none"
+      >
+        <div className="relative">
+          <ShoppingCart size={28} />
+          {cart.length > 0 && (
+            <span className="absolute -top-4 -right-4 bg-cyan-500 text-white text-[10px] font-black w-7 h-7 flex items-center justify-center rounded-xl border-4 border-[#020617]">
+              {cart.reduce((a, b) => a + b.cartQuantity, 0)}
+            </span>
+          )}
+        </div>
+      </button>
+
+      {/* Main Catalog Section */}
+      <div className="flex-1 flex flex-col gap-8 overflow-hidden">
+        <div className="glass-card p-6 rounded-[2rem] flex items-center gap-5 group focus-within:border-cyan-500/20 transition-all duration-700">
+          <Search size={22} className="text-slate-700 group-focus-within:text-cyan-400 transition-colors" />
+          <input 
+            type="text" 
+            placeholder="ESCANEANDO PRODUCTOS..." 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="flex-1 bg-transparent border-none outline-none text-white font-black placeholder:text-slate-800 uppercase text-xs tracking-[0.2em]"
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} className="p-2 hover:text-white text-slate-700 transition-colors">
+              <X size={20} />
+            </button>
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-32 lg:pb-0">
           {filteredProd.map(product => (
-            <div key={product.id} className="glass-card p-4 rounded-xl flex items-center justify-between hover:border-primary/50 transition-colors">
-              <div>
-                <p className="font-semibold text-lg">{product.name} <span className="text-sm font-normal text-slate-500 ml-2">{product.sku}</span></p>
-                <div className="flex gap-4 mt-1 text-sm">
-                  <span className="text-emerald-500 font-medium">${product.net_price.toLocaleString()} NETO</span>
-                  <span className={`font-medium ${product.stock > 0 ? 'text-slate-400' : 'text-red-400'}`}>Stock: {product.stock}</span>
+            <div 
+              key={product.id}
+              onClick={() => addToCart(product)}
+              className="glass-card p-8 rounded-[3rem] group cursor-pointer active:scale-[0.98] transition-all hover:bg-white/[0.02] border-white/5 hover:border-cyan-500/20 flex flex-col items-center text-center gap-6 relative overflow-hidden"
+            >
+              <div className="absolute top-6 right-6">
+                 {product.stock <= 0 ? (
+                   <div className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.6)]" />
+                 ) : (
+                   <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)]" />
+                 )}
+              </div>
+
+              <div className="w-24 h-24 rounded-[2rem] bg-white/[0.01] border border-white/5 flex items-center justify-center text-4xl font-black text-slate-800 group-hover:text-cyan-400 group-hover:bg-cyan-500/5 group-hover:border-cyan-500/20 transition-all duration-1000">
+                {product.name.charAt(0)}
+              </div>
+              
+              <div className="space-y-2 px-2">
+                <h4 className="text-sm font-black text-white line-clamp-2 uppercase tracking-tight leading-snug group-hover:text-cyan-400 transition-colors">{product.name}</h4>
+                <div className="flex flex-col items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{product.sku || 'SIN SKU'}</span>
+                  <span className={`text-[9px] font-black uppercase ${product.stock <= 0 ? 'text-amber-500/70' : 'text-slate-600'}`}>
+                    {product.stock <= 0 ? 'Agotado' : `${product.stock} DISPONIBLES`}
+                  </span>
                 </div>
               </div>
-              <button 
-                onClick={() => addToCart(product)}
-                className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-foreground p-3 rounded-xl transition-colors disabled:opacity-50"
-              >
-                <Plus size={20} />
-              </button>
+
+              <div className="mt-2 pt-4 border-t border-white/5 w-full">
+                <p className="text-2xl font-black text-white tracking-tighter">{formatCurrency(product.net_price)}</p>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Cart Column */}
-      <div className="w-full lg:w-96 flex flex-col gap-4">
-        <div className="glass-card p-6 rounded-2xl flex-1 flex flex-col h-full bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-2 mb-6 text-xl font-bold">
-            <ShoppingCart className="text-primary" /> Carrito
+      {/* Cart & Checkout Section */}
+      <div className={`
+        ${showCart ? 'fixed inset-0 z-[100] lg:relative lg:inset-auto' : 'hidden lg:flex'}
+        w-full lg:w-[460px] flex flex-col bg-[#020617] lg:bg-transparent transition-all duration-700
+      `}>
+        {/* Mobile Header */}
+        <div className="lg:hidden h-28 flex items-center justify-between px-10 border-b border-white/5 bg-white/[0.01] backdrop-blur-3xl">
+          <div className="space-y-1">
+            <h3 className="text-3xl font-black tracking-tighter text-white uppercase">Operación</h3>
+            <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em]">Checkpoint de Venta</p>
+          </div>
+          <button onClick={() => setShowCart(false)} className="w-14 h-14 flex items-center justify-center bg-white/5 rounded-2xl text-slate-500 hover:text-white transition-all">
+            <X size={28} />
+          </button>
+        </div>
+
+        <div className="flex-1 flex flex-col glass-card lg:rounded-[4rem] overflow-hidden m-6 lg:m-0 border-white/5 shadow-2xl relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[100px] -mr-32 -mt-32" />
+          
+          <div className="p-10 border-b border-white/5 space-y-6 relative z-10" ref={clientSearchRef}>
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Destinatario</span>
+              <button onClick={() => setIsNewClientModalOpen(true)} className="text-cyan-500 text-[10px] font-black uppercase flex items-center gap-2 hover:text-cyan-400 transition-all">
+                <UserPlus size={16} /> Alta Rápida
+              </button>
+            </div>
+            
+            <div className="relative">
+              <div 
+                onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
+                className="w-full bg-white/[0.02] border border-white/5 p-6 rounded-3xl flex items-center justify-between cursor-pointer group hover:bg-white/[0.04] transition-all duration-500"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-slate-600 group-hover:text-cyan-400 transition-colors">
+                    <UserIcon size={18} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-black text-white uppercase tracking-wider truncate max-w-[200px]">
+                      {selectedClientId ? clients.find(c => c.id === selectedClientId)?.name : 'Seleccionar Cliente'}
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-600 uppercase">
+                      {selectedClientId ? clients.find(c => c.id === selectedClientId)?.rut : 'Búsqueda Inteligente'}
+                    </span>
+                  </div>
+                </div>
+                <ChevronDown size={20} className={`text-slate-800 transition-transform duration-700 ${isClientDropdownOpen ? 'rotate-180' : ''}`} />
+              </div>
+
+              {isClientDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-4 z-[110] glass-card rounded-[3rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.9)] border-white/10 animate-in fade-in zoom-in-95 duration-500 backdrop-blur-3xl">
+                   <div className="p-6 border-b border-white/5 bg-white/[0.02]">
+                      <div className="flex items-center gap-4 bg-black/40 p-4 rounded-2xl border border-white/5 group focus-within:border-cyan-500/30 transition-all">
+                        <Search size={16} className="text-slate-700 group-focus-within:text-cyan-500" />
+                        <input 
+                          autoFocus
+                          type="text" 
+                          placeholder="NOMBRE O RUT..."
+                          value={clientSearchTerm}
+                          onChange={e => setClientSearchTerm(e.target.value)}
+                          className="w-full bg-transparent text-[10px] font-black text-white outline-none uppercase placeholder:text-slate-800 tracking-widest"
+                        />
+                      </div>
+                   </div>
+                   <div className="max-h-[300px] overflow-y-auto no-scrollbar py-4">
+                     {!clientSearchTerm && (
+                        <div className="px-8 mb-4">
+                           <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2">
+                             <Sparkles size={12} className="text-cyan-500" /> Sugeridos
+                           </span>
+                        </div>
+                     )}
+                     {filteredClients.length === 0 ? (
+                       <div className="py-12 text-center space-y-3 opacity-20">
+                          <AlertCircle size={32} className="mx-auto" />
+                          <p className="text-[10px] font-black uppercase tracking-widest">Sin Resultados</p>
+                       </div>
+                     ) : filteredClients.map(client => (
+                       <div 
+                         key={client.id}
+                         onClick={() => {
+                           setSelectedClientId(client.id);
+                           setClientSearchTerm(client.name);
+                           setIsClientDropdownOpen(false);
+                         }}
+                         className="px-8 py-5 hover:bg-white/[0.03] cursor-pointer flex items-center justify-between group transition-all"
+                       >
+                         <div className="flex flex-col gap-1">
+                           <span className="text-[11px] font-black text-white uppercase group-hover:text-cyan-400 transition-colors tracking-tight">{client.name}</span>
+                           <span className="text-[9px] font-bold text-slate-700 uppercase tracking-widest">{client.rut || 'CONSUMIDOR FINAL'}</span>
+                         </div>
+                         {selectedClientId === client.id && <div className="w-2.5 h-2.5 bg-cyan-500 rounded-full shadow-[0_0_15px_rgba(6,182,212,1)]" />}
+                       </div>
+                     ))}
+                   </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-4 mb-6">
+          <div className="flex-1 overflow-y-auto p-10 space-y-6 no-scrollbar relative z-10">
             {cart.length === 0 ? (
-              <p className="text-slate-400 text-center py-10">Agrega productos al carrito</p>
+              <div className="flex flex-col items-center justify-center py-32 opacity-10 text-center space-y-8">
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center">
+                  <ShoppingCart size={48} strokeWidth={1} />
+                </div>
+                <p className="text-[11px] font-black uppercase tracking-[0.5em]">Carrito Vacío</p>
+              </div>
             ) : (
               cart.map(item => (
-                <div key={item.id} className="flex justify-between items-start gap-2 border-b border-card-border pb-4">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm line-clamp-2">{item.name}</p>
-                    <p className="text-xs text-slate-400 mt-1">${item.net_price.toLocaleString()} x {item.cartQuantity}</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <p className="font-bold">${(item.net_price * item.cartQuantity).toLocaleString()}</p>
-                    <div className="flex items-center gap-1 bg-background border border-card-border rounded-lg p-1">
-                      <button onClick={() => updateQuantity(item.id, -1)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded"><Minus size={14}/></button>
-                      <span className="text-xs w-6 text-center font-medium">{item.cartQuantity}</span>
-                      <button onClick={() => updateQuantity(item.id, 1)} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded"><Plus size={14}/></button>
-                      <button onClick={() => removeFromCart(item.id)} className="p-1 text-red-500 hover:bg-red-500/10 rounded ml-1"><Trash2 size={14}/></button>
+                <div key={item.id} className="flex flex-col gap-5 p-6 bg-white/[0.01] rounded-[2.5rem] border border-white/5 group hover:border-white/10 transition-all duration-500">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1 flex-1 pr-6">
+                      <h5 className="text-[11px] font-black text-white uppercase tracking-tight leading-relaxed group-hover:text-cyan-400 transition-colors">{item.name}</h5>
+                      <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{formatCurrency(item.net_price)} / UNIT</p>
                     </div>
+                    <button onClick={() => removeFromCart(item.id)} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/0 hover:bg-rose-500/10 text-slate-800 hover:text-rose-500 transition-all">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <div className="flex items-center gap-2 bg-black/40 rounded-2xl p-1.5 border border-white/5">
+                      <button onClick={() => updateQuantity(item.id, -1)} className="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-white transition-colors bg-white/0 hover:bg-white/5 rounded-xl"><Minus size={16} /></button>
+                      <span className="text-xs font-black w-10 text-center text-white">{item.cartQuantity}</span>
+                      <button onClick={() => updateQuantity(item.id, 1)} className="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-white transition-colors bg-white/0 hover:bg-white/5 rounded-xl"><Plus size={16} /></button>
+                    </div>
+                    <p className="text-lg font-black text-white tracking-tighter">{formatCurrency(item.net_price * item.cartQuantity)}</p>
                   </div>
                 </div>
               ))
             )}
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-card-border">
-            {/* Client Selector */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-medium">Cliente</label>
-                <button 
-                  onClick={() => setIsNewClientModalOpen(true)}
-                  className="text-primary text-xs flex items-center gap-1 hover:underline"
-                >
-                  <UserPlus size={14}/> Nuevo Cliente
-                </button>
-              </div>
-              
-              <div className="relative">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                  <input 
-                    type="text"
-                    placeholder="Escriba nombre o RUT..."
-                    value={clientSearchTerm}
-                    onChange={e => {
-                      setClientSearchTerm(e.target.value);
-                      setIsClientDropdownOpen(true);
-                    }}
-                    onFocus={() => setIsClientDropdownOpen(true)}
-                    className="w-full bg-background border border-card-border rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
-                  />
-                </div>
-
-                {isClientDropdownOpen && (
-                  <div className="absolute z-50 w-full bg-background border border-card-border rounded-xl mt-1 shadow-2xl max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-                    {filteredClients.length > 0 ? (
-                      filteredClients.map(client => (
-                        <div 
-                          key={client.id}
-                          onClick={() => {
-                            setSelectedClientId(client.id);
-                            setClientSearchTerm(client.name);
-                            setIsClientDropdownOpen(false);
-                          }}
-                          className={`px-4 py-2 hover:bg-primary/10 cursor-pointer border-b border-card-border last:border-0 transition-colors ${selectedClientId === client.id ? 'bg-primary/5' : ''}`}
-                        >
-                          <p className="font-bold text-sm text-foreground">{client.name}</p>
-                          <p className="text-[10px] text-slate-500 font-medium">{client.rut || 'Sin RUT'}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-xs text-slate-500 italic text-center">
-                        No se encontraron clientes
-                      </div>
-                    )}
-                  </div>
-                )}
-                {/* Overlay to close dropdown when clicking away */}
-                {isClientDropdownOpen && (
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setIsClientDropdownOpen(false)}
-                  />
-                )}
-              </div>
-              
-              {selectedClientId && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-bold animate-in zoom-in-95">
-                  <CheckCircle2 size={10} />
-                  Seleccionado: {clients.find(c => c.id === selectedClientId)?.name}
-                </div>
-              )}
-            </div>
-
-            {/* Payment Terms */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-1">
-                <Calendar size={14}/> Días de Pago / Vencimiento
-              </label>
-              <div className="flex gap-2">
+          <div className="p-10 bg-white/[0.01] border-t border-white/5 space-y-10 relative z-10">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] ml-2">Folio Int.</span>
                 <input 
-                  type="number" 
-                  value={paymentDays}
-                  onChange={e => setPaymentDays(parseInt(e.target.value, 10) || 0)}
-                  className="w-20 bg-background border border-card-border rounded-xl px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-primary"
+                  type="number"
+                  value={invoiceFolio}
+                  onChange={e => setInvoiceFolio(e.target.value)}
+                  className={`w-full bg-white/[0.02] border p-5 rounded-2xl text-xs font-black outline-none transition-all ${folioWarning ? 'border-rose-500/50 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.1)]' : 'border-white/5 text-white focus:border-cyan-500/30'}`}
                 />
-                <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-2 text-xs flex items-center text-slate-500">
-                  Vence: {formatDate(new Date(new Date().setDate(new Date().getDate() + paymentDays)))}
+              </div>
+              <div className="space-y-3">
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] ml-2">Términos</span>
+                <div className="relative">
+                  <input 
+                    type="number"
+                    value={paymentDays}
+                    onChange={e => setPaymentDays(parseInt(e.target.value, 10) || 0)}
+                    className="w-full bg-white/[0.02] border border-white/5 p-5 rounded-2xl text-xs font-black text-white outline-none focus:border-cyan-500/30 transition-all pr-12"
+                  />
+                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-700 uppercase">Días</span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Asignar Factura</label>
-              <input 
-                type="number" 
-                value={invoiceFolio}
-                onChange={e => setInvoiceFolio(e.target.value)}
-                placeholder="N° Folio"
-                className={`w-full bg-background border ${folioWarning ? 'border-red-500 focus:ring-red-500' : 'border-card-border focus:ring-primary'} rounded-xl px-4 py-2 font-mono text-lg focus:outline-none focus:ring-2`}
-              />
-              {folioWarning && (
-                <p className="text-xs text-red-500 flex items-center gap-1"><AlertTriangle size={12}/> {folioWarning}</p>
-              )}
-            </div>
-
-            <div className="bg-background rounded-xl p-4 border border-card-border space-y-2">
-              <div className="flex justify-between text-sm text-slate-500">
-                <span>Subtotal (Neto)</span>
-                <span>${netSubtotal.toLocaleString()}</span>
+            <div className="space-y-4 pt-4">
+              <div className="flex justify-between text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">
+                <span>Neto</span>
+                <span className="text-white">{formatCurrency(netSubtotal)}</span>
               </div>
-              <div className="flex justify-between text-sm text-amber-500">
-                <span>IVA (19%)</span>
-                <span>+ ${iva.toLocaleString()}</span>
+              <div className="flex justify-between text-[10px] font-black uppercase text-slate-600 tracking-[0.3em]">
+                <span>I.V.A (19%)</span>
+                <span className="text-white">{formatCurrency(iva)}</span>
               </div>
-              <div className="h-px bg-card-border my-2"></div>
-              <div className="flex justify-between text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-400 bg-clip-text text-transparent">
-                <span>TOTAL</span>
-                <span>${totalWithTax.toLocaleString()}</span>
+              <div className="flex justify-between items-center pt-8 border-t border-white/10">
+                <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.5em]">Bruto</span>
+                <div className="flex items-baseline gap-1">
+                   <span className="text-[10px] font-black text-cyan-500 mr-2 uppercase">Total</span>
+                   <span className="text-4xl font-black text-white tracking-tighter">{formatCurrency(totalWithTax)}</span>
+                </div>
               </div>
             </div>
 
             <button 
               onClick={handleSale}
               disabled={isProcessing || cart.length === 0 || !!folioWarning}
-              className="w-full bg-primary hover:bg-blue-600 disabled:bg-slate-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-primary/20"
+              className="w-full h-24 bg-white text-black hover:bg-cyan-400 disabled:bg-slate-900/50 disabled:text-slate-700 rounded-[2rem] font-black text-[12px] uppercase tracking-[0.4em] active:scale-95 transition-all flex items-center justify-center gap-4 group/confirm shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
             >
-              {isProcessing ? 'Procesando...' : <><CheckCircle2 /> Completar Venta</>}
+              {isProcessing ? (
+                <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>Procesar Venta</span>
+                  <div className="w-8 h-8 rounded-xl bg-black/5 flex items-center justify-center group-hover/confirm:translate-x-2 transition-transform">
+                    <ChevronRight size={20} />
+                  </div>
+                </>
+              )}
             </button>
           </div>
         </div>
       </div>
-      {/* New Client Modal */}
+    </div>
+
+    {/* New Client Modal */}
       {isNewClientModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-md p-6 rounded-2xl space-y-4 shadow-2xl bg-white dark:bg-slate-900">
-            <h3 className="text-xl font-bold flex items-center gap-2">
-              <UserPlus className="text-primary" /> Nuevo Cliente
-            </h3>
-            <div className="space-y-3">
-              <input 
-                placeholder="Nombre completo" 
-                value={newClient.name}
-                onChange={e => setNewClient({...newClient, name: e.target.value})}
-                className="w-full bg-background border border-card-border rounded-xl px-4 py-2"
-              />
-              <input 
-                placeholder="RUT (opcional)" 
-                value={newClient.rut}
-                onChange={e => setNewClient({...newClient, rut: e.target.value})}
-                className="w-full bg-background border border-card-border rounded-xl px-4 py-2"
-              />
-              <input 
-                placeholder="Dirección" 
-                value={newClient.address}
-                onChange={e => setNewClient({...newClient, address: e.target.value})}
-                className="w-full bg-background border border-card-border rounded-xl px-4 py-2"
-              />
-              <input 
-                placeholder="Comuna" 
-                value={newClient.commune}
-                onChange={e => setNewClient({...newClient, commune: e.target.value})}
-                className="w-full bg-background border border-card-border rounded-xl px-4 py-2"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setIsNewClientModalOpen(false)}
-                className="flex-1 py-2 rounded-xl border border-card-border hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={handleCreateClient}
-                className="flex-1 py-2 rounded-xl bg-primary text-white hover:bg-blue-600 transition-colors"
-              >
-                Crear Cliente
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/95 backdrop-blur-3xl animate-in fade-in duration-700">
+          <div className="glass-card w-full max-w-lg p-12 rounded-[4rem] space-y-12 relative overflow-hidden border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.9)]">
+            <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-500/5 blur-[100px] -ml-32 -mt-32" />
+            
+            <div className="flex items-center justify-between relative z-10">
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Nexus Directory</p>
+                <h3 className="text-4xl font-black tracking-tight text-white uppercase">Nuevo Cliente</h3>
+              </div>
+              <button onClick={() => setIsNewClientModalOpen(false)} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white/5 text-slate-500 hover:text-white transition-all">
+                <X size={32} />
               </button>
             </div>
+            
+            <div className="space-y-8 relative z-10">
+               <div className="space-y-3">
+                 <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] ml-2">Nombre Comercial / Razón Social</label>
+                 <input 
+                   autoFocus
+                   value={newClient.name}
+                   onChange={e => setNewClient({...newClient, name: e.target.value})}
+                   className="w-full bg-white/[0.02] border border-white/5 p-7 rounded-3xl text-sm font-black text-white outline-none focus:border-cyan-500/30 transition-all uppercase placeholder:text-slate-900"
+                   placeholder="NOMBRE COMPLETO"
+                 />
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-3">
+                   <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] ml-2">R.U.T / Identificación</label>
+                   <input 
+                     value={newClient.rut}
+                     onChange={e => setNewClient({...newClient, rut: formatRUT(e.target.value)})}
+                     className="w-full bg-white/[0.02] border border-white/5 p-7 rounded-3xl text-sm font-black text-white outline-none focus:border-cyan-500/30 transition-all placeholder:text-slate-900"
+                     placeholder="XX.XXX.XXX-X"
+                   />
+                 </div>
+                 <div className="space-y-3">
+                   <label className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] ml-2">Ubicación (Comuna)</label>
+                   <input 
+                     value={newClient.commune}
+                     onChange={e => setNewClient({...newClient, commune: e.target.value})}
+                     className="w-full bg-white/[0.02] border border-white/5 p-7 rounded-3xl text-sm font-black text-white outline-none focus:border-cyan-500/30 transition-all uppercase placeholder:text-slate-900"
+                     placeholder="SANTIAGO, CL"
+                   />
+                 </div>
+               </div>
+            </div>
+
+            <button 
+              onClick={handleCreateClient}
+              className="w-full h-24 bg-white text-black rounded-[2.5rem] font-black text-[12px] uppercase tracking-[0.4em] active:scale-95 transition-all flex items-center justify-center gap-3 relative z-10 hover:bg-cyan-400 shadow-2xl"
+            >
+              Confirmar Registro Maestro
+            </button>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
-

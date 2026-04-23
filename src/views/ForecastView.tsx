@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-  BarChart, Bar, Cell
+  BarChart, Bar, Cell, AreaChart, Area
 } from 'recharts';
-import { TrendingUp, AlertTriangle, Package, Users, Calendar, ArrowRight, Search } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Package, Users, Calendar, ArrowRight, Search, Zap, RefreshCcw, ArrowUpRight } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import toast from 'react-hot-toast';
 
@@ -46,23 +46,21 @@ export default function ForecastView() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Sales and Items for historical analysis
-      // We'll fetch the last 6 months of data
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
       const { data: salesData, error: salesError } = await supabase
-        .from('sales')
+        .from('nf_sales')
         .select(`
           id,
           created_at,
-          total_with_tax,
+          total_amount,
           client_id,
-          clients (name),
-          sale_items (
+          client:nf_clients (name),
+          items:nf_sale_items (
             product_id,
             quantity,
-            products (name, stock)
+            product:nf_products (name, stock)
           )
         `)
         .gte('created_at', sixMonthsAgo.toISOString())
@@ -70,7 +68,6 @@ export default function ForecastView() {
 
       if (salesError) throw salesError;
 
-      // 2. Process historical trends
       const monthlyGroups: Record<string, { total: number, quantity: number }> = {};
       const productStats: Record<string, { name: string, stock: number, sales: number[] }> = {};
       const clientStats: Record<string, { name: string, totals: number[], dates: Date[] }> = {};
@@ -79,56 +76,49 @@ export default function ForecastView() {
         const date = new Date(sale.created_at);
         const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
         
-        // General trends
         if (!monthlyGroups[monthKey]) monthlyGroups[monthKey] = { total: 0, quantity: 0 };
-        monthlyGroups[monthKey].total += Number(sale.total_with_tax);
+        monthlyGroups[monthKey].total += Number(sale.total_amount);
 
-        // Product stats
-        sale.sale_items?.forEach((item: any) => {
-          if (!monthlyGroups[monthKey]) return; // Should not happen
+        (sale.items as any[])?.forEach((item: any) => {
           monthlyGroups[monthKey].quantity += item.quantity;
 
           if (!productStats[item.product_id]) {
             productStats[item.product_id] = { 
-              name: item.products?.name || 'Producto Desconocido', 
-              stock: item.products?.stock || 0,
+              name: item.product?.name || 'Producto Desconocido', 
+              stock: item.product?.stock || 0,
               sales: [] 
             };
           }
           productStats[item.product_id].sales.push(item.quantity);
         });
 
-        // Client stats
         if (sale.client_id) {
           if (!clientStats[sale.client_id]) {
             clientStats[sale.client_id] = { 
-              name: (sale.clients as any)?.name || 'Cliente Desconocido',
+              name: (sale.client as any)?.name || 'Cliente Desconocido',
               totals: [],
               dates: []
             };
           }
-          clientStats[sale.client_id].totals.push(Number(sale.total_with_tax));
+          clientStats[sale.client_id].totals.push(Number(sale.total_amount));
           clientStats[sale.client_id].dates.push(date);
         }
       });
 
-      // 3. Transform for Charts
       const history: HistoricalData[] = Object.entries(monthlyGroups).map(([month, data]) => ({
         month,
         total: data.total,
         quantity: data.quantity
       })).sort((a, b) => a.month.localeCompare(b.month));
 
-      // Simple prediction for next month (Average of last 3 months)
       if (history.length >= 3) {
         const last3 = history.slice(-3);
         const avgTotal = last3.reduce((acc, curr) => acc + curr.total, 0) / 3;
         const avgQty = last3.reduce((acc, curr) => acc + curr.quantity, 0) / 3;
         
-        // Add "Next Month" projection
         const nextMonthDate = new Date();
         nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
-        const nextMonthKey = `${nextMonthDate.getFullYear()}-${(nextMonthDate.getMonth() + 1).toString().padStart(2, '0')} (Proj)`;
+        const nextMonthKey = `${nextMonthDate.getFullYear()}-${(nextMonthDate.getMonth() + 1).toString().padStart(2, '0')} (P)`;
         
         history.push({
           month: nextMonthKey,
@@ -138,11 +128,10 @@ export default function ForecastView() {
       }
       setHistoricalSales(history);
 
-      // 4. Product Forecasts
       const pForecasts: ProductForecast[] = Object.entries(productStats).map(([id, stats]) => {
         const totalSold = stats.sales.reduce((a, b) => a + b, 0);
-        const avgMonthly = totalSold / 6; // Simple 6-month average
-        const predicted = avgMonthly * 1.1; // 10% growth assumption for safety
+        const avgMonthly = totalSold / 6; 
+        const predicted = avgMonthly * 1.1; 
         const coverage = predicted > 0 ? (stats.stock / predicted) * 30 : 999;
 
         return {
@@ -156,7 +145,6 @@ export default function ForecastView() {
       }).sort((a, b) => a.stockCoverageDays - b.stockCoverageDays);
       setProductForecasts(pForecasts);
 
-      // 5. Client Forecasts
       const cForecasts: ClientForecast[] = Object.entries(clientStats).map(([id, stats]) => {
         const totalVal = stats.totals.reduce((a, b) => a + b, 0);
         const avgVal = totalVal / 6;
@@ -174,93 +162,70 @@ export default function ForecastView() {
       setClientForecasts(cForecasts);
 
     } catch (error: any) {
-      toast.error('Error al generar forecast: ' + error.message);
-      console.error(error);
+      toast.error('Error al generar inteligencia predictiva');
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = productForecasts.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredClients = clientForecasts.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = productForecasts.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredClients = clientForecasts.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const stockAlerts = productForecasts.filter(p => p.stockCoverageDays < 15).length;
   const growthRate = historicalSales.length >= 3 
-    ? ((historicalSales[historicalSales.length-2].total / historicalSales[historicalSales.length-3].total) - 1) * 100 
+    ? ((historicalSales[historicalSales.length-2].total / (historicalSales[historicalSales.length-3].total || 1)) - 1) * 100 
     : 0;
 
   if (loading) {
-    return <div className="flex items-center justify-center h-full text-slate-500">Analizando tendencias y stock...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] space-y-8 opacity-20">
+        <div className="w-16 h-16 border-2 border-white/20 border-t-cyan-500 rounded-full animate-spin"></div>
+        <p className="text-[10px] font-black uppercase tracking-[0.5em]">Corriendo Modelos Predictivos</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-4xl font-black text-slate-800 dark:text-white tracking-tight">Predicción y Tendencias</h2>
-          <p className="text-slate-500 mt-2 flex items-center gap-2">
-            <Calendar size={16} /> Basado en el historial de los últimos 6 meses
-          </p>
-        </div>
-        <div className="flex gap-4">
-          <button 
-            onClick={fetchData}
-            className="px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
-          >
-            Actualizar Datos
-          </button>
-        </div>
-      </div>
-
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="glass-card p-6 rounded-[2rem] border-primary/10">
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Venta Proyectada (Próx. Mes)</p>
-            <TrendingUp size={18} className="text-primary" />
+    <div className="space-y-12 font-outfit pb-24">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row justify-between items-end gap-10 px-4">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+             <span className="w-8 h-px bg-cyan-500" />
+             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Predictive Analysis</p>
           </div>
-          <p className="text-3xl font-black mt-2">
-            {formatCurrency(historicalSales[historicalSales.length - 1]?.total || 0)}
-          </p>
-          <p className={`text-xs mt-2 font-bold ${growthRate >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            {growthRate >= 0 ? '↑' : '↓'} {Math.abs(growthRate).toFixed(1)}% vs mes anterior
-          </p>
+          <h2 className="text-5xl font-black tracking-tight text-white uppercase">Forecast <span className="text-slate-700">& Tendencias</span></h2>
+          <div className="flex items-center gap-6">
+             <p className="text-xs font-bold text-slate-600 uppercase tracking-widest max-w-[300px] leading-relaxed">
+               Inteligencia basada en el historial operativo de los últimos 180 días
+             </p>
+             <button onClick={fetchData} className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl text-slate-500 hover:text-white transition-all"><RefreshCcw size={18} /></button>
+          </div>
         </div>
 
-        <div className="glass-card p-6 rounded-[2rem] border-amber-500/10">
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Riesgo de Quiebre Stock</p>
-            <AlertTriangle size={18} className="text-amber-500" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto">
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Venta Proyectada</p>
+            <p className="text-xl font-black text-white">{formatCurrency(historicalSales[historicalSales.length - 1]?.total || 0)}</p>
+            <p className={`text-[8px] font-black uppercase mt-1 ${growthRate >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+              {growthRate >= 0 ? '+' : ''}{growthRate.toFixed(1)}% vs Last Month
+            </p>
           </div>
-          <p className="text-3xl font-black mt-2 text-amber-500">{stockAlerts}</p>
-          <p className="text-xs mt-2 text-slate-400 font-medium">Productos con cobertura {"<"} 15 días</p>
-        </div>
-
-        <div className="glass-card p-6 rounded-[2rem] border-emerald-500/10">
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ticket Promedio</p>
-            <Users size={18} className="text-emerald-500" />
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Riesgo Stock</p>
+            <p className={`text-xl font-black ${stockAlerts > 0 ? 'text-rose-500' : 'text-white'}`}>{stockAlerts} Items</p>
+            <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Cobertura {"<"} 15 Días</p>
           </div>
-          <p className="text-3xl font-black mt-2">
-            {formatCurrency(clientForecasts.reduce((acc, c) => acc + c.avgPurchaseValue, 0) / (clientForecasts.length || 1))}
-          </p>
-          <p className="text-xs mt-2 text-slate-400 font-medium">Valor mensual por cliente</p>
-        </div>
-
-        <div className="glass-card p-6 rounded-[2rem] border-blue-500/10">
-          <div className="flex justify-between items-start">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Demanda Total Items</p>
-            <Package size={18} className="text-blue-500" />
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Ticket Promedio</p>
+            <p className="text-xl font-black text-white">{formatCurrency(clientForecasts.reduce((acc, c) => acc + c.avgPurchaseValue, 0) / (clientForecasts.length || 1))}</p>
+            <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Valor Unitario Mensual</p>
           </div>
-          <p className="text-3xl font-black mt-2">
-            {Math.round(historicalSales[historicalSales.length - 1]?.quantity || 0).toLocaleString()}
-          </p>
-          <p className="text-xs mt-2 text-slate-400 font-medium">Unidades proyectadas</p>
+          <div className="glass-card p-6 rounded-[2rem] border-white/5">
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Demanda Items</p>
+            <p className="text-xl font-black text-white">{Math.round(historicalSales[historicalSales.length - 1]?.quantity || 0).toLocaleString()}</p>
+            <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Unidades Proyectadas</p>
+          </div>
         </div>
       </div>
 
@@ -327,75 +292,80 @@ export default function ForecastView() {
             <button 
               onClick={() => setActiveTab('clients')}
               className={`px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${
-                activeTab === 'clients' ? 'bg-white dark:bg-slate-800 shadow-md scale-100' : 'text-slate-500 hover:text-slate-700'
+                activeTab === 'clients' ? 'bg-white text-black shadow-2xl' : 'text-slate-600 hover:text-white'
               }`}
             >
-              Tendencia por Cliente
+              Comportamiento Cliente
             </button>
           </div>
 
           <div className="relative group">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+            <Search size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-700 group-focus-within:text-cyan-400 transition-colors" />
             <input
               type="text"
-              placeholder={`Buscar ${activeTab === 'products' ? 'producto' : 'cliente'}...`}
+              placeholder="FILTRAR RESULTADOS..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:ring-4 focus:ring-primary/10 outline-none transition-all w-80 shadow-sm"
+              className="pl-14 pr-6 h-16 bg-white/[0.02] border border-white/5 rounded-2xl text-[10px] font-black text-white focus:border-cyan-500/30 outline-none w-80 uppercase tracking-widest"
             />
           </div>
         </div>
 
-        <div className="glass-card rounded-[2.5rem] overflow-hidden border-slate-200/50 dark:border-slate-800 shadow-2xl">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
-              {activeTab === 'products' ? (
-                <tr>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Producto</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Stock Actual</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Venta Prom. (Mensual)</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Demanda Proyectada</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Cobertura Estimada</th>
-                </tr>
-              ) : (
-                <tr>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Cliente</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Última Compra</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Ticket Promedio</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Volumen Proyectado</th>
-                  <th className="p-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Estado</th>
-                </tr>
-              )}
+        <div className="glass-card rounded-[3.5rem] overflow-hidden border-white/5 shadow-2xl">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-white/[0.01] text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
+                {activeTab === 'products' ? (
+                  <>
+                    <th className="p-8 pl-10">Producto</th>
+                    <th className="p-8">Disponibilidad</th>
+                    <th className="p-8">Venta Mensual</th>
+                    <th className="p-8">Demanda Proyectada</th>
+                    <th className="p-8 pr-10">Cobertura Critica</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="p-8 pl-10">Razón Social</th>
+                    <th className="p-8">Recencia</th>
+                    <th className="p-8">Ticket Promedio</th>
+                    <th className="p-8">Volumen Estimado</th>
+                    <th className="p-8 pr-10 text-right">Status Fidelidad</th>
+                  </>
+                )}
+              </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-white/[0.03]">
               {activeTab === 'products' ? (
                 filteredProducts.map(p => (
-                  <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="p-6 font-black text-slate-800 dark:text-white">{p.name}</td>
-                    <td className="p-6">
-                      <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                        p.currentStock <= p.predictedDemand * 0.5 ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'
+                  <tr key={p.id} className="group hover:bg-white/[0.01] transition-all">
+                    <td className="p-8 pl-10">
+                      <div className="flex items-center gap-4">
+                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-700 group-hover:text-cyan-400 transition-colors"><Package size={16} /></div>
+                         <p className="text-sm font-black text-white uppercase tracking-tighter">{p.name}</p>
+                      </div>
+                    </td>
+                    <td className="p-8">
+                      <span className={`text-[10px] font-black px-4 py-1.5 rounded-lg uppercase ${
+                        p.currentStock <= p.predictedDemand * 0.5 ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-white/5 text-slate-400 border border-white/5'
                       }`}>
-                        {p.currentStock} unid.
+                        {p.currentStock} Unidades
                       </span>
                     </td>
-                    <td className="p-6 text-slate-500 font-bold">{Math.round(p.avgMonthlySales)} / mes</td>
-                    <td className="p-6 text-primary font-black">{Math.round(p.predictedDemand)} / mes</td>
-                    <td className="p-6">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden min-w-[60px]">
+                    <td className="p-8 text-xs font-bold text-slate-500">{Math.round(p.avgMonthlySales)} / Periodo</td>
+                    <td className="p-8 text-sm font-black text-cyan-400 uppercase tracking-tighter">{Math.round(p.predictedDemand)} / Mes</td>
+                    <td className="p-8 pr-10">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1 bg-white/[0.02] h-1.5 rounded-full overflow-hidden min-w-[80px]">
                           <div 
-                            className={`h-full rounded-full ${
+                            className={`h-full transition-all duration-1000 ${
                               p.stockCoverageDays < 15 ? 'bg-rose-500' : 
                               p.stockCoverageDays < 30 ? 'bg-amber-500' : 'bg-emerald-500'
                             }`}
                             style={{ width: `${Math.min((p.stockCoverageDays / 60) * 100, 100)}%` }}
                           />
                         </div>
-                        <span className={`text-xs font-black whitespace-nowrap ${
-                          p.stockCoverageDays < 15 ? 'text-rose-500' : 'text-slate-500'
-                        }`}>
-                          {p.stockCoverageDays > 365 ? '> 1 año' : `${p.stockCoverageDays} días`}
+                        <span className={`text-[10px] font-black uppercase ${p.stockCoverageDays < 15 ? 'text-rose-500 animate-pulse' : 'text-slate-600'}`}>
+                          {p.stockCoverageDays > 365 ? '> 1 Año' : `${p.stockCoverageDays} Días`}
                         </span>
                       </div>
                     </td>
@@ -403,20 +373,25 @@ export default function ForecastView() {
                 ))
               ) : (
                 filteredClients.map(c => (
-                  <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                    <td className="p-6 font-black text-slate-800 dark:text-white">{c.name}</td>
-                    <td className="p-6 text-slate-500 font-bold">
-                      {c.lastPurchaseDays === 0 ? 'Hoy' : `Hace ${c.lastPurchaseDays} días`}
+                  <tr key={c.id} className="group hover:bg-white/[0.01] transition-all">
+                    <td className="p-8 pl-10">
+                      <div className="flex items-center gap-4">
+                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-700 group-hover:text-cyan-400 transition-colors"><Users size={16} /></div>
+                         <p className="text-sm font-black text-white uppercase tracking-tighter">{c.name}</p>
+                      </div>
                     </td>
-                    <td className="p-6 font-bold">{formatCurrency(c.avgPurchaseValue)}</td>
-                    <td className="p-6 text-emerald-500 font-black">{formatCurrency(c.predictedVolume)}</td>
-                    <td className="p-6">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                        c.lastPurchaseDays > 60 ? 'bg-rose-100 text-rose-600' : 
-                        c.lastPurchaseDays > 30 ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'
+                    <td className="p-8 text-xs font-bold text-slate-500 uppercase">
+                      {c.lastPurchaseDays === 0 ? 'Activo Hoy' : `Hace ${c.lastPurchaseDays} Días`}
+                    </td>
+                    <td className="p-8 text-sm font-black text-white tracking-tighter">{formatCurrency(c.avgPurchaseValue)}</td>
+                    <td className="p-8 text-sm font-black text-emerald-500 tracking-tighter">{formatCurrency(c.predictedVolume)}</td>
+                    <td className="p-8 pr-10 text-right">
+                      <span className={`text-[9px] font-black px-4 py-2 rounded-xl uppercase border ${
+                        c.lastPurchaseDays > 60 ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 
+                        c.lastPurchaseDays > 30 ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                       }`}>
-                        {c.lastPurchaseDays > 60 ? 'Riesgo Fuga' : 
-                         c.lastPurchaseDays > 30 ? 'Inactivo' : 'Activo'}
+                        {c.lastPurchaseDays > 60 ? 'ALERTA FUGA' : 
+                         c.lastPurchaseDays > 30 ? 'DORMIDO' : 'CLIENTE VIP'}
                       </span>
                     </td>
                   </tr>

@@ -12,9 +12,16 @@ import {
   Truck,
   Map as MapIcon,
   DollarSign,
-  TrendingUp
+  TrendingUp,
+  LogOut,
+  User,
+  ShieldCheck,
+  ChevronRight,
+  Bell
 } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
+import LoginView from '@/views/LoginView';
 
 // Views
 import InventoryView from '@/views/InventoryView';
@@ -28,6 +35,7 @@ import AgingView from '@/views/AgingView';
 import ForecastView from '@/views/ForecastView';
 
 function App() {
+  const { user, loading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'transfers' | 'routing' | 'aging' | 'forecast'>('dashboard');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -40,6 +48,28 @@ function App() {
     }
   }, [theme]);
 
+  if (loading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#050B14]">
+        <div className="relative">
+          <div className="w-20 h-20 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-10 h-10 bg-cyan-500 rounded-lg animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <Toaster position="top-right" />
+        <LoginView />
+      </>
+    );
+  }
+
   const navigation = [
     { name: 'Dashboard', id: 'dashboard', icon: LayoutDashboard },
     { name: 'Punto de Venta', id: 'sales', icon: ShoppingCart },
@@ -51,73 +81,172 @@ function App() {
     { name: 'Traspasos', id: 'transfers', icon: Truck },
     { name: 'Routing', id: 'routing', icon: MapIcon },
     { name: 'Configuración', id: 'settings', icon: Settings },
-  ] as const;
-
-  return (
-    <div className="flex h-screen bg-background text-foreground transition-colors duration-300">
+  ] as const;  return (
+    <div className="flex h-screen bg-[#050B14] text-slate-200 overflow-hidden font-outfit selection:bg-cyan-500/30 selection:text-white">
       <Toaster position="top-right" />
       
-      {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} h-full bg-sidebar-bg border-r border-card-border p-4 transition-all duration-300 flex flex-col justify-between shrink-0`}>
-        <div className="flex flex-col h-full">
-          <div className="flex items-center gap-3 mb-8 px-2 overflow-hidden justify-between">
-            {sidebarOpen && <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-slate-400 bg-clip-text text-transparent truncate flex-1">Nexus Flow</h1>}
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-slate-800 text-sidebar-text shrink-0">
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden transition-all duration-300"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar - Nexus Lean Style */}
+      <aside 
+        className={`
+          fixed lg:relative inset-y-0 left-0 z-[70] h-full bg-[#050B14] border-r border-white/5 
+          transition-all duration-500 ease-in-out flex flex-col
+          ${sidebarOpen ? 'w-72 translate-x-0' : 'w-24 -translate-x-full lg:translate-x-0'}
+          ${!sidebarOpen && 'lg:w-24'}
+        `}
+      >
+        {/* Decorative background blur */}
+        <div className="absolute top-0 left-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col h-full relative z-10">
+          {/* Header */}
+          <div className="h-20 lg:h-24 flex items-center px-6 justify-between">
+            <div className={`flex items-center gap-3 transition-all duration-500 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'opacity-0 w-0' : 'opacity-100'}`}>
+              <div className="relative">
+                <div className="absolute inset-0 bg-cyan-500 blur-md opacity-30 rounded-full" />
+                <div className="relative w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <ShieldCheck size={20} className="text-white" />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-lg font-black tracking-tighter text-white">NEXUS <span className="text-cyan-400">FLOW</span></h1>
+                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] -mt-1">INTELLIGENCE</p>
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)} 
+              className="p-2 rounded-xl hover:bg-white/5 text-slate-400 transition-all duration-300 active:scale-95 tap-highlight-none"
+            >
               <Menu size={20} />
             </button>
           </div>
           
-          <nav className="space-y-1 flex-1 overflow-y-auto no-scrollbar">
-            {navigation.map((item) => {
+          {/* Nav Section */}
+          <nav className="flex-1 overflow-y-auto no-scrollbar px-4 space-y-1 py-4">
+            {sidebarOpen && (
+              <div className="px-4 mb-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] opacity-30">Menú Principal</div>
+            )}
+            {navigation.map((item, idx) => {
               const Icon = item.icon;
+              const isActive = currentView === item.id;
+              const isDesktopCollapsed = !sidebarOpen;
+
               return (
                 <button
                   key={item.id}
-                  onClick={() => setCurrentView(item.id as any)}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
-                    currentView === item.id
-                      ? 'bg-primary text-white shadow-[0_8px_20px_-6px_rgba(59,130,246,0.5)]'
-                      : 'text-sidebar-text hover:bg-slate-800 hover:text-white'
-                  }`}
-                  title={!sidebarOpen ? item.name : undefined}
+                  onClick={() => {
+                    setCurrentView(item.id as any);
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  }}
+                  className={`
+                    w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative tap-highlight-none
+                    ${isActive
+                      ? 'bg-white/5 text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
+                      : 'text-slate-500 hover:text-white hover:bg-white/5'
+                    }
+                  `}
+                  title={isDesktopCollapsed ? item.name : undefined}
                 >
-                  <Icon size={20} className="shrink-0" />
-                  {sidebarOpen && <span className="font-medium whitespace-nowrap text-sm">{item.name}</span>}
+                  <Icon size={20} className={`shrink-0 transition-all duration-500 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:scale-110'}`} />
+                  
+                  {(sidebarOpen || window.innerWidth < 1024) && (
+                    <span className={`font-medium whitespace-nowrap text-sm tracking-wide ${isActive ? 'opacity-100' : 'opacity-80'}`}>
+                      {item.name}
+                    </span>
+                  )}
+                  
+                  {isActive && (sidebarOpen || window.innerWidth < 1024) && (
+                    <div className="absolute left-0 w-1 h-6 bg-cyan-400 rounded-r-full shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+                  )}
                 </button>
               );
             })}
           </nav>
 
-          <div className="pt-4 border-t border-slate-800">
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex items-center gap-2 p-3 w-full justify-center rounded-xl hover:bg-slate-800 text-sidebar-text transition-colors"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-              {sidebarOpen && <span className="text-sm font-medium">{theme === 'dark' ? 'Modo Día' : 'Modo Oscuro'}</span>}
-            </button>
+          {/* User Profile */}
+          <div className="p-4 border-t border-white/5 bg-black/20">
+            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-300 group cursor-pointer tap-highlight-none">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-center text-white font-bold text-sm border border-white/10 group-hover:border-cyan-500/50 shadow-lg transition-all">
+                  <span className="text-white font-black">{user.email?.charAt(0).toUpperCase()}</span>
+                </div>
+              </div>
+
+              {(sidebarOpen || window.innerWidth < 1024) && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white truncate">{user.email?.split('@')[0]}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Admin</p>
+                </div>
+              )}
+            </div>
+
+            <div className={`mt-3 flex gap-2 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'flex-col' : 'flex-row'}`}>
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="flex-1 flex items-center justify-center p-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-500 hover:text-white transition-all duration-300 tap-highlight-none"
+              >
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+              <button
+                onClick={signOut}
+                className="flex-1 flex items-center justify-center p-2.5 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-all duration-300 border border-transparent hover:border-red-500/20 tap-highlight-none"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-background p-6 lg:p-10">
-        <div className="max-w-7xl mx-auto h-full">
-          {currentView === 'dashboard' && <DashboardView />}
-          {currentView === 'inventory' && <InventoryView />}
-          {currentView === 'sales' && <SalesView />}
-          {currentView === 'customers' && <CustomersView />}
-          { currentView === 'invoices' && <InvoicesView /> }
-          { currentView === 'aging' && <AgingView /> }
-          { currentView === 'forecast' && <ForecastView /> }
-          { currentView === 'transfers' && (
-            <div className="flex flex-col items-center justify-center h-full opacity-50 space-y-4">
-              <Truck size={64} />
-              <p className="text-xl font-bold">Módulo de Traspasos próximamente</p>
-            </div>
-          )}
-          {currentView === 'routing' && <RoutingView />}
-          {currentView === 'settings' && <SettingsView />}
+      <main className="flex-1 overflow-auto bg-background relative flex flex-col no-scrollbar">
+        {/* Mobile Header */}
+        <header className="lg:hidden h-20 flex items-center justify-between px-6 border-b border-white/5 bg-[#050B14]/80 backdrop-blur-xl sticky top-0 z-40">
+          <button 
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-slate-400 hover:text-white transition-colors tap-highlight-none"
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="text-lg font-black tracking-tighter text-white">
+            NEXUS <span className="text-cyan-400">FLOW</span>
+          </h1>
+          <button className="p-2 text-slate-400 hover:text-white transition-colors tap-highlight-none relative">
+            <Bell size={20} />
+            <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#050B14]" />
+          </button>
+        </header>
+
+        {/* Content Container */}
+        <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 lg:p-12 transition-all duration-500">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {currentView === 'dashboard' && <DashboardView onNavigate={setCurrentView} />}
+            {currentView === 'inventory' && <InventoryView />}
+            {currentView === 'sales' && <SalesView />}
+            {currentView === 'customers' && <CustomersView />}
+            {currentView === 'invoices' && <InvoicesView />}
+            {currentView === 'aging' && <AgingView />}
+            {currentView === 'forecast' && <ForecastView />}
+            {currentView === 'transfers' && (
+              <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
+                <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center text-slate-700 mb-6 animate-float">
+                  <Truck size={48} />
+                </div>
+                <h2 className="text-2xl font-black text-white tracking-tight">Módulo en Desarrollo</h2>
+                <p className="text-slate-500 mt-2 max-w-xs mx-auto">Estamos trabajando para habilitar la gestión de traspasos en la próxima actualización.</p>
+              </div>
+            )}
+            {currentView === 'routing' && <RoutingView />}
+            {currentView === 'settings' && <SettingsView />}
+          </div>
         </div>
       </main>
     </div>
