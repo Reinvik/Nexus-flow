@@ -37,7 +37,7 @@ import ForecastView from '@/views/ForecastView';
 function App() {
   const { user, loading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'transfers' | 'routing' | 'aging' | 'forecast'>('dashboard');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-[#050B14]">
+      <div className="h-screen w-full flex items-center justify-center bg-background">
         <div className="relative">
           <div className="w-20 h-20 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -148,10 +148,10 @@ function App() {
                   }}
                   className={`
                     w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative tap-highlight-none
-                    ${isActive
-                      ? 'bg-white/5 text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
-                      : 'text-slate-500 hover:text-white hover:bg-white/5'
-                    }
+                     ${isActive
+                       ? 'bg-primary/10 dark:bg-white/5 text-primary dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
+                       : 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                     }
                   `}
                   title={isDesktopCollapsed ? item.name : undefined}
                 >
@@ -172,17 +172,17 @@ function App() {
           </nav>
 
           {/* User Profile */}
-          <div className="p-4 border-t border-white/5 bg-black/20">
+          <div className="p-4 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
             <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-300 group cursor-pointer tap-highlight-none">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-center text-white font-bold text-sm border border-white/10 group-hover:border-cyan-500/50 shadow-lg transition-all">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-center text-white font-bold text-sm border border-slate-200 dark:border-white/10 group-hover:border-cyan-500/50 shadow-lg transition-all">
                   <span className="text-white font-black">{user.email?.charAt(0).toUpperCase()}</span>
                 </div>
               </div>
 
               {(sidebarOpen || window.innerWidth < 1024) && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{user.email?.split('@')[0]}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{user.email?.split('@')[0]}</p>
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Admin</p>
                 </div>
               )}
@@ -191,7 +191,7 @@ function App() {
             <div className={`mt-3 flex gap-2 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'flex-col' : 'flex-row'}`}>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="flex-1 flex items-center justify-center p-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-500 hover:text-white transition-all duration-300 tap-highlight-none"
+                className="flex-1 flex items-center justify-center p-2.5 rounded-lg bg-slate-200/50 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-500 hover:text-primary dark:hover:text-white transition-all duration-300 tap-highlight-none"
               >
                 {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
@@ -209,19 +209,19 @@ function App() {
       {/* Main Content */}
       <main className="flex-1 overflow-auto bg-background relative flex flex-col no-scrollbar">
         {/* Mobile Header */}
-        <header className="lg:hidden h-20 flex items-center justify-between px-6 border-b border-white/5 bg-[#050B14]/80 backdrop-blur-xl sticky top-0 z-40">
+        <header className="lg:hidden h-20 flex items-center justify-between px-6 border-b border-slate-200 dark:border-white/5 bg-background/80 backdrop-blur-xl sticky top-0 z-40">
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="p-2 text-slate-400 hover:text-white transition-colors tap-highlight-none"
+            className="p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white transition-colors tap-highlight-none"
           >
             <Menu size={24} />
           </button>
-          <h1 className="text-lg font-black tracking-tighter text-white">
-            NEXUS <span className="text-cyan-400">FLOW</span>
+          <h1 className="text-lg font-black tracking-tighter text-foreground">
+            NEXUS <span className="text-primary">FLOW</span>
           </h1>
-          <button className="p-2 text-slate-400 hover:text-white transition-colors tap-highlight-none relative">
+          <button className="p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white transition-colors tap-highlight-none relative">
             <Bell size={20} />
-            <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#050B14]" />
+            <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-background" />
           </button>
         </header>
 

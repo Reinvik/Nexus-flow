@@ -171,17 +171,17 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
              </div>
              <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Nexus Intelligence</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-white uppercase leading-none">Dashboard <span className="text-slate-800">Maestro</span></h2>
+          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Dashboard <span className="text-slate-400 dark:text-slate-800">Maestro</span></h2>
         </div>
         
-        <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-3xl backdrop-blur-3xl">
-           <div className="flex flex-col text-right pr-4 border-r border-white/10">
+        <div className="flex items-center gap-4 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-4 rounded-3xl backdrop-blur-3xl">
+           <div className="flex flex-col text-right pr-4 border-r border-slate-200 dark:border-white/10">
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Estado Sistema</span>
               <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 justify-end">
                 Sincronizado <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
               </span>
            </div>
-           <button onClick={() => window.location.reload()} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 text-slate-400 hover:text-white transition-all active:scale-95">
+           <button onClick={() => window.location.reload()} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-primary transition-all active:scale-95">
               <Activity size={20} />
            </button>
         </div>
@@ -191,23 +191,23 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat) => (
-            <div key={stat.name} className="glass-card p-10 rounded-[3.5rem] relative overflow-hidden group hover:bg-white/[0.01] transition-all duration-700 border-white/5">
+            <div key={stat.name} className="glass-card p-10 rounded-[3.5rem] relative overflow-hidden group hover:bg-slate-200/10 dark:hover:bg-white/[0.01] transition-all duration-700">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/[0.02] blur-[80px] -mr-24 -mt-24 pointer-events-none" />
               
               <div className="flex items-center justify-between mb-8">
-                 <div className={`w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform duration-700`}>
+                 <div className={`w-14 h-14 rounded-2xl bg-slate-200/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform duration-700`}>
                    <stat.icon size={24} />
                  </div>
-                 <span className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-full border border-white/5 bg-white/[0.02] text-slate-500`}>
+                 <span className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/5 bg-slate-200/30 dark:bg-white/[0.02] text-slate-500`}>
                    {stat.trend}
                  </span>
               </div>
               
               <div className="space-y-2">
                 <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">{stat.name}</p>
-                <h3 className="text-4xl font-black text-white tracking-tighter leading-tight">
+                 <h3 className="text-4xl font-black text-foreground tracking-tighter leading-tight">
                   {metrics.loading ? (
-                    <div className="h-10 w-32 bg-white/5 animate-pulse rounded-2xl" />
+                     <div className="h-10 w-32 bg-slate-200/50 dark:bg-white/5 animate-pulse rounded-2xl" />
                   ) : (
                     stat.name === 'Quiebre Stock' ? `${stat.value} Unidades` : formatCurrency(stat.value)
                   )}
@@ -221,7 +221,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
         {/* Main Content Areas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Geo-Debt Analysis */}
-          <div className="lg:col-span-7 glass-card p-14 rounded-[4.5rem] relative overflow-hidden border-white/5">
+          <div className="lg:col-span-7 glass-card p-14 rounded-[4.5rem] relative overflow-hidden border border-slate-200 dark:border-white/5">
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/[0.02] blur-[120px] -ml-48 -mb-48 pointer-events-none" />
             
             <div className="flex items-center justify-between mb-14">
@@ -230,16 +230,16 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                    <Globe size={16} className="text-cyan-500" />
                    <span className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.4em]">Cartografía Operativa</span>
                 </div>
-                <h3 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">Concentración Geográfica</h3>
+                 <h3 className="text-4xl font-black text-foreground tracking-tighter uppercase leading-none">Concentración Geográfica</h3>
               </div>
-              <div className="w-16 h-16 rounded-3xl bg-white/[0.01] border border-white/5 flex items-center justify-center text-slate-800">
+               <div className="w-16 h-16 rounded-3xl bg-slate-200/50 dark:bg-white/[0.01] border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 dark:text-slate-800">
                 <MapPin size={28} />
               </div>
             </div>
 
             <div className="space-y-10">
               {metrics.loading ? (
-                [1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-white/5 rounded-[2.5rem] animate-pulse" />)
+                 [1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-slate-200/50 dark:bg-white/5 rounded-[2.5rem] animate-pulse" />)
               ) : metrics.debtByCommune.length > 0 ? (
                 metrics.debtByCommune.map((item, idx) => {
                   const maxDebt = metrics.debtByCommune[0].amount;
@@ -249,11 +249,11 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                       <div className="flex justify-between items-end mb-5 px-3">
                         <div className="flex items-center gap-6">
                             <span className="text-[11px] font-black text-slate-600 tabular-nums">0{idx + 1}</span>
-                            <span className="text-base font-black text-slate-200 uppercase tracking-wide group-hover:text-cyan-400 transition-colors">{item.commune}</span>
+                            <span className="text-base font-black text-slate-500 dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
                          </div>
-                         <span className="text-2xl font-black text-white tracking-tighter">{formatCurrency(item.amount)}</span>
+                         <span className="text-2xl font-black text-foreground tracking-tighter">{formatCurrency(item.amount)}</span>
                        </div>
-                       <div className="h-3 w-full bg-white/[0.05] rounded-full overflow-hidden border border-white/10">
+                       <div className="h-3 w-full bg-slate-200 dark:bg-white/[0.05] rounded-full overflow-hidden border border-slate-200 dark:border-white/10">
                          <div 
                            className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-[2s] ease-out shadow-[0_0_30px_rgba(34,211,238,0.4)]" 
                            style={{ width: `${percentage}%` }}
@@ -273,8 +273,8 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
 
           {/* Quick Actions & Alarms */}
           <div className="lg:col-span-5 flex flex-col gap-10">
-            <div className="glass-card p-12 rounded-[4.5rem] border-white/5 flex-1 relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.01] blur-[100px] -mr-32 -mt-32" />
+            <div className="glass-card p-12 rounded-[4.5rem] flex-1 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-slate-200/50 dark:bg-white/[0.01] blur-[100px] -mr-32 -mt-32" />
                <h4 className="text-[11px] font-black text-slate-600 uppercase tracking-[0.4em] mb-12 ml-4 flex items-center gap-3">
                  <ChevronRight size={14} className="text-cyan-500" /> Accesos de Alta Velocidad
                </h4>
@@ -285,13 +285,13 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                    { label: 'Registro Maestro', icon: FileText, view: 'invoices', color: 'bg-indigo-500/10 text-indigo-500' },
                    { label: 'Proyecciones', icon: Target, view: 'forecast', color: 'bg-purple-500/10 text-purple-500' },
                  ].map((action) => (
-                   <button 
-                     key={action.view}
-                     onClick={() => onNavigate?.(action.view)}
-                     className="w-full h-24 bg-white/[0.01] hover:bg-white text-slate-500 hover:text-black rounded-[2.5rem] border border-white/5 hover:border-transparent flex items-center justify-between px-10 transition-all duration-700 group active:scale-[0.98] shadow-sm hover:shadow-2xl hover:shadow-white/5"
-                   >
+                    <button 
+                      key={action.view}
+                      onClick={() => onNavigate?.(action.view)}
+                      className="w-full h-24 bg-slate-200/30 dark:bg-white/[0.01] hover:bg-white dark:hover:bg-white/5 text-slate-500 hover:text-black dark:hover:text-white rounded-[2.5rem] border border-slate-200 dark:border-white/5 hover:border-transparent flex items-center justify-between px-10 transition-all duration-700 group active:scale-[0.98] shadow-sm hover:shadow-2xl hover:shadow-primary/20"
+                    >
                      <div className="flex items-center gap-6">
-                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${action.color} group-hover:bg-black/5 group-hover:text-black`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${action.color} group-hover:bg-primary/20 group-hover:text-primary`}>
                          <action.icon size={22} />
                        </div>
                        <span className="text-[12px] font-black uppercase tracking-[0.2em]">{action.label}</span>
@@ -302,7 +302,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                </div>
             </div>
 
-            <div className="glass-card p-12 rounded-[4.5rem] bg-rose-500/[0.01] border-rose-500/10 relative overflow-hidden group">
+             <div className="glass-card p-12 rounded-[4.5rem] bg-rose-500/[0.03] dark:bg-rose-500/[0.01] border-rose-500/20 dark:border-rose-500/10 relative overflow-hidden group">
                <div className="absolute -bottom-12 -right-12 opacity-[0.02] group-hover:scale-110 transition-transform duration-1000">
                  <AlertCircle size={200} />
                </div>
@@ -315,13 +315,13 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                </div>
                
                <div className="space-y-8 relative z-10">
-                 <div className="flex justify-between items-center bg-black/20 p-6 rounded-[2.5rem] border border-white/5">
+                  <div className="flex justify-between items-center bg-slate-200/50 dark:bg-black/20 p-6 rounded-[2.5rem] border border-slate-200 dark:border-white/5">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Stock Crítico</p>
-                      <p className="text-2xl font-black text-white tracking-tighter uppercase">{metrics.criticalStock} RECAUDOS</p>
+                      <p className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">Stock Crítico</p>
+                      <p className="text-2xl font-black text-foreground tracking-tighter uppercase">{metrics.criticalStock} RECAUDOS</p>
                     </div>
-                    <ArrowRight size={20} className="text-slate-800" />
-                 </div>
+                    <ArrowRight size={20} className="text-slate-400 dark:text-slate-800" />
+                  </div>
                  
                  <div className="flex justify-between items-center bg-rose-500/5 p-6 rounded-[2.5rem] border border-rose-500/10">
                     <div className="space-y-1">
