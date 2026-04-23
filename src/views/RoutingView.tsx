@@ -257,7 +257,7 @@ export default function RoutingView() {
               <MapIcon className="text-primary w-8 h-8" />
             </div>
             <div>
-              <h2 className="text-4xl font-black tracking-tight text-white">Logística & Rutas</h2>
+              <h2 className="text-4xl font-black tracking-tight text-foreground">Logística & Rutas</h2>
               <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Geolocalización de Cobranza en Tiempo Real</p>
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function RoutingView() {
               placeholder="Buscar cliente o dirección..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all w-64 md:w-80 backdrop-blur-md"
+              className="bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold text-foreground placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all w-64 md:w-80 backdrop-blur-md"
             />
           </div>
 
@@ -295,7 +295,7 @@ export default function RoutingView() {
           <button 
             onClick={() => fetchClientsAndInvoices()}
             disabled={loading || isGeocoding}
-            className="p-3.5 bg-white/5 border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 active:scale-90"
+            className="p-3.5 bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 active:scale-90"
           >
             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
           </button>
@@ -308,9 +308,9 @@ export default function RoutingView() {
           <select
             value={selectedCommune}
             onChange={(e) => setSelectedCommune(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-black text-white focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md appearance-none cursor-pointer hover:bg-white/10 transition-all"
+            className="w-full bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm font-black text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md appearance-none cursor-pointer hover:bg-white/10 transition-all"
           >
-            {communes.map(c => <option key={c} value={c} className="bg-slate-900">{c}</option>)}
+            {communes.map(c => <option key={c} value={c} className="bg-slate-100 dark:bg-slate-900 text-foreground">{c}</option>)}
           </select>
         </div>
 
@@ -369,10 +369,10 @@ export default function RoutingView() {
 
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'gray' ? 'all' : 'gray')}
-          className={`p-4 rounded-2xl flex items-center justify-between transition-all border ${
+          className={`p-4 rounded-2xl flex items-center justify-between transition-all border group ${
             selectedStatus === 'gray' 
               ? 'bg-slate-500 text-white border-slate-600 shadow-xl shadow-slate-500/20' 
-              : 'bg-white/5 border-white/10 text-slate-400 hover:bg-slate-500/10'
+              : 'bg-slate-200/50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 hover:bg-slate-500/10'
           }`}
         >
           <div className="flex items-center gap-3">
@@ -386,49 +386,49 @@ export default function RoutingView() {
       </div>
 
       {/* Map Container */}
-      <div className="flex-1 min-h-[450px] relative rounded-[2.5rem] overflow-hidden glass-card shadow-2xl border border-white/10 group">
+      <div className="flex-1 min-h-[450px] relative rounded-[2.5rem] overflow-hidden glass-card shadow-2xl border border-slate-200 dark:border-white/10 group">
         {loading && clients.length === 0 ? (
-          <div className="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center space-y-6">
+          <div className="absolute inset-0 z-20 bg-background/80 backdrop-blur-md flex flex-col items-center justify-center space-y-6">
             <div className="relative">
                 <RefreshCw className="animate-spin text-primary" size={60} />
                 <div className="absolute inset-0 animate-ping bg-primary/20 rounded-full blur-xl" />
             </div>
             <div className="text-center">
-                <p className="text-2xl font-black tracking-tight text-white">Sincronizando Coordenadas</p>
+                <p className="text-2xl font-black tracking-tight text-foreground">Sincronizando Coordenadas</p>
                 <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Accediendo a la base de datos maestra</p>
             </div>
           </div>
         ) : filteredClients.length === 0 && !isGeocoding ? (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center space-y-8 p-12 text-center bg-slate-950/50 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center space-y-8 p-12 text-center bg-background/50 backdrop-blur-sm">
             <div className="p-8 bg-amber-500/10 rounded-[2.5rem] border border-amber-500/20 animate-bounce">
               <AlertTriangle className="text-amber-500" size={64} />
             </div>
             <div className="space-y-4">
-                <h3 className="text-3xl font-black tracking-tight text-white">No se encontraron clientes</h3>
-                <p className="text-slate-400 max-w-lg mx-auto font-medium text-lg leading-relaxed">
+                <h3 className="text-3xl font-black tracking-tight text-foreground">No se encontraron clientes</h3>
+                <p className="text-slate-500 dark:text-slate-400 max-w-lg mx-auto font-medium text-lg leading-relaxed">
                   Ajusta los filtros o busca otra dirección. El sistema solo muestra clientes con coordenadas válidas.
                 </p>
             </div>
           </div>
         ) : null}
         
-        <div className="absolute inset-0 grayscale-[0.2] brightness-[0.8] contrast-[1.2]">
+        <div className="absolute inset-0">
             <DynamicMap clients={filteredClients} onMarkerDrag={handleMarkerDrag} />
         </div>
 
         {/* Legend / Info Overlay */}
         <div className="absolute top-6 left-6 z-10 hidden md:block">
-            <div className="glass-card p-6 rounded-3xl border border-white/10 backdrop-blur-xl shadow-2xl space-y-4 w-64">
+            <div className="glass-card p-6 rounded-3xl border border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-2xl space-y-4 w-64">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
                     <MapPin size={12} className="text-primary" /> Referencia de Ruta
                 </h4>
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-white">Clientes Totales</span>
+                        <span className="text-sm font-bold text-foreground">Clientes Totales</span>
                         <span className="text-sm font-black text-primary">{clients.length}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-white">En el Mapa</span>
+                        <span className="text-sm font-bold text-foreground">En el Mapa</span>
                         <span className="text-sm font-black text-emerald-500">{filteredClients.length}</span>
                     </div>
                 </div>
