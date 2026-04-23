@@ -31,3 +31,5 @@ scratch/
 !package.json
 !package-lock.json
 !tsconfig*.json
+.vercel
+.env*.local

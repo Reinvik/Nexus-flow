@@ -43,6 +43,7 @@ export default function DashboardView() {
             total_amount, 
             paid_amount, 
             payment_due_date,
+            issued_at,
             client:clients!invoices_client_id_fkey (commune)
           `)
           .neq('status', 'Pagada')
@@ -56,7 +57,7 @@ export default function DashboardView() {
 
       pendingInvoices?.forEach(inv => {
         const debt = Number(inv.total_amount) - Number(inv.paid_amount);
-        const commune = inv.client?.commune || 'Sin Comuna';
+        const commune = Array.isArray(inv.client) ? (inv.client[0]?.commune || 'Sin Comuna') : ((inv.client as any)?.commune || 'Sin Comuna');
         
         // Commune Debt
         communeDebtMap[commune] = (communeDebtMap[commune] || 0) + debt;

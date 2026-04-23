@@ -295,7 +295,7 @@ export default function ForecastView() {
                   padding: '1rem'
                 }}
                 itemStyle={{ fontSize: '12px', fontWeight: 900 }}
-                formatter={(val: number) => [formatCurrency(val), 'Ventas']}
+                formatter={(val: any) => [formatCurrency(Number(val)), 'Ventas']}
               />
               <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px' }} />
               <Line 

@@ -48,7 +48,7 @@ export default function RoutingView() {
       // Fetch pending/active invoices
       const { data: invoicesData, error: invoicesError } = await supabase
         .from('invoices')
-        .select('id, client_id, total_amount, paid_amount, payment_due_date, issued_at, status')
+        .select('id, client_id, total_amount, paid_amount, payment_due_date, issued_at, status, folio')
         .neq('status', 'Pagada'); // Only interested in unpaid ones
 
       if (invoicesError) throw invoicesError;
