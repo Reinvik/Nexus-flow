@@ -226,7 +226,7 @@ function App() {
         </header>
 
         {/* Content Container */}
-        <div className="w-full max-w-[1600px] mx-auto p-4 md:p-8 lg:p-12 transition-all duration-500">
+        <div className={`w-full max-w-[1700px] mx-auto transition-all duration-500 ${currentView === 'sales' ? 'p-2 md:p-4 lg:p-4' : 'p-4 md:p-8 lg:p-12'}`}>
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             {currentView === 'dashboard' && <DashboardView onNavigate={setCurrentView} />}
             {currentView === 'inventory' && <InventoryView />}
