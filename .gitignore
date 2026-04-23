@@ -23,13 +23,19 @@ dist-ssr
 *.sln
 *.sw?
 
-# Data
+.env*
+*.py
+*.sql
+*.csv
 *.xlsx
-*.json
 scratch/
+.vercel
+node_modules
+dist
+dist-ssr
+
+*.local
 
 !package.json
 !package-lock.json
 !tsconfig*.json
-.vercel
-.env*.local
