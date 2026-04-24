@@ -281,8 +281,15 @@ export default function SalesView() {
                   </div>
                 </div>
 
-                <div className="text-right pl-4 border-l border-slate-200 dark:border-white/5">
-                  <p className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(product.net_price)}</p>
+                <div className="text-right pl-4 border-l border-slate-200 dark:border-white/5 flex flex-col justify-center items-end">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(product.net_price)}</p>
+                    {cart.find(item => item.id === product.id) && (
+                      <span className="text-[10px] font-black text-primary animate-in zoom-in-50 duration-300">
+                        x{cart.find(item => item.id === product.id)?.cartQuantity}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[7px] font-black text-primary uppercase tracking-widest opacity-40">Neto</p>
                 </div>
               </div>
@@ -361,37 +368,11 @@ export default function SalesView() {
             </div>
           </div>
 
-          {/* Persistent Cart Items List - Ultra Compact */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-1.5 no-scrollbar relative z-10">
-            {cart.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full opacity-10 text-center gap-4">
-                <ShoppingCart size={32} strokeWidth={1} />
-                <p className="text-[8px] font-black uppercase tracking-widest">Carrito Vacío</p>
-              </div>
-            ) : (
-              cart.map(item => (
-                <div key={item.id} className="flex items-center justify-between gap-3 p-2 bg-slate-100/50 dark:bg-white/[0.01] rounded-xl border border-slate-200 dark:border-white/5 group hover:border-primary/20 transition-all">
-                  <div className="flex-1 min-w-0">
-                    <h5 className="text-[9px] font-black text-foreground uppercase tracking-tight truncate">{item.name}</h5>
-                    <p className="text-[7px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest">{formatCurrency(item.net_price)}/u</p>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-slate-200 dark:bg-black/40 rounded-lg p-0.5 border border-slate-300 dark:border-white/5">
-                      <button onClick={() => updateQuantity(item.id, -1)} className="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-primary transition-colors"><Minus size={10} /></button>
-                      <span className="text-[9px] font-black w-4 text-center text-foreground">{item.cartQuantity}</span>
-                      <button onClick={() => updateQuantity(item.id, 1)} className="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-primary transition-colors"><Plus size={10} /></button>
-                    </div>
-                    <div className="text-right min-w-[60px]">
-                      <p className="text-[10px] font-black text-foreground tracking-tighter">{formatCurrency(item.net_price * item.cartQuantity)}</p>
-                    </div>
-                    <button onClick={() => removeFromCart(item.id)} className="text-slate-300 dark:text-slate-800 hover:text-rose-500 transition-colors p-1">
-                      <X size={12} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
+          {/* Persistent Cart Items List - REMOVED for extra space as requested */}
+          <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 flex flex-col items-center justify-center p-8 opacity-20 group">
+             <ShoppingCart size={40} strokeWidth={1} className="group-hover:scale-110 transition-transform duration-700" />
+             <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-4">Venta en Curso</p>
+             <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">{cart.reduce((acc, item) => acc + item.cartQuantity, 0)} Items</p>
           </div>
 
           {/* Sticky Footer Summary - Optimized for Quick Checkout */}

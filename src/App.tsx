@@ -160,7 +160,7 @@ function App() {
                   className={`
                     w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative tap-highlight-none
                      ${isActive
-                       ? 'bg-primary/10 dark:bg-white/5 text-foreground dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
+                       ? 'bg-primary/10 dark:bg-white/5 text-slate-900 dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
                        : 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                      }
                   `}
