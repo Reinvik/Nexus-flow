@@ -281,33 +281,29 @@ export default function SalesView() {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-2">
+          <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 p-1">
             {filteredProd.map(product => (
               <div 
                 key={product.id}
                 onClick={() => addToCart(product)}
-                className="glass-card p-2 rounded-xl group cursor-pointer active:scale-95 transition-all hover:bg-slate-100/50 dark:hover:bg-white/[0.01] border-slate-200 dark:border-white/5 hover:border-primary/30 flex flex-col items-center text-center gap-2 relative overflow-hidden"
+                className="glass-card p-3 rounded-2xl group cursor-pointer active:scale-95 transition-all hover:bg-slate-100/50 dark:hover:bg-white/[0.01] border-slate-200 dark:border-white/5 hover:border-primary/30 flex items-center gap-4 relative overflow-hidden h-[72px]"
               >
-                <div className="absolute top-2 right-2">
-                  <div className={`w-1.5 h-1.5 rounded-full ${product.stock <= 0 ? 'bg-rose-500' : 'bg-emerald-500'} shadow-[0_0_10px_rgba(16,185,129,0.3)]`} />
-                </div>
-
-                <div className="w-10 h-10 rounded-lg bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 flex items-center justify-center text-sm font-black text-slate-400 dark:text-slate-800 group-hover:text-primary group-hover:bg-primary/5 transition-all duration-500">
-                  {product.name.charAt(0)}
-                </div>
-                
-                <div className="space-y-1 w-full">
-                  <h4 className="text-[9px] font-black text-foreground line-clamp-1 uppercase tracking-tight group-hover:text-primary transition-colors">{product.name}</h4>
-                  <div className="flex flex-col items-center gap-0 opacity-60">
-                    <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest">{product.sku || 'N/A'}</span>
-                    <span className={`text-[7px] font-black uppercase ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-400'}`}>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-1.5 h-1.5 rounded-full ${product.stock <= 0 ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                    <h4 className="text-[10px] font-black text-foreground truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none">{product.name}</h4>
+                  </div>
+                  <div className="flex items-center gap-3 opacity-60 ml-3">
+                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{product.sku || 'N/A'}</span>
+                    <span className={`text-[8px] font-black uppercase ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-400'}`}>
                       {product.stock} DISP
                     </span>
                   </div>
                 </div>
 
-                <div className="mt-auto pt-1 border-t border-slate-200 dark:border-white/5 w-full">
-                  <p className="text-[11px] font-black text-foreground tracking-tighter">{formatCurrency(product.net_price)}</p>
+                <div className="text-right pl-4 border-l border-slate-200 dark:border-white/5">
+                  <p className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(product.net_price)}</p>
+                  <p className="text-[7px] font-black text-primary uppercase tracking-widest opacity-40">Neto</p>
                 </div>
               </div>
             ))}
