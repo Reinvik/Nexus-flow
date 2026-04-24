@@ -352,12 +352,12 @@ export default function InvoicesView() {
                        </button>
                     </div>
                     <div className="relative">
-                       <div className="absolute left-8 top-1/2 -translate-y-1/2 text-primary text-xl font-black">$</div>
+                       <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary text-xl font-black z-10">$</div>
                        <input 
                          type="number"
                          value={editTotalAmount}
                          onChange={e => setEditTotalAmount(e.target.value)}
-                         className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-8 rounded-3xl text-4xl font-black text-foreground outline-none focus:border-primary/30 transition-all tracking-tighter"
+                         className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-8 pl-14 rounded-3xl text-4xl font-black text-foreground outline-none focus:border-primary/30 transition-all tracking-tighter"
                        />
                     </div>
                  </div>
@@ -373,12 +373,12 @@ export default function InvoicesView() {
                        </button>
                     </div>
                     <div className="relative">
-                       <div className="absolute left-8 top-1/2 -translate-y-1/2 text-emerald-500 text-xl font-black">$</div>
+                       <div className="absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500 text-xl font-black z-10">$</div>
                        <input 
                          type="number"
                          value={editPaidAmount}
                          onChange={e => setEditPaidAmount(e.target.value)}
-                         className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-8 rounded-3xl text-4xl font-black text-foreground outline-none focus:border-primary/30 transition-all tracking-tighter"
+                         className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-8 pl-14 rounded-3xl text-4xl font-black text-foreground outline-none focus:border-primary/30 transition-all tracking-tighter"
                        />
                     </div>
                  </div>
