@@ -97,7 +97,7 @@ function App() {
       {/* Sidebar - Nexus Lean Style */}
       <aside 
         className={`
-          fixed lg:relative inset-y-0 left-0 z-[70] h-full bg-sidebar-bg border-r border-slate-200 dark:border-white/5 
+          fixed lg:relative inset-y-0 left-0 z-[100] h-full bg-sidebar-bg border-r border-slate-200 dark:border-white/5 
           transition-all duration-500 ease-in-out flex flex-col
           ${sidebarOpen ? 'w-72 translate-x-0' : 'w-24 -translate-x-full lg:translate-x-0'}
           ${!sidebarOpen && 'lg:w-24'}
@@ -108,34 +108,34 @@ function App() {
 
         <div className="flex flex-col h-full relative z-10">
           {/* Header */}
-          <div className="h-20 lg:h-24 flex items-center px-6 justify-between">
-            <div className={`flex items-center gap-3 transition-all duration-500 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'opacity-0 w-0' : 'opacity-100'}`}>
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary blur-md opacity-30 rounded-full" />
-                <div className="relative w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
-                  <ShieldCheck size={20} className="text-white" />
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <h1 className="text-lg font-black tracking-tighter text-foreground">NEXUS <span className="text-primary">FLOW</span></h1>
-                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] -mt-1">INTELLIGENCE</p>
-              </div>
-            </div>
-            
-            {/* Toggle Button - Desktop Only */}
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="hidden lg:flex p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/5 text-slate-400 transition-all duration-300 active:scale-95 tap-highlight-none"
-            >
-              <Menu size={20} />
-            </button>
-
-            {/* Close Button - Mobile Only */}
+          <div className="h-20 lg:h-24 flex items-center px-6 gap-3">
+            {/* Close Button - Mobile Only (Left side for consistent toggle) */}
             <button 
               onClick={() => setSidebarOpen(false)} 
               className="lg:hidden p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/5 text-slate-400 transition-all duration-300 active:scale-95 tap-highlight-none"
             >
               <X size={24} />
+            </button>
+
+            <div className={`flex items-center gap-3 transition-all duration-500 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'opacity-0 w-0' : 'opacity-100'} ${window.innerWidth < 1024 ? 'flex-1' : ''}`}>
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 bg-primary blur-md opacity-30 rounded-full" />
+                <div className="relative w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
+                  <ShieldCheck size={20} className="text-white" />
+                </div>
+              </div>
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-lg font-black tracking-tighter text-foreground truncate">NEXUS <span className="text-primary">FLOW</span></h1>
+                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] -mt-1">INTELLIGENCE</p>
+              </div>
+            </div>
+            
+            {/* Toggle Button - Desktop Only (Right side) */}
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)} 
+              className="hidden lg:flex p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/5 text-slate-400 transition-all duration-300 active:scale-95 tap-highlight-none ml-auto"
+            >
+              <Menu size={20} />
             </button>
           </div>
           
