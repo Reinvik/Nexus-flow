@@ -159,22 +159,22 @@ function App() {
                   className={`
                     w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative tap-highlight-none
                      ${isActive
-                       ? 'bg-primary/10 dark:bg-white/5 text-primary dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
+                       ? 'bg-primary/10 dark:bg-white/5 text-foreground dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
                        : 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                      }
                   `}
                   title={isDesktopCollapsed ? item.name : undefined}
                 >
-                  <Icon size={20} className={`shrink-0 transition-all duration-500 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:scale-110'}`} />
+                  <Icon size={20} className={`shrink-0 transition-all duration-500 ${isActive ? 'text-primary drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]' : 'group-hover:scale-110'}`} />
                   
                   {(sidebarOpen || window.innerWidth < 1024) && (
-                    <span className={`font-medium whitespace-nowrap text-sm tracking-wide ${isActive ? 'opacity-100' : 'opacity-80'}`}>
+                    <span className={`font-black whitespace-nowrap text-sm tracking-wide ${isActive ? 'opacity-100' : 'opacity-80'}`}>
                       {item.name}
                     </span>
                   )}
                   
                   {isActive && (sidebarOpen || window.innerWidth < 1024) && (
-                    <div className="absolute left-0 w-1 h-6 bg-cyan-400 rounded-r-full shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
+                    <div className="absolute left-0 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_12px_rgba(6,182,212,0.5)]" />
                   )}
                 </button>
               );
