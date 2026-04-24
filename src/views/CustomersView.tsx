@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Client } from '@/types';
 import toast from 'react-hot-toast';
@@ -33,6 +33,7 @@ export default function CustomersView() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedClientHistory, setSelectedClientHistory] = useState<any | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
   
   // Form State
   const [name, setName] = useState('');
@@ -131,10 +132,31 @@ export default function CustomersView() {
     }
   };
 
-  const filtered = clients.filter(c => 
-    (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (c.rut || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = useMemo(() => {
+    let result = clients.filter(c => 
+      (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (c.rut || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (sortConfig.key) {
+      result.sort((a: any, b: any) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [clients, searchTerm, sortConfig]);
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   return (
     <div className="space-y-12 lg:h-[calc(100vh-180px)] flex flex-col font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -161,6 +183,22 @@ export default function CustomersView() {
                className="pl-14 pr-6 h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl text-[10px] font-black text-foreground focus:border-primary/30 outline-none w-full md:w-80 uppercase tracking-widest placeholder:text-slate-400 dark:placeholder:text-slate-800"
              />
            </div>
+
+           <div className="hidden xl:flex bg-slate-200/50 dark:bg-white/[0.02] p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 items-center gap-1.5">
+             <button 
+               onClick={() => requestSort('name')}
+               className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase transition-all duration-300 ${sortConfig.key === 'name' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-500 hover:text-foreground'}`}
+             >
+               Nombre {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+             </button>
+             <button 
+               onClick={() => requestSort('total_debt')}
+               className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase transition-all duration-300 ${sortConfig.key === 'total_debt' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-500 hover:text-foreground'}`}
+             >
+               Deuda {sortConfig.key === 'total_debt' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+             </button>
+           </div>
+
            <button 
              onClick={() => setIsAdding(true)}
              className="h-16 px-10 bg-primary text-white dark:bg-white dark:text-black rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-2xl shadow-primary/20"

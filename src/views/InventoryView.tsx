@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Product } from '@/types';
 import toast from 'react-hot-toast';
@@ -11,6 +11,7 @@ export default function InventoryView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
   
   // New Product Form
   const [name, setName] = useState('');
@@ -108,10 +109,31 @@ export default function InventoryView() {
     }
   };
 
-  const filtered = products.filter(p => 
-    (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filtered = useMemo(() => {
+    let result = products.filter(p => 
+      (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    if (sortConfig.key) {
+      result.sort((a: any, b: any) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [products, searchTerm, sortConfig]);
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   const totalValue = products.reduce((acc, p) => acc + (p.net_price * p.stock), 0);
   const criticalStock = products.filter(p => p.stock <= 5).length;
@@ -253,11 +275,19 @@ export default function InventoryView() {
 
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-white/[0.01] text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
-                <th className="p-8 pl-10">Descripción del Bien</th>
-                <th className="p-8">Identificador</th>
-                <th className="p-8">Costo Unitario</th>
-                <th className="p-8">Disponibilidad</th>
+              <tr className="bg-white/[0.01] text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-[0.3em]">
+                <th className="p-8 pl-10 cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('name')}>
+                  Descripción {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                </th>
+                <th className="p-8 cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('sku')}>
+                  Identificador {sortConfig.key === 'sku' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                </th>
+                <th className="p-8 cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('net_price')}>
+                  Costo {sortConfig.key === 'net_price' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                </th>
+                <th className="p-8 cursor-pointer hover:text-primary transition-colors" onClick={() => requestSort('stock')}>
+                  Stock {sortConfig.key === 'stock' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                </th>
                 <th className="p-8 pr-10 text-right">Acciones</th>
               </tr>
             </thead>

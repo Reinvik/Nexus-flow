@@ -237,72 +237,53 @@ export default function SalesView() {
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] lg:h-[calc(100vh-140px)] font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700 pb-4">
-      {/* Header Section - Extreme Compact */}
-      <div className="flex items-center justify-between px-4 mb-2 h-12 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <ShoppingCart size={16} className="text-white" fill="currentColor" />
-          </div>
-          <h2 className="text-lg font-black tracking-tighter text-foreground uppercase leading-none">POS <span className="text-primary">ULTRA</span></h2>
-        </div>
-        
-        <div className="flex items-center gap-4 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 px-4 py-1.5 rounded-xl backdrop-blur-3xl">
-          <p className="text-[10px] font-black text-foreground uppercase tracking-tighter hidden sm:block">{user?.email?.split('@')[0]}</p>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">En Línea</span>
-          </div>
+    <div className="flex flex-col h-[calc(100vh-100px)] lg:h-[calc(100vh-140px)] font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* Product Catalog - Full Width */}
+      <div className="flex-1 flex flex-col min-w-0 bg-white/[0.01] dark:bg-black/10 rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden mb-4">
+        <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-4">
+          {filteredProd.map(product => (
+            <div 
+              key={product.id}
+              onClick={() => addToCart(product)}
+              className="glass-card p-4 rounded-3xl group cursor-pointer active:scale-95 transition-all hover:bg-slate-100/50 dark:hover:bg-white/[0.01] border-slate-200 dark:border-white/5 hover:border-primary/30 flex items-center gap-4 relative overflow-hidden h-24"
+            >
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${product.stock <= 0 ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                  <h4 className="text-xs font-black text-foreground truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none">{product.name}</h4>
+                </div>
+                <div className="flex items-center gap-3 opacity-60 ml-4">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{product.sku || 'N/A'}</span>
+                  <span className={`text-[10px] font-black uppercase ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-400'}`}>
+                    {product.stock} DISP
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-right pl-4 border-l border-slate-200 dark:border-white/5 flex flex-col justify-center items-end">
+                <div className="flex items-center gap-2">
+                  <p className="text-lg font-black text-foreground tracking-tighter">{formatCurrency(product.net_price)}</p>
+                  {cart.find(item => item.id === product.id) && (
+                    <span className="text-sm font-black text-primary animate-in zoom-in-50 duration-300">
+                      x{cart.find(item => item.id === product.id)?.cartQuantity}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[9px] font-black text-primary uppercase tracking-widest opacity-40">Neto</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-hidden px-4">
-        {/* Main Catalog Section - scrollable top on mobile */}
-        <div className="flex-[3] flex flex-col gap-2 overflow-hidden h-1/2 lg:h-full">
-          {/* Search bar removed as requested */}
-
-          <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 p-1">
-            {filteredProd.map(product => (
-              <div 
-                key={product.id}
-                onClick={() => addToCart(product)}
-                className="glass-card p-3 rounded-2xl group cursor-pointer active:scale-95 transition-all hover:bg-slate-100/50 dark:hover:bg-white/[0.01] border-slate-200 dark:border-white/5 hover:border-primary/30 flex items-center gap-4 relative overflow-hidden h-[72px]"
-              >
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${product.stock <= 0 ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-                    <h4 className="text-[10px] font-black text-foreground truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none">{product.name}</h4>
-                  </div>
-                  <div className="flex items-center gap-3 opacity-60 ml-3">
-                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{product.sku || 'N/A'}</span>
-                    <span className={`text-[8px] font-black uppercase ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-400'}`}>
-                      {product.stock} DISP
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-right pl-4 border-l border-slate-200 dark:border-white/5 flex flex-col justify-center items-end">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(product.net_price)}</p>
-                    {cart.find(item => item.id === product.id) && (
-                      <span className="text-[10px] font-black text-primary animate-in zoom-in-50 duration-300">
-                        x{cart.find(item => item.id === product.id)?.cartQuantity}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[7px] font-black text-primary uppercase tracking-widest opacity-40">Neto</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cart & Checkout Section - Always visible bottom/side */}
-        <div className="flex-[2] min-w-0 lg:max-w-[420px] flex flex-col glass-card rounded-[2.5rem] overflow-hidden border-slate-200 dark:border-white/5 shadow-2xl relative h-1/2 lg:h-full">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 pointer-events-none" />
-          
-          {/* Compact Client/Folio Header */}
-          <div className="p-4 border-b border-slate-200 dark:border-white/5 space-y-3 relative z-10 bg-slate-100/50 dark:bg-white/[0.01]">
+      {/* Footer Checkout Summary - Consolidated at Bottom */}
+      <div className="glass-card rounded-[2.5rem] overflow-hidden border-slate-200 dark:border-white/5 shadow-2xl relative shrink-0">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 pointer-events-none" />
+        
+        <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-white/5">
+          {/* Section: Client & Folio */}
+          <div className="p-4 lg:w-1/3 space-y-3 bg-slate-100/50 dark:bg-white/[0.01]">
             <div className="flex items-center justify-between">
               <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Cliente & Folio</span>
               <button onClick={() => setIsNewClientModalOpen(true)} className="text-primary text-[8px] font-black uppercase flex items-center gap-1.5 hover:opacity-80 transition-all">
@@ -310,11 +291,11 @@ export default function SalesView() {
               </button>
             </div>
             
-            <div className="grid grid-cols-12 gap-2">
-              <div className="col-span-8 relative">
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
                 <div 
                   onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
-                  className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-2 rounded-xl flex items-center justify-between cursor-pointer group hover:border-primary/30 transition-all"
+                  className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-2.5 rounded-xl flex items-center justify-between cursor-pointer group hover:border-primary/30 transition-all"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <UserIcon size={14} className="text-slate-400 dark:text-slate-600 group-hover:text-primary" />
@@ -326,18 +307,18 @@ export default function SalesView() {
                 </div>
 
                 {isClientDropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 z-[110] glass-card rounded-2xl overflow-hidden shadow-2xl border-slate-200 dark:border-white/10 animate-in fade-in zoom-in-95 duration-300 backdrop-blur-3xl">
+                  <div className="absolute bottom-full left-0 right-0 mb-2 z-[110] glass-card rounded-2xl overflow-hidden shadow-2xl border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-2 duration-300 backdrop-blur-3xl">
                     <div className="p-3 bg-slate-100/50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/5">
                       <input 
                         autoFocus
                         type="text" 
-                        placeholder="BUSCAR..."
+                        placeholder="BUSCAR CLIENTE..."
                         value={clientSearchTerm}
                         onChange={e => setClientSearchTerm(e.target.value)}
                         className="w-full bg-transparent text-[9px] font-black text-foreground outline-none uppercase placeholder:text-slate-400 dark:placeholder:text-slate-700"
                       />
                     </div>
-                    <div className="max-h-[200px] overflow-y-auto no-scrollbar py-2">
+                    <div className="max-h-[150px] overflow-y-auto no-scrollbar py-2">
                       {filteredClients.map(client => (
                         <div 
                           key={client.id}
@@ -356,28 +337,21 @@ export default function SalesView() {
                   </div>
                 )}
               </div>
-              <div className="col-span-4">
+              <div className="w-24">
                 <input 
                   type="number"
                   value={invoiceFolio}
                   onChange={e => setInvoiceFolio(e.target.value)}
                   placeholder="FOLIO"
-                  className={`w-full h-full bg-slate-200/50 dark:bg-white/[0.02] border p-2 rounded-xl text-[9px] font-black outline-none transition-all text-center ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-slate-200 dark:border-white/5 text-foreground focus:border-primary/30'}`}
+                  className={`w-full h-full bg-slate-200/50 dark:bg-white/[0.02] border p-2 rounded-xl text-[10px] font-black outline-none transition-all text-center ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-slate-200 dark:border-white/5 text-foreground focus:border-primary/30'}`}
                 />
               </div>
             </div>
           </div>
 
-          {/* Persistent Cart Items List - REMOVED for extra space as requested */}
-          <div className="flex-1 overflow-y-auto no-scrollbar relative z-10 flex flex-col items-center justify-center p-8 opacity-20 group">
-             <ShoppingCart size={40} strokeWidth={1} className="group-hover:scale-110 transition-transform duration-700" />
-             <p className="text-[10px] font-black uppercase tracking-[0.3em] mt-4">Venta en Curso</p>
-             <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">{cart.reduce((acc, item) => acc + item.cartQuantity, 0)} Items</p>
-          </div>
-
-          {/* Sticky Footer Summary - Optimized for Quick Checkout */}
-          <div className="p-3 bg-slate-100 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/5 space-y-2 relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-            <div className="flex items-center justify-between">
+          {/* Section: Totals & Processing */}
+          <div className="p-4 flex-1 flex flex-col lg:flex-row items-center justify-between gap-6 bg-slate-50 dark:bg-black/20">
+            <div className="flex items-center gap-10">
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1">Total a Recaudar</span>
                 <div className="flex items-baseline gap-1">
@@ -385,10 +359,15 @@ export default function SalesView() {
                   <span className="text-[10px] font-black text-primary uppercase">CLP</span>
                 </div>
               </div>
-              <div className="flex flex-col text-right justify-center">
-                <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
-                  <span className="text-slate-500 dark:text-slate-400">Neto: <span className="text-foreground">{formatCurrency(netSubtotal)}</span></span>
-                  <span className="text-slate-500 dark:text-slate-400">IVA: <span className="text-primary">{formatCurrency(iva)}</span></span>
+              
+              <div className="flex items-center gap-6 border-l border-slate-200 dark:border-white/10 pl-6">
+                <div className="flex flex-col">
+                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-1">Neto</span>
+                  <p className="text-xs font-black text-foreground">{formatCurrency(netSubtotal)}</p>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-1">Iva (19%)</span>
+                  <p className="text-xs font-black text-primary">{formatCurrency(iva)}</p>
                 </div>
               </div>
             </div>
@@ -396,13 +375,13 @@ export default function SalesView() {
             <button 
               onClick={handleSale}
               disabled={isProcessing || cart.length === 0 || !!folioWarning}
-              className="w-full h-12 bg-primary text-white dark:bg-primary dark:text-white hover:brightness-110 disabled:opacity-30 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/30 group/btn border border-white/10"
+              className="w-full lg:w-72 h-14 bg-primary text-white hover:brightness-110 disabled:opacity-30 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/30 group/btn border border-white/10"
             >
               {isProcessing ? (
                 <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  <ShieldCheck size={18} className="group-hover/btn:scale-110 transition-transform text-white" />
+                  <ShieldCheck size={20} className="group-hover/btn:scale-110 transition-transform text-white" />
                   <span className="text-white">Procesar Transacción</span>
                 </>
               )}
