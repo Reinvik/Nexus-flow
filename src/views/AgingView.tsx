@@ -71,21 +71,17 @@ export default function AgingView() {
 
   useEffect(() => {
     fetchData();
-  }, [showPaid]);
+  }, [selectedYear]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      let invQuery = supabase
+      const invQuery = supabase
         .from('nf_invoices')
         .select(`
           *,
           client:nf_clients!nf_invoices_client_id_fkey(*)
         `);
-      
-      if (!showPaid) {
-        invQuery = invQuery.neq('status', 'Pagada');
-      }
 
       const { data: invData, error: invError } = await invQuery.order('issued_at', { ascending: false });
 
@@ -388,6 +384,24 @@ export default function AgingView() {
           );
         })}
       </div>
+
+      {/* Auto-toggle History Tip */}
+      {selectedMonthData && !showPaid && selectedMonthData.invoices.filter(inv => inv.status !== 'Pagada').length === 0 && selectedMonthData.collected > 0 && (
+        <div className="px-4 animate-in fade-in slide-in-from-top-2">
+          <div className="bg-primary/5 border border-primary/10 p-4 rounded-2xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Clock size={16} className="text-primary" />
+              <p className="text-[10px] font-black text-primary uppercase tracking-widest">Este mes solo tiene movimientos liquidados. Haz clic en "Ver Historial" para auditarlos.</p>
+            </div>
+            <button 
+              onClick={() => setShowPaid(true)}
+              className="px-6 py-2 bg-primary text-white dark:bg-white dark:text-black rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg"
+            >
+              Ver Historial
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Details Table */}
       {selectedMonthData && (
