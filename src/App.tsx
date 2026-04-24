@@ -117,7 +117,8 @@ function App() {
               <X size={24} />
             </button>
 
-            <div className={`flex items-center gap-3 transition-all duration-500 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'opacity-0 w-0' : 'opacity-100'} ${window.innerWidth < 1024 ? 'flex-1' : ''}`}>
+            {/* Logo - Desktop Only */}
+            <div className={`hidden lg:flex items-center gap-3 transition-all duration-500 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'opacity-0 w-0' : 'opacity-100'}`}>
               <div className="relative shrink-0">
                 <div className="absolute inset-0 bg-primary blur-md opacity-30 rounded-full" />
                 <div className="relative w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
