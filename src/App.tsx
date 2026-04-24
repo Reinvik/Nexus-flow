@@ -17,7 +17,8 @@ import {
   User,
   ShieldCheck,
   ChevronRight,
-  Bell
+  Bell,
+  X
 } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
