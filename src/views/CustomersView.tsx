@@ -132,8 +132,8 @@ export default function CustomersView() {
   };
 
   const filtered = clients.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.rut.toLowerCase().includes(searchTerm.toLowerCase())
+    (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (c.rut || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -147,7 +147,7 @@ export default function CustomersView() {
              </div>
              <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Gestión de Cartera</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Clientes <span className="text-slate-400 dark:text-slate-800">Elite</span></h2>
+          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Clientes <span className="text-slate-500 dark:text-slate-800">Elite</span></h2>
         </div>
         
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -188,7 +188,7 @@ export default function CustomersView() {
               <div className="flex items-start justify-between gap-6 mb-8">
                 <div className="flex items-center gap-6">
                   <div className="relative">
-                    <div className="w-16 h-16 rounded-[1.5rem] bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 flex items-center justify-center text-3xl font-black text-slate-300 dark:text-slate-800 group-hover:text-primary transition-all duration-700 shadow-inner">
+                    <div className="w-16 h-16 rounded-[1.5rem] bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 flex items-center justify-center text-3xl font-black text-slate-400 dark:text-slate-800 group-hover:text-primary transition-all duration-700 shadow-inner">
                       {client.name.charAt(0)}
                     </div>
                     {client.debt_status === 'overdue' && (
@@ -202,7 +202,7 @@ export default function CustomersView() {
                          <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
                       )}
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">{client.rut}</p>
+                    <p className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">{client.rut}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -225,8 +225,8 @@ export default function CustomersView() {
               <div className="mt-8 pt-8 border-t border-slate-200 dark:border-white/5 space-y-6">
                 <div className="flex justify-between items-center">
                    <div className="space-y-1">
-                      <span className="text-[9px] font-black text-slate-400 dark:text-slate-700 uppercase tracking-[0.2em]">Movimientos</span>
-                      <p className="text-xl font-black text-foreground tracking-tighter">{client.invoice_count} <span className="text-[10px] text-slate-400 dark:text-slate-700 ml-1">DOCS</span></p>
+                      <span className="text-[9px] font-black text-slate-500 dark:text-slate-700 uppercase tracking-[0.2em]">Movimientos</span>
+                      <p className="text-xl font-black text-foreground tracking-tighter">{client.invoice_count} <span className="text-[10px] text-slate-500 dark:text-slate-700 ml-1">DOCS</span></p>
                    </div>
                    {client.total_debt > 0 && (
                      <div className="text-right space-y-1">

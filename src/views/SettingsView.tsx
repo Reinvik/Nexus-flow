@@ -86,7 +86,7 @@ export default function SettingsView() {
              <span className="w-8 h-px bg-cyan-500" />
              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">System Configuration</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tight text-white uppercase">Ajustes <span className="text-slate-700">& Core</span></h2>
+          <h2 className="text-5xl font-black tracking-tight text-foreground uppercase">Ajustes <span className="text-slate-700 dark:text-slate-500">& Core</span></h2>
           <p className="text-xs font-bold text-slate-600 uppercase tracking-widest max-w-[400px] leading-relaxed">
             Parámetros globales que definen el comportamiento financiero y operativo de Nexus Flow.
           </p>
@@ -113,7 +113,7 @@ export default function SettingsView() {
                <ShieldCheck size={24} />
             </div>
             <div className="space-y-2">
-              <h3 className="text-lg font-black text-white uppercase tracking-tighter">Zona Crítica</h3>
+              <h3 className="text-lg font-black text-foreground uppercase tracking-tighter">Zona Crítica</h3>
               <p className="text-[10px] font-bold text-slate-600 uppercase leading-relaxed tracking-widest">
                 Estos ajustes afectan la integridad de los documentos tributarios y el cálculo de impuestos.
               </p>
@@ -146,7 +146,7 @@ export default function SettingsView() {
                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500">
                     <Hash size={20} />
                  </div>
-                 <h4 className="text-xl font-black text-white uppercase tracking-tighter">Control Operativo</h4>
+                 <h4 className="text-xl font-black text-foreground uppercase tracking-tighter">Control Operativo</h4>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -157,7 +157,7 @@ export default function SettingsView() {
                          type="number" 
                          value={nextInvoice}
                          onChange={(e) => setNextInvoice(e.target.value)}
-                         className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
+                         className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
                        />
                        <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <span className="text-[9px] font-black text-slate-700 uppercase">Sequential</span>
@@ -172,7 +172,7 @@ export default function SettingsView() {
                          type="number" 
                          value={taxRate}
                          onChange={(e) => setTaxRate(e.target.value)}
-                         className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
+                         className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
                        />
                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-700">
                           <Percent size={16} />
@@ -188,7 +188,7 @@ export default function SettingsView() {
                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500">
                     <Building2 size={20} />
                  </div>
-                 <h4 className="text-xl font-black text-white uppercase tracking-tighter">Identidad Corporativa</h4>
+                 <h4 className="text-xl font-black text-foreground uppercase tracking-tighter">Identidad Corporativa</h4>
               </div>
 
               <div className="space-y-4">
@@ -197,7 +197,7 @@ export default function SettingsView() {
                    type="text" 
                    value={companyName}
                    onChange={(e) => setCompanyName(e.target.value)}
-                   className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
+                   className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
                    placeholder="NOMBRE DE LA EMPRESA..."
                  />
               </div>

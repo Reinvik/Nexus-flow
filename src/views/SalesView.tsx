@@ -376,19 +376,19 @@ export default function SalesView() {
           </div>
 
           {/* Sticky Footer Summary - Optimized for Quick Checkout */}
-          <div className="p-4 bg-slate-100 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/5 space-y-4 relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+          <div className="p-3 bg-slate-100 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/5 space-y-2 relative z-10 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1">Total a Recaudar</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-foreground tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
-                  <span className="text-[8px] font-black text-primary uppercase">CLP</span>
+                  <span className="text-4xl font-black text-foreground tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
+                  <span className="text-[10px] font-black text-primary uppercase">CLP</span>
                 </div>
               </div>
-              <div className="flex flex-col text-right">
-                <div className="flex items-center gap-4 text-[8px] font-black uppercase text-slate-400 dark:text-slate-600 tracking-widest">
-                  <span>Neto: {formatCurrency(netSubtotal)}</span>
-                  <span>IVA: {formatCurrency(iva)}</span>
+              <div className="flex flex-col text-right justify-center">
+                <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
+                  <span className="text-slate-500 dark:text-slate-400">Neto: <span className="text-foreground">{formatCurrency(netSubtotal)}</span></span>
+                  <span className="text-slate-500 dark:text-slate-400">IVA: <span className="text-primary">{formatCurrency(iva)}</span></span>
                 </div>
               </div>
             </div>
@@ -396,14 +396,14 @@ export default function SalesView() {
             <button 
               onClick={handleSale}
               disabled={isProcessing || cart.length === 0 || !!folioWarning}
-              className="w-full h-14 bg-primary text-white dark:bg-white dark:text-black hover:opacity-90 disabled:opacity-30 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20 group/btn"
+              className="w-full h-12 bg-primary text-white dark:bg-primary dark:text-white hover:brightness-110 disabled:opacity-30 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] active:scale-95 transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/30 group/btn border border-white/10"
             >
               {isProcessing ? (
                 <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  <ShieldCheck size={18} className="group-hover/btn:scale-110 transition-transform" />
-                  <span>Procesar Transacción</span>
+                  <ShieldCheck size={18} className="group-hover/btn:scale-110 transition-transform text-white" />
+                  <span className="text-white">Procesar Transacción</span>
                 </>
               )}
             </button>

@@ -180,7 +180,7 @@ export default function ForecastView() {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] space-y-8 opacity-20">
         <div className="w-16 h-16 border-2 border-white/20 border-t-cyan-500 rounded-full animate-spin"></div>
-        <p className="text-[10px] font-black uppercase tracking-[0.5em]">Corriendo Modelos Predictivos</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-foreground">Corriendo Modelos Predictivos</p>
       </div>
     );
   }
@@ -194,7 +194,7 @@ export default function ForecastView() {
              <span className="w-8 h-px bg-primary" />
              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Predictive Analysis</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tight text-foreground uppercase">Forecast <span className="text-slate-400 dark:text-slate-700">& Tendencias</span></h2>
+          <h2 className="text-5xl font-black tracking-tight text-foreground uppercase">Forecast <span className="text-slate-500 dark:text-slate-700">& Tendencias</span></h2>
           <div className="flex items-center gap-6">
              <p className="text-xs font-bold text-slate-600 uppercase tracking-widest max-w-[300px] leading-relaxed">
                Inteligencia basada en el historial operativo de los últimos 180 días
@@ -231,7 +231,7 @@ export default function ForecastView() {
 
       {/* Main Chart */}
       <div className="glass-card p-8 rounded-[2.5rem] border-primary/5 shadow-xl">
-        <h3 className="text-xl font-black mb-8 flex items-center gap-3">
+        <h3 className="text-xl font-black mb-8 flex items-center gap-3 text-foreground">
           <TrendingUp className="text-primary" /> Tendencia de Ventas Mensuales
         </h3>
         <div className="h-[400px] w-full">
@@ -253,13 +253,13 @@ export default function ForecastView() {
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: 'white', 
+                  backgroundColor: 'var(--card)', 
                   borderRadius: '1rem', 
-                  border: 'none', 
+                  border: '1px solid var(--card-border)', 
                   boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                   padding: '1rem'
                 }}
-                itemStyle={{ fontSize: '12px', fontWeight: 900 }}
+                itemStyle={{ fontSize: '12px', fontWeight: 900, color: 'var(--foreground)' }}
                 formatter={(val: any) => [formatCurrency(Number(val)), 'Ventas']}
               />
               <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px' }} />
@@ -306,7 +306,7 @@ export default function ForecastView() {
               placeholder="FILTRAR RESULTADOS..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-14 pr-6 h-16 bg-white/[0.02] border border-white/5 rounded-2xl text-[10px] font-black text-white focus:border-cyan-500/30 outline-none w-80 uppercase tracking-widest"
+              className="pl-14 pr-6 h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl text-[10px] font-black text-foreground focus:border-cyan-500/30 outline-none w-80 uppercase tracking-widest"
             />
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function ForecastView() {
                     <td className="p-8 pl-10">
                       <div className="flex items-center gap-4">
                          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-700 group-hover:text-cyan-400 transition-colors"><Package size={16} /></div>
-                         <p className="text-sm font-black text-white uppercase tracking-tighter">{p.name}</p>
+                         <p className="text-sm font-black text-foreground uppercase tracking-tighter">{p.name}</p>
                       </div>
                     </td>
                     <td className="p-8">
@@ -377,13 +377,13 @@ export default function ForecastView() {
                     <td className="p-8 pl-10">
                       <div className="flex items-center gap-4">
                          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-700 group-hover:text-cyan-400 transition-colors"><Users size={16} /></div>
-                         <p className="text-sm font-black text-white uppercase tracking-tighter">{c.name}</p>
+                         <p className="text-sm font-black text-foreground uppercase tracking-tighter">{c.name}</p>
                       </div>
                     </td>
                     <td className="p-8 text-xs font-bold text-slate-500 uppercase">
                       {c.lastPurchaseDays === 0 ? 'Activo Hoy' : `Hace ${c.lastPurchaseDays} Días`}
                     </td>
-                    <td className="p-8 text-sm font-black text-white tracking-tighter">{formatCurrency(c.avgPurchaseValue)}</td>
+                    <td className="p-8 text-sm font-black text-foreground tracking-tighter">{formatCurrency(c.avgPurchaseValue)}</td>
                     <td className="p-8 text-sm font-black text-emerald-500 tracking-tighter">{formatCurrency(c.predictedVolume)}</td>
                     <td className="p-8 pr-10 text-right">
                       <span className={`text-[9px] font-black px-4 py-2 rounded-xl uppercase border ${

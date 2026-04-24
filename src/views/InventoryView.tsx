@@ -109,7 +109,7 @@ export default function InventoryView() {
   };
 
   const filtered = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
     (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -148,7 +148,7 @@ export default function InventoryView() {
                placeholder="BUSCAR SKU..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="pl-14 pr-6 h-16 bg-white/[0.02] border border-white/5 rounded-2xl text-[10px] font-black text-white focus:border-cyan-500/30 outline-none w-full lg:w-80 uppercase tracking-widest"
+               className="pl-14 pr-6 h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl text-[10px] font-black text-foreground focus:border-cyan-500/30 outline-none w-full lg:w-80 uppercase tracking-widest"
              />
            </div>
            <button 
@@ -164,7 +164,7 @@ export default function InventoryView() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
           <div className="glass-card p-6 rounded-[2rem] border-white/5">
             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Catálogo Total</p>
-            <p className="text-xl font-black text-white">{products.length} Items</p>
+            <p className="text-xl font-black text-foreground">{products.length} Items</p>
             <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Existencias Únicas</p>
           </div>
           <div className="glass-card p-6 rounded-[2rem] border-white/5">
@@ -174,12 +174,12 @@ export default function InventoryView() {
           </div>
           <div className="glass-card p-6 rounded-[2rem] border-white/5">
             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Quiebre Stock</p>
-            <p className={`text-xl font-black ${criticalStock > 0 ? 'text-amber-500' : 'text-white'}`}>{criticalStock} Alert</p>
+            <p className={`text-xl font-black ${criticalStock > 0 ? 'text-amber-500' : 'text-foreground'}`}>{criticalStock} Alert</p>
             <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Stock {"<="} 5 Units</p>
           </div>
           <div className="glass-card p-6 rounded-[2rem] border-white/5">
             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Stock Crítico</p>
-            <p className={`text-xl font-black ${negativeStock > 0 ? 'text-rose-500 animate-pulse' : 'text-white'}`}>{negativeStock} Items</p>
+            <p className={`text-xl font-black ${negativeStock > 0 ? 'text-rose-500 animate-pulse' : 'text-foreground'}`}>{negativeStock} Items</p>
             <p className="text-[8px] font-black uppercase text-slate-700 mt-1">Existencias Negativas</p>
           </div>
       </div>
@@ -194,9 +194,9 @@ export default function InventoryView() {
                <div className="flex justify-between items-center relative z-10">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400"><Edit3 size={18} /></div>
-                    <h3 className="text-xl font-black text-white uppercase tracking-tighter">{editingId ? 'Editar Maestro' : 'Nuevo Registro'}</h3>
+                    <h3 className="text-xl font-black text-foreground uppercase tracking-tighter">{editingId ? 'Editar Maestro' : 'Nuevo Registro'}</h3>
                   </div>
-                  <button onClick={handleCancel} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-500 hover:text-white transition-all"><X size={18}/></button>
+                  <button onClick={handleCancel} className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-foreground transition-all"><X size={18}/></button>
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
@@ -207,7 +207,7 @@ export default function InventoryView() {
                       value={name} 
                       onChange={e=>setName(e.target.value)} 
                       placeholder="DESCRIPCIÓN COMERCIAL..."
-                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
+                      className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
                     />
                   </div>
                   <div className="space-y-4">
@@ -217,7 +217,7 @@ export default function InventoryView() {
                       value={sku} 
                       onChange={e=>setSku(e.target.value)} 
                       placeholder="REF-0000"
-                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
+                      className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
                     />
                   </div>
                   <div className="space-y-4">
@@ -228,7 +228,7 @@ export default function InventoryView() {
                          type="number" 
                          value={netPrice} 
                          onChange={e=>setNetPrice(e.target.value)} 
-                         className="w-full bg-white/[0.02] border border-white/5 rounded-2xl pl-14 pr-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all"
+                         className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl pl-14 pr-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all"
                        />
                     </div>
                   </div>
@@ -238,7 +238,7 @@ export default function InventoryView() {
                       type="number" 
                       value={stock} 
                       onChange={e=>setStock(e.target.value)} 
-                      className="w-full bg-white/[0.02] border border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-white focus:border-cyan-500/30 outline-none transition-all"
+                      className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all"
                     />
                   </div>
                </div>
@@ -267,13 +267,13 @@ export default function InventoryView() {
                   <td className="p-8 pl-10">
                     <div className="flex items-center gap-4">
                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-700 group-hover:text-cyan-400 transition-colors"><Package size={16} /></div>
-                       <p className="text-sm font-black text-white uppercase tracking-tighter">{p.name}</p>
+                       <p className="text-sm font-black text-foreground uppercase tracking-tighter">{p.name}</p>
                     </div>
                   </td>
                   <td className="p-8">
                     <span className="text-[10px] font-black px-3 py-1 bg-white/5 rounded-lg text-slate-500 uppercase tracking-widest">{p.sku || 'N/A'}</span>
                   </td>
-                  <td className="p-8 text-sm font-black text-white tracking-tighter">{formatCurrency(p.net_price)}</td>
+                  <td className="p-8 text-sm font-black text-foreground tracking-tighter">{formatCurrency(p.net_price)}</td>
                   <td className="p-8">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${
@@ -290,7 +290,7 @@ export default function InventoryView() {
                   </td>
                   <td className="p-8 pr-10 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
-                      <button onClick={() => handleEdit(p)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-white transition-all"><Edit3 size={14}/></button>
+                      <button onClick={() => handleEdit(p)} className="w-10 h-10 rounded-xl bg-slate-200/50 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-foreground transition-all"><Edit3 size={14}/></button>
                       <button onClick={() => handleDelete(p.id)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-rose-500 transition-all"><Trash2 size={14}/></button>
                     </div>
                   </td>

@@ -160,7 +160,7 @@ function App() {
                   className={`
                     w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group relative tap-highlight-none
                      ${isActive
-                       ? 'bg-primary/10 dark:bg-white/5 text-slate-900 dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.05)]'
+                       ? 'bg-primary/15 dark:bg-white/10 text-primary dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.1)]'
                        : 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                      }
                   `}
@@ -169,7 +169,7 @@ function App() {
                   <Icon size={20} className={`shrink-0 transition-all duration-500 ${isActive ? 'text-primary drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]' : 'group-hover:scale-110'}`} />
                   
                   {(sidebarOpen || window.innerWidth < 1024) && (
-                    <span className={`font-black whitespace-nowrap text-sm tracking-wide ${isActive ? 'opacity-100' : 'opacity-80'}`}>
+                    <span className={`font-black whitespace-nowrap text-sm tracking-wide ${isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'}`}>
                       {item.name}
                     </span>
                   )}
@@ -194,7 +194,6 @@ function App() {
               {(sidebarOpen || window.innerWidth < 1024) && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground truncate">{user.email?.split('@')[0]}</p>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Admin</p>
                 </div>
               )}
             </div>
