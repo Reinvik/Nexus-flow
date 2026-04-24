@@ -26,7 +26,12 @@ import {
 import { generateWhatsAppLink } from '@/lib/whatsapp';
 import { formatDate, formatRUT, validateRUT, formatCurrency } from '@/lib/formatters';
 
-export default function CustomersView() {
+interface CustomersProps {
+  onNavigate?: (view: any) => void;
+  onSelectInvoice?: (id: string) => void;
+}
+
+export default function CustomersView({ onNavigate, onSelectInvoice }: CustomersProps) {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -159,28 +164,28 @@ export default function CustomersView() {
   };
 
   return (
-    <div className="space-y-12 lg:h-[calc(100vh-180px)] flex flex-col font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-6 lg:h-[calc(100vh-140px)] flex flex-col font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
-                <Users size={20} className="text-white" fill="currentColor" />
+             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <Users size={16} className="text-white" fill="currentColor" />
              </div>
-             <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Gestión de Cartera</p>
+             <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">Gestión de Cartera</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Clientes <span className="text-slate-500 dark:text-slate-800">Elite</span></h2>
+          <h2 className="text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Clientes <span className="text-slate-500 dark:text-slate-800">Elite</span></h2>
         </div>
         
         <div className="flex items-center gap-4 w-full md:w-auto">
            <div className="relative group flex-1 md:flex-none">
-             <Search size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+             <Search size={14} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
              <input
                type="text"
                placeholder="BUSCAR CLIENTE..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="pl-14 pr-6 h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl text-[10px] font-black text-foreground focus:border-primary/30 outline-none w-full md:w-80 uppercase tracking-widest placeholder:text-slate-400 dark:placeholder:text-slate-800"
+               className="pl-12 pr-4 h-12 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-xl text-[9px] font-black text-foreground focus:border-primary/30 outline-none w-full md:w-64 uppercase tracking-widest placeholder:text-slate-400 dark:placeholder:text-slate-800"
              />
            </div>
 
@@ -199,12 +204,12 @@ export default function CustomersView() {
              </button>
            </div>
 
-           <button 
-             onClick={() => setIsAdding(true)}
-             className="h-16 px-10 bg-primary text-white dark:bg-white dark:text-black rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-2xl shadow-primary/20"
-           >
-             <Plus size={18} /> Nuevo Cliente
-           </button>
+            <button 
+              onClick={() => setIsAdding(true)}
+              className="h-12 px-8 bg-primary text-white dark:bg-white dark:text-black rounded-xl font-black text-[9px] uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-xl shadow-primary/20"
+            >
+              <Plus size={16} /> Nuevo Cliente
+            </button>
         </div>
       </div>
 
@@ -222,25 +227,25 @@ export default function CustomersView() {
                 <p className="text-[10px] font-black uppercase tracking-[0.4em]">No hay coincidencias en la base</p>
             </div>
           ) : filtered.map(client => (
-            <div key={client.id} className="glass-card p-8 rounded-[2.5rem] group relative overflow-hidden flex flex-col border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/[0.01] transition-all duration-700 shadow-sm hover:shadow-2xl hover:shadow-primary/10">
-              <div className="flex items-start justify-between gap-6 mb-8">
-                <div className="flex items-center gap-6">
+            <div key={client.id} className="glass-card p-6 rounded-[2rem] group relative overflow-hidden flex flex-col border-slate-200 dark:border-white/5 hover:bg-slate-100/50 dark:hover:bg-white/[0.01] transition-all duration-700 shadow-sm hover:shadow-2xl hover:shadow-primary/10">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-center gap-4">
                   <div className="relative">
-                    <div className="w-16 h-16 rounded-[1.5rem] bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 flex items-center justify-center text-3xl font-black text-slate-400 dark:text-slate-800 group-hover:text-primary transition-all duration-700 shadow-inner">
+                    <div className="w-12 h-12 rounded-[1rem] bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 flex items-center justify-center text-xl font-black text-slate-400 dark:text-slate-800 group-hover:text-primary transition-all duration-700 shadow-inner">
                       {client.name.charAt(0)}
                     </div>
                     {client.debt_status === 'overdue' && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full border-[6px] border-[#020617] shadow-[0_0_20px_rgba(244,63,94,0.6)] animate-pulse" />
                     )}
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-xl font-black text-foreground uppercase tracking-tight group-hover:text-primary transition-colors leading-none">{client.name}</h3>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-foreground uppercase tracking-tight group-hover:text-primary transition-colors leading-none">{client.name}</h3>
                       {client.debt_status === 'overdue' && (
                          <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
                       )}
                     </div>
-                    <p className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">{client.rut}</p>
+                    <p className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">{client.rut}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -249,44 +254,51 @@ export default function CustomersView() {
                 </div>
               </div>
 
-              <div className="space-y-4 flex-1">
-                <div className="flex items-center gap-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">
-                  <Phone size={14} className="text-primary/50" /> {client.phone}
+              <div className="space-y-2 flex-1">
+                <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <Phone size={12} className="text-primary/50" /> {client.phone}
                 </div>
                 {client.commune && (
-                  <div className="flex items-center gap-4 text-[11px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">
-                    <MapPin size={14} className="text-primary/50" /> {client.commune}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">
+                      <MapPin size={12} className="text-primary/50" /> {client.commune}
+                    </div>
+                    {client.address && (
+                      <p className="text-[8px] font-bold text-slate-400 dark:text-slate-700 uppercase tracking-widest ml-6 truncate max-w-[200px]">
+                        {client.address}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
 
-              <div className="mt-8 pt-8 border-t border-slate-200 dark:border-white/5 space-y-6">
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-white/5 space-y-4">
                 <div className="flex justify-between items-center">
                    <div className="space-y-1">
-                      <span className="text-[9px] font-black text-slate-500 dark:text-slate-700 uppercase tracking-[0.2em]">Movimientos</span>
-                      <p className="text-xl font-black text-foreground tracking-tighter">{client.invoice_count} <span className="text-[10px] text-slate-500 dark:text-slate-700 ml-1">DOCS</span></p>
+                      <span className="text-[8px] font-black text-slate-500 dark:text-slate-700 uppercase tracking-[0.2em]">Movimientos</span>
+                      <p className="text-base font-black text-foreground tracking-tighter">{client.invoice_count} <span className="text-[9px] text-slate-500 dark:text-slate-700 ml-1">DOCS</span></p>
                    </div>
                    {client.total_debt > 0 && (
                      <div className="text-right space-y-1">
-                        <span className="text-[9px] font-black text-rose-500/70 uppercase tracking-[0.2em]">Deuda Vencida</span>
-                        <p className="text-xl font-black text-rose-500 tracking-tighter">{formatCurrency(client.total_debt)}</p>
+                        <span className="text-[8px] font-black text-rose-500/70 uppercase tracking-[0.2em]">Deuda Vencida</span>
+                        <p className="text-base font-black text-rose-500 tracking-tighter">{formatCurrency(client.total_debt)}</p>
                      </div>
                    )}
                 </div>
                 
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <button 
                     onClick={() => setSelectedClientHistory(client)}
-                    className="flex-1 h-14 bg-slate-200/50 dark:bg-white/5 hover:bg-primary hover:text-white dark:hover:bg-white dark:hover:text-black text-slate-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-500 active:scale-95 shadow-sm"
+                    className="flex-1 h-10 bg-slate-200/50 dark:bg-white/5 hover:bg-primary hover:text-white dark:hover:bg-white dark:hover:text-black text-slate-500 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-500 active:scale-95 shadow-sm"
                   >
                     Historial
                   </button>
                   <a 
                     href={generateWhatsAppLink(client.phone, client.name, client.debt_status === 'overdue' ? 'red' : 'green', client.total_debt, [])}
                     target="_blank"
-                    className="w-14 h-14 bg-emerald-500/5 text-emerald-500 flex items-center justify-center rounded-2xl hover:bg-emerald-500 hover:text-white transition-all duration-500 active:scale-95"
+                    className="w-10 h-10 bg-emerald-500/5 text-emerald-500 flex items-center justify-center rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-500 active:scale-95"
                   >
-                    <MessageCircle size={20} />
+                    <MessageCircle size={16} />
                   </a>
                 </div>
               </div>
@@ -309,13 +321,25 @@ export default function CustomersView() {
 
              <div className="max-h-[400px] overflow-y-auto no-scrollbar space-y-4 pr-2">
                 {selectedClientHistory.nf_invoices?.sort((a: any, b: any) => new Date(b.issued_at).getTime() - new Date(a.issued_at).getTime()).map((inv: any) => (
-                  <div key={inv.id} className="p-6 bg-slate-100 dark:bg-white/[0.01] rounded-3xl border border-slate-200 dark:border-white/5 flex items-center justify-between group hover:border-primary/20 transition-all">
+                  <div 
+                    key={inv.id} 
+                    onClick={() => {
+                      if (onSelectInvoice && onNavigate) {
+                        onSelectInvoice(inv.id);
+                        onNavigate('invoices');
+                      }
+                    }}
+                    className="p-6 bg-slate-100 dark:bg-white/[0.01] rounded-3xl border border-slate-200 dark:border-white/5 flex items-center justify-between group hover:border-primary/20 transition-all cursor-pointer active:scale-[0.98]"
+                  >
                     <div className="flex items-center gap-6">
                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${inv.status === 'Pagada' ? 'bg-emerald-400/5 text-emerald-500' : 'bg-primary/5 text-primary'}`}>
                          <FileText size={20} />
                        </div>
                        <div className="space-y-1">
-                          <span className="text-sm font-black text-foreground uppercase tracking-tight">Folio #{inv.folio}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-black text-foreground uppercase tracking-tight">Folio #{inv.folio}</span>
+                            <ArrowUpRight size={12} className="text-primary opacity-0 group-hover:opacity-100 transition-all -translate-y-1" />
+                          </div>
                           <div className="flex items-center gap-2">
                              <Calendar size={12} className="text-slate-400 dark:text-slate-700" />
                              <span className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase">{formatDate(inv.issued_at)}</span>

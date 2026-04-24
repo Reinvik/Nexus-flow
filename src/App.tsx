@@ -38,6 +38,7 @@ import ForecastView from '@/views/ForecastView';
 function App() {
   const { user, loading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'transfers' | 'routing' | 'aging' | 'forecast'>('dashboard');
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -108,25 +109,11 @@ function App() {
 
         <div className="flex flex-col h-full relative z-10">
           {/* Header */}
-          <div className="h-20 lg:h-24 flex items-center px-6 gap-3 shrink-0">
-            {/* Logo Section */}
-            <div className={`flex items-center gap-3 transition-all duration-500 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-              <div className="relative shrink-0">
-                <div className="absolute inset-0 bg-primary blur-md opacity-30 rounded-full" />
-                <div className="relative w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
-                  <ShieldCheck size={20} className="text-white" />
-                </div>
-              </div>
-              <div className="flex flex-col min-w-0">
-                <h1 className="text-lg font-black tracking-tighter text-foreground truncate uppercase">NEXUS <span className="text-primary">FLOW</span></h1>
-                <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] -mt-1">INTELLIGENCE</p>
-              </div>
-            </div>
-            
+          <div className="h-16 lg:h-20 flex items-center px-6 gap-3 shrink-0">
             {/* Toggle Button - Desktop Only */}
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="hidden lg:flex p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/5 text-slate-400 transition-all duration-300 ml-auto"
+              className="hidden lg:flex p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/5 text-slate-400 transition-all duration-300 mr-auto"
             >
               <Menu size={20} />
             </button>
@@ -160,13 +147,13 @@ function App() {
                   className={`
                     w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative tap-highlight-none
                      ${isActive
-                       ? 'bg-primary/15 dark:bg-white/10 text-primary dark:text-white shadow-[0_0_20px_rgba(6,182,212,0.1)]'
+                       ? 'bg-slate-900 dark:bg-white/10 text-white shadow-[0_20px_40px_rgba(0,0,0,0.2)]'
                        : 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                      }
                   `}
                   title={isDesktopCollapsed ? item.name : undefined}
                 >
-                  <Icon size={20} className={`shrink-0 transition-all duration-500 ${isActive ? 'text-primary drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] scale-110' : 'group-hover:scale-110'}`} />
+                  <Icon size={20} className={`shrink-0 transition-all duration-500 ${isActive ? 'text-white dark:text-primary dark:drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] scale-110' : 'group-hover:scale-110'}`} />
                   
                   {(sidebarOpen || window.innerWidth < 1024) && (
                     <span className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${isActive ? 'opacity-100 translate-x-0' : 'opacity-60 group-hover:opacity-100 group-hover:translate-x-1'}`}>
@@ -236,13 +223,23 @@ function App() {
         </header>
 
         {/* Content Container */}
-        <div className={`w-full max-w-[1700px] mx-auto transition-all duration-500 ${currentView === 'sales' ? 'p-2 md:p-4 lg:p-4' : 'p-4 md:p-8 lg:p-12'}`}>
+        <div className={`w-full max-w-[1700px] mx-auto transition-all duration-500 ${currentView === 'sales' ? 'p-2 md:p-3 lg:p-3' : 'p-3 md:p-4 lg:p-4'}`}>
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             {currentView === 'dashboard' && <DashboardView onNavigate={setCurrentView} />}
             {currentView === 'inventory' && <InventoryView />}
             {currentView === 'sales' && <SalesView />}
-            {currentView === 'customers' && <CustomersView />}
-            {currentView === 'invoices' && <InvoicesView />}
+            {currentView === 'customers' && (
+              <CustomersView 
+                onNavigate={setCurrentView} 
+                onSelectInvoice={(id) => setSelectedInvoiceId(id)} 
+              />
+            )}
+            {currentView === 'invoices' && (
+              <InvoicesView 
+                initialInvoiceId={selectedInvoiceId} 
+                onClearInvoice={() => setSelectedInvoiceId(null)} 
+              />
+            )}
             {currentView === 'aging' && <AgingView />}
             {currentView === 'forecast' && <ForecastView />}
             {currentView === 'transfers' && (

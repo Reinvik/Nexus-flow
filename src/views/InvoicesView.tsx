@@ -23,7 +23,12 @@ import {
 } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/lib/formatters';
 
-export default function InvoicesView() {
+interface InvoicesProps {
+  initialInvoiceId?: string | null;
+  onClearInvoice?: () => void;
+}
+
+export default function InvoicesView({ initialInvoiceId, onClearInvoice }: InvoicesProps) {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +49,21 @@ export default function InvoicesView() {
     fetchInvoices();
   }, [showPaid]);
 
+  useEffect(() => {
+    if (initialInvoiceId && invoices.length > 0) {
+      const target = invoices.find(inv => inv.id === initialInvoiceId);
+      if (target) {
+        setEditingInvoice(target);
+        setEditFolio(target.folio.toString());
+        setEditIssuedAt(target.issued_at?.split('T')[0] || '');
+        setEditDueDate(target.payment_due_date?.split('T')[0] || '');
+        setEditTotalAmount((target.total_amount || 0).toString());
+        setEditPaidAmount((target.paid_amount || 0).toString());
+        if (onClearInvoice) onClearInvoice();
+      }
+    }
+  }, [initialInvoiceId, invoices, onClearInvoice]);
+
   const fetchInvoices = async () => {
     setLoading(true);
     try {
@@ -54,7 +74,7 @@ export default function InvoicesView() {
           client:nf_clients!nf_invoices_client_id_fkey (*)
         `);
       
-      if (!showPaid) {
+      if (!showPaid && !initialInvoiceId) {
         query = query.neq('status', 'Pagada');
       }
 

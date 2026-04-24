@@ -248,138 +248,138 @@ export default function RoutingView() {
   }, [fetchClientsAndInvoices]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] space-y-6 animate-in fade-in duration-700">
+    <div className="flex flex-col h-[calc(100vh-100px)] space-y-2 animate-in fade-in duration-700">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-2">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-2xl">
-              <MapIcon className="text-primary w-8 h-8" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 px-2">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/10 rounded-lg">
+              <MapIcon className="text-primary w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-4xl font-black tracking-tight text-foreground">Logística & Rutas</h2>
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Geolocalización de Cobranza en Tiempo Real</p>
+              <h2 className="text-xl font-black tracking-tight text-foreground uppercase">Logística <span className="text-slate-500">& Rutas</span></h2>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-[8px]">Geolocalización en Tiempo Real</p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative group">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary transition-colors">
-              <Filter size={18} />
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary transition-colors">
+              <Filter size={14} />
             </div>
             <input
               type="text"
-              placeholder="Buscar cliente o dirección..."
+              placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl pl-12 pr-6 py-3.5 text-sm font-bold text-foreground placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all w-64 md:w-80 backdrop-blur-md"
+              className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all w-48 md:w-64"
             />
           </div>
 
           <button
             onClick={() => setIsAutoGeocodeEnabled(!isAutoGeocodeEnabled)}
-            className={`flex items-center gap-3 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
               isAutoGeocodeEnabled 
-                ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/20' 
-                : 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95'
+                ? 'bg-amber-500 text-white' 
+                : 'bg-emerald-500 text-white hover:scale-105 active:scale-95'
             }`}
           >
             {isAutoGeocodeEnabled ? (
-              <><Pause size={18} /> Detener Scan</>
+              <><Pause size={12} /> Detener</>
             ) : (
-              <><Play size={18} /> Iniciar Scan</>
+              <><Play size={12} /> Scan</>
             )}
           </button>
 
           <button 
             onClick={() => fetchClientsAndInvoices()}
             disabled={loading || isGeocoding}
-            className="p-3.5 bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 active:scale-90"
+            className="p-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-500 dark:text-slate-400 hover:text-primary transition-all disabled:opacity-50 active:scale-90"
           >
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 px-2">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 px-2">
         <div className="lg:col-span-1">
           <select
             value={selectedCommune}
             onChange={(e) => setSelectedCommune(e.target.value)}
-            className="w-full bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-sm font-black text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md appearance-none cursor-pointer hover:bg-white/10 transition-all"
+            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-[11px] font-black text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer transition-all"
           >
-            {communes.map(c => <option key={c} value={c} className="bg-slate-100 dark:bg-slate-900 text-foreground">{c}</option>)}
+            {communes.map(c => <option key={c} value={c} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{c}</option>)}
           </select>
         </div>
 
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'red' ? 'all' : 'red')}
-          className={`p-4 rounded-2xl flex items-center justify-between transition-all border group ${
+          className={`px-4 py-2.5 rounded-xl flex items-center justify-between transition-all border group ${
             selectedStatus === 'red' 
               ? 'bg-rose-500 text-white border-rose-600 shadow-xl shadow-rose-500/20' 
-              : 'bg-white/5 border-white/10 text-rose-500 hover:bg-rose-500/10'
+              : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-rose-500 hover:bg-rose-500/10'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full relative ${selectedStatus === 'red' ? 'bg-white' : 'bg-rose-500'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full relative ${selectedStatus === 'red' ? 'bg-white' : 'bg-rose-500'}`}>
               <div className={`absolute inset-0 rounded-full animate-ping opacity-75 ${selectedStatus === 'red' ? 'bg-white' : 'bg-rose-500'}`} />
             </div>
-            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Vencidos</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.1em]">Vencidos</span>
           </div>
-          <span className={`text-xs font-black ${selectedStatus === 'red' ? 'text-white/70' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-black ${selectedStatus === 'red' ? 'text-white/70' : 'text-slate-500'}`}>
             {clients.filter(c => c.status === 'red').length}
           </span>
         </button>
         
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'yellow' ? 'all' : 'yellow')}
-          className={`p-4 rounded-2xl flex items-center justify-between transition-all border ${
+          className={`px-4 py-2.5 rounded-xl flex items-center justify-between transition-all border ${
             selectedStatus === 'yellow' 
               ? 'bg-amber-500 text-white border-amber-600 shadow-xl shadow-amber-500/20' 
-              : 'bg-white/5 border-white/10 text-amber-500 hover:bg-amber-500/10'
+              : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-amber-500 hover:bg-amber-500/10'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${selectedStatus === 'yellow' ? 'bg-white' : 'bg-amber-500'}`} />
-            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Esta Semana</span>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${selectedStatus === 'yellow' ? 'bg-white' : 'bg-amber-500'}`} />
+            <span className="text-[10px] font-black uppercase tracking-[0.1em]">Esta Semana</span>
           </div>
-          <span className={`text-xs font-black ${selectedStatus === 'yellow' ? 'text-white/70' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-black ${selectedStatus === 'yellow' ? 'text-white/70' : 'text-slate-500'}`}>
             {clients.filter(c => c.status === 'yellow').length}
           </span>
         </button>
 
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'green' ? 'all' : 'green')}
-          className={`p-4 rounded-2xl flex items-center justify-between transition-all border ${
+          className={`px-4 py-2.5 rounded-xl flex items-center justify-between transition-all border ${
             selectedStatus === 'green' 
               ? 'bg-emerald-500 text-white border-emerald-600 shadow-xl shadow-emerald-500/20' 
-              : 'bg-white/5 border-white/10 text-emerald-500 hover:bg-emerald-500/10'
+              : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-emerald-500 hover:bg-emerald-500/10'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${selectedStatus === 'green' ? 'bg-white' : 'bg-emerald-500'}`} />
-            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Al Día</span>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${selectedStatus === 'green' ? 'bg-white' : 'bg-emerald-500'}`} />
+            <span className="text-[10px] font-black uppercase tracking-[0.1em]">Al Día</span>
           </div>
-          <span className={`text-xs font-black ${selectedStatus === 'green' ? 'text-white/70' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-black ${selectedStatus === 'green' ? 'text-white/70' : 'text-slate-500'}`}>
             {clients.filter(c => c.status === 'green').length}
           </span>
         </button>
 
         <button 
           onClick={() => setSelectedStatus(selectedStatus === 'gray' ? 'all' : 'gray')}
-          className={`p-4 rounded-2xl flex items-center justify-between transition-all border group ${
+          className={`px-4 py-2.5 rounded-xl flex items-center justify-between transition-all border group ${
             selectedStatus === 'gray' 
               ? 'bg-slate-500 text-white border-slate-600 shadow-xl shadow-slate-500/20' 
-              : 'bg-slate-200/50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 hover:bg-slate-500/10'
+              : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 hover:bg-slate-500/10'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${selectedStatus === 'gray' ? 'bg-white' : 'bg-slate-400'}`} />
-            <span className="text-[11px] font-black uppercase tracking-[0.1em]">Sin Deuda</span>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${selectedStatus === 'gray' ? 'bg-white' : 'bg-slate-400'}`} />
+            <span className="text-[10px] font-black uppercase tracking-[0.1em]">Sin Deuda</span>
           </div>
-          <span className={`text-xs font-black ${selectedStatus === 'gray' ? 'text-white/70' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-black ${selectedStatus === 'gray' ? 'text-white/70' : 'text-slate-500'}`}>
             {clients.filter(c => c.status === 'gray').length}
           </span>
         </button>

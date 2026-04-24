@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Product } from '@/types';
 import toast from 'react-hot-toast';
@@ -18,6 +18,7 @@ export default function InventoryView() {
   const [sku, setSku] = useState('');
   const [netPrice, setNetPrice] = useState('');
   const [stock, setStock] = useState('');
+  const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -41,7 +42,8 @@ export default function InventoryView() {
   };
 
   const handleSave = async () => {
-    if (!name || !netPrice || !stock) {
+    // Better validation: stock can be "0"
+    if (!name || !netPrice || stock === '') {
       toast.error('Nombre, Precio Neto y Stock son requeridos');
       return;
     }
@@ -78,11 +80,16 @@ export default function InventoryView() {
 
   const handleEdit = (product: Product) => {
     setEditingId(product.id);
-    setName(product.name);
+    setName(product.name || '');
     setSku(product.sku || '');
-    setNetPrice(product.net_price.toString());
-    setStock(product.stock.toString());
+    setNetPrice(product.net_price?.toString() || '0');
+    setStock(product.stock?.toString() || '0');
     setIsAdding(true);
+    
+    // Smooth scroll to form
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const handleCancel = () => {
@@ -211,7 +218,10 @@ export default function InventoryView() {
         <div className="glass-card rounded-[3.5rem] overflow-hidden border-white/5 shadow-2xl relative">
           {/* Add Form Overlay */}
           {isAdding && (
-            <div className="p-10 border-b border-white/5 bg-cyan-500/[0.02] space-y-10 animate-in slide-in-from-top-4 duration-500 relative overflow-hidden">
+            <div 
+              ref={formRef}
+              className="p-10 border-b border-white/5 bg-cyan-500/[0.02] space-y-10 animate-in slide-in-from-top-4 duration-500 relative overflow-hidden"
+            >
                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-[80px] -mr-32 -mt-32" />
                <div className="flex justify-between items-center relative z-10">
                   <div className="flex items-center gap-4">
@@ -221,8 +231,8 @@ export default function InventoryView() {
                   <button onClick={handleCancel} className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-foreground transition-all"><X size={18}/></button>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
-                  <div className="md:col-span-2 space-y-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 relative z-10">
+                  <div className="lg:col-span-2 space-y-4">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Nombre del Producto</label>
                     <input 
                       type="text" 
@@ -293,7 +303,10 @@ export default function InventoryView() {
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
               {filtered.map(p => (
-                <tr key={p.id} className="group hover:bg-white/[0.01] transition-all">
+                <tr 
+                  key={p.id} 
+                  className={`group transition-all ${editingId === p.id ? 'bg-cyan-500/10' : 'hover:bg-white/[0.01]'}`}
+                >
                   <td className="p-8 pl-10">
                     <div className="flex items-center gap-4">
                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-700 group-hover:text-cyan-400 transition-colors"><Package size={16} /></div>
