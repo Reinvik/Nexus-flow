@@ -238,23 +238,17 @@ export default function SalesView() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-100px)] lg:h-[calc(100vh-140px)] font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700 pb-4">
-      {/* Header Section - More Compact */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-4 mb-4">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <ShoppingCart size={18} className="text-white" fill="currentColor" />
+      {/* Header Section - Extreme Compact */}
+      <div className="flex items-center justify-between px-4 mb-2 h-12 shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+            <ShoppingCart size={16} className="text-white" fill="currentColor" />
           </div>
-          <div className="flex flex-col">
-            <h2 className="text-2xl font-black tracking-tighter text-foreground uppercase leading-none">POS <span className="text-slate-500 dark:text-slate-400">Ultra</span></h2>
-            <p className="text-[8px] font-black text-primary uppercase tracking-[0.4em]">Terminal de Ventas</p>
-          </div>
+          <h2 className="text-lg font-black tracking-tighter text-foreground uppercase leading-none">POS <span className="text-primary">ULTRA</span></h2>
         </div>
         
-        <div className="flex items-center gap-4 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 px-4 py-2 rounded-2xl backdrop-blur-3xl">
-          <div className="text-right pr-4 border-r border-slate-200 dark:border-white/10 hidden sm:block">
-            <p className="text-[8px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-[0.2em]">Cajero</p>
-            <p className="text-[10px] font-black text-foreground uppercase tracking-tighter">{user?.email?.split('@')[0]}</p>
-          </div>
+        <div className="flex items-center gap-4 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 px-4 py-1.5 rounded-xl backdrop-blur-3xl">
+          <p className="text-[10px] font-black text-foreground uppercase tracking-tighter hidden sm:block">{user?.email?.split('@')[0]}</p>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
             <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">En Línea</span>
@@ -264,22 +258,8 @@ export default function SalesView() {
 
       <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-hidden px-4">
         {/* Main Catalog Section - scrollable top on mobile */}
-        <div className="flex-[3] flex flex-col gap-4 overflow-hidden h-1/2 lg:h-full">
-          <div className="glass-card p-3 rounded-2xl flex items-center gap-4 group focus-within:ring-1 ring-primary/30 transition-all duration-500 border-slate-200 dark:border-white/5">
-            <Search size={18} className="text-slate-400 dark:text-slate-700 group-focus-within:text-primary transition-colors" />
-            <input 
-              type="text" 
-              placeholder="ESCANEANDO PRODUCTOS..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="flex-1 bg-transparent border-none outline-none text-foreground font-black placeholder:text-slate-300 dark:placeholder:text-slate-800 uppercase text-[10px] tracking-widest"
-            />
-            {searchTerm && (
-              <button onClick={() => setSearchTerm('')} className="p-1 hover:text-primary text-slate-400 transition-colors">
-                <X size={16} />
-              </button>
-            )}
-          </div>
+        <div className="flex-[3] flex flex-col gap-2 overflow-hidden h-1/2 lg:h-full">
+          {/* Search bar removed as requested */}
 
           <div className="flex-1 overflow-y-auto no-scrollbar grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 p-1">
             {filteredProd.map(product => (
