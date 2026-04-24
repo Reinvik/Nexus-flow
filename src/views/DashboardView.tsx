@@ -171,7 +171,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
              </div>
              <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.5em]">Nexus Intelligence</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Dashboard <span className="text-slate-400 dark:text-slate-800">Operativo</span></h2>
+          <h2 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Dashboard <span className="text-slate-500 dark:text-slate-400">Operativo</span></h2>
         </div>
         
         <div className="flex items-center gap-4 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 p-4 rounded-3xl backdrop-blur-3xl">
@@ -204,7 +204,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
               </div>
               
               <div className="space-y-2">
-                <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">{stat.name}</p>
+                <p className="text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-[0.4em]">{stat.name}</p>
                  <h3 className="text-4xl font-black text-foreground tracking-tighter leading-tight">
                   {metrics.loading ? (
                      <div className="h-10 w-32 bg-slate-200/50 dark:bg-white/5 animate-pulse rounded-2xl" />
@@ -212,7 +212,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                     stat.name === 'Quiebre Stock' ? `${stat.value} Unidades` : formatCurrency(stat.value)
                   )}
                 </h3>
-                <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest pt-2">{stat.label}</p>
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-widest max-w-[200px] leading-relaxed">{stat.label}</p>
               </div>
             </div>
           ))}

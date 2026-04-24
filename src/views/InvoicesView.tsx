@@ -160,7 +160,7 @@ export default function InvoicesView() {
           <h2 className="text-5xl font-black tracking-tight text-foreground uppercase leading-none">Cuentas</h2>
           <div className="flex items-center gap-2">
              <span className="w-8 h-px bg-primary" />
-             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Libro de Cobranzas</p>
+              <p className="text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-[0.4em]">Libro de Cobranzas</p>
           </div>
         </div>
         

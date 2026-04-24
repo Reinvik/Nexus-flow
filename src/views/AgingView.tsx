@@ -307,7 +307,7 @@ export default function AgingView() {
              <span className="w-8 h-px bg-primary" />
              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Financial Tracking</p>
           </div>
-          <h2 className="text-5xl font-black tracking-tight text-foreground uppercase">Recaudación <span className="text-slate-500">{selectedYear}</span></h2>
+          <h2 className="text-5xl font-black tracking-tight text-foreground uppercase">Recaudación <span className="text-slate-600 dark:text-slate-500">{selectedYear}</span></h2>
           
           <div className="flex items-center gap-6">
             <div className="relative group">
@@ -322,7 +322,7 @@ export default function AgingView() {
               </select>
               <CalendarDays className="absolute right-5 top-1/2 -translate-y-1/2 text-primary/50 dark:text-cyan-500/50 pointer-events-none" size={16} />
             </div>
-            <p className="text-xs font-bold text-slate-600 uppercase tracking-widest max-w-[200px] leading-relaxed">Control operativo de cartera y flujos proyectados</p>
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-widest max-w-[200px] leading-relaxed">Control operativo de cartera y flujos proyectados</p>
           </div>
         </div>
 

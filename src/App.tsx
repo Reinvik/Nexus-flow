@@ -82,13 +82,13 @@ function App() {
     { name: 'Routing', id: 'routing', icon: MapIcon },
     { name: 'Configuración', id: 'settings', icon: Settings },
   ] as const;  return (
-    <div className="flex h-screen bg-[#050B14] text-slate-200 overflow-hidden font-outfit selection:bg-cyan-500/30 selection:text-white">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden font-outfit selection:bg-primary/30 selection:text-white">
       <Toaster position="top-right" />
       
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden transition-all duration-300"
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60] lg:hidden animate-in fade-in duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -96,36 +96,45 @@ function App() {
       {/* Sidebar - Nexus Lean Style */}
       <aside 
         className={`
-          fixed lg:relative inset-y-0 left-0 z-[70] h-full bg-[#050B14] border-r border-white/5 
+          fixed lg:relative inset-y-0 left-0 z-[70] h-full bg-sidebar-bg border-r border-slate-200 dark:border-white/5 
           transition-all duration-500 ease-in-out flex flex-col
           ${sidebarOpen ? 'w-72 translate-x-0' : 'w-24 -translate-x-full lg:translate-x-0'}
           ${!sidebarOpen && 'lg:w-24'}
         `}
       >
         {/* Decorative background blur */}
-        <div className="absolute top-0 left-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col h-full relative z-10">
           {/* Header */}
           <div className="h-20 lg:h-24 flex items-center px-6 justify-between">
             <div className={`flex items-center gap-3 transition-all duration-500 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'opacity-0 w-0' : 'opacity-100'}`}>
               <div className="relative">
-                <div className="absolute inset-0 bg-cyan-500 blur-md opacity-30 rounded-full" />
-                <div className="relative w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                <div className="absolute inset-0 bg-primary blur-md opacity-30 rounded-full" />
+                <div className="relative w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
                   <ShieldCheck size={20} className="text-white" />
                 </div>
               </div>
               <div className="flex flex-col">
-                <h1 className="text-lg font-black tracking-tighter text-white">NEXUS <span className="text-cyan-400">FLOW</span></h1>
+                <h1 className="text-lg font-black tracking-tighter text-foreground">NEXUS <span className="text-primary">FLOW</span></h1>
                 <p className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em] -mt-1">INTELLIGENCE</p>
               </div>
             </div>
             
+            {/* Toggle Button - Desktop Only */}
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="p-2 rounded-xl hover:bg-white/5 text-slate-400 transition-all duration-300 active:scale-95 tap-highlight-none"
+              className="hidden lg:flex p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/5 text-slate-400 transition-all duration-300 active:scale-95 tap-highlight-none"
             >
               <Menu size={20} />
+            </button>
+
+            {/* Close Button - Mobile Only */}
+            <button 
+              onClick={() => setSidebarOpen(false)} 
+              className="lg:hidden p-2 rounded-xl hover:bg-slate-200/50 dark:hover:bg-white/5 text-slate-400 transition-all duration-300 active:scale-95 tap-highlight-none"
+            >
+              <X size={24} />
             </button>
           </div>
           

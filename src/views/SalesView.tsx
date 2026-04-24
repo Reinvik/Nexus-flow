@@ -245,7 +245,7 @@ export default function SalesView() {
             <ShoppingCart size={18} className="text-white" fill="currentColor" />
           </div>
           <div className="flex flex-col">
-            <h2 className="text-2xl font-black tracking-tighter text-foreground uppercase leading-none">POS <span className="text-slate-400 dark:text-slate-700">Ultra</span></h2>
+            <h2 className="text-2xl font-black tracking-tighter text-foreground uppercase leading-none">POS <span className="text-slate-500 dark:text-slate-400">Ultra</span></h2>
             <p className="text-[8px] font-black text-primary uppercase tracking-[0.4em]">Terminal de Ventas</p>
           </div>
         </div>
