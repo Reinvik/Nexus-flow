@@ -100,7 +100,7 @@ export default function ForecastView() {
               dates: []
             };
           }
-          clientStats[sale.client_id].totals.push(Number(sale.total_amount));
+          clientStats[sale.client_id].totals.push(Number(sale.total_with_tax));
           clientStats[sale.client_id].dates.push(date);
         }
       });
