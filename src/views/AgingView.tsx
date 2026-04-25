@@ -196,12 +196,24 @@ export default function AgingView() {
     today.setHours(0, 0, 0, 0);
 
     return MONTHS.map((name, index) => {
+      // Find all payments that occurred in this specific month/year
+      const monthPayments = payments.filter(p => {
+        const pDate = new Date(p.payment_date);
+        return pDate.getMonth() === index && pDate.getFullYear() === selectedYear;
+      });
+
+      const paidInvoiceIds = new Set(monthPayments.map(p => p.invoice_id));
+
       let monthInvoices = invoices.filter(inv => {
+        // Condition 1: Invoice is due or issued in this month
         const dateStr = inv.payment_due_date || inv.issued_at;
-        if (!dateStr) return false;
+        if (dateStr) {
+          const date = new Date(dateStr);
+          if (date.getMonth() === index && date.getFullYear() === selectedYear) return true;
+        }
         
-        const date = new Date(dateStr);
-        return date.getMonth() === index && date.getFullYear() === selectedYear;
+        // Condition 2: Invoice was paid in this month
+        return paidInvoiceIds.has(inv.id);
       });
 
       // Apply Sorting to Month Invoices
@@ -238,17 +250,8 @@ export default function AgingView() {
         });
       }
 
-      const collected = monthInvoices.reduce((sum, inv) => {
-        return sum + Number(inv.paid_amount || 0);
-      }, 0);
-
-      const directPayments = payments.reduce((sum, p) => {
-        const pDate = new Date(p.payment_date);
-        if (pDate.getMonth() === index && pDate.getFullYear() === selectedYear) {
-          return sum + Number(p.amount);
-        }
-        return sum;
-      }, 0);
+      // Collected amount is the sum of payments made in THIS month
+      const collectedInMonth = monthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
 
       const toCollect = monthInvoices.reduce((sum, inv) => {
         if (inv.status !== 'Pagada') {
@@ -271,7 +274,7 @@ export default function AgingView() {
       return {
         name,
         index,
-        collected: collected > 0 ? collected : directPayments,
+        collected: collectedInMonth,
         toCollect,
         overdueCount,
         totalInvoices: monthInvoices.length,
