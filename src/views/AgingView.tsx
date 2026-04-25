@@ -500,7 +500,7 @@ export default function AgingView() {
                               <p className="text-[9px] font-black text-slate-400 dark:text-slate-700 uppercase tracking-widest">Folio #{inv.folio}</p>
                               {(inv as any)._isCollectionOnly && (
                                 <span className="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md uppercase tracking-tighter animate-pulse">
-                                  Recaudado en {MONTHS[index]}
+                                  Recaudado en {selectedMonthData.name}
                                 </span>
                               )}
                             </div>
