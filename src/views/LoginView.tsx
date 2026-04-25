@@ -65,7 +65,7 @@ const LoginView = () => {
             <div className="relative z-10 space-y-8 mt-12 lg:mt-0">
               <div className="space-y-2">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
-                  Gestión inteligente de flujos operativos y analítica en tiempo real para el ecosistema Nexus.
+                  Arquitectura operativa integral que cubre desde la venta y el inventario hasta la logística de última milla y la cobranza, bajo una filosofía Smart & Lean.
                 </p>
               </div>
               
