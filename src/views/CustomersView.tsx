@@ -289,7 +289,7 @@ export default function CustomersView({ onNavigate, onSelectInvoice }: Customers
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setSelectedClientHistory(client)}
-                    className="flex-1 h-10 bg-slate-200/50 dark:bg-white/5 hover:bg-primary hover:text-white dark:hover:bg-white dark:hover:text-black text-slate-500 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-500 active:scale-95 shadow-sm"
+                    className="flex-1 h-12 bg-slate-100 dark:bg-slate-900 hover:bg-primary hover:text-white dark:hover:bg-white dark:hover:text-black text-slate-600 dark:text-white rounded-xl font-black text-[9px] uppercase tracking-widest transition-all duration-500 active:scale-95 shadow-sm border border-slate-200 dark:border-white/5"
                   >
                     Historial
                   </button>

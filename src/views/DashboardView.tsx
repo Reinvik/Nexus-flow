@@ -269,7 +269,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                     <button 
                       key={action.view}
                       onClick={() => onNavigate?.(action.view)}
-                      className="w-full h-14 bg-white dark:bg-white/[0.03] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 rounded-2xl border border-slate-200/60 dark:border-white/5 flex items-center px-4 transition-all group active:scale-95 shadow-sm"
+                      className="w-full h-14 bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-white rounded-2xl border border-slate-200/60 dark:border-white/10 flex items-center px-4 transition-all group active:scale-95 shadow-sm"
                     >
                      <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-lg ${action.color}`}>
@@ -291,9 +291,9 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                </div>
                
                <div className="space-y-3 relative z-10">
-                  <div className="flex justify-between items-center bg-white dark:bg-black/40 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                  <div className="flex justify-between items-center bg-white dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
                     <div className="space-y-1">
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Stock Crítico</p>
+                      <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Stock Crítico</p>
                       <p className="text-xl font-black text-foreground dark:text-white tracking-tighter uppercase">{metrics.criticalStock} <span className="text-slate-400">UNIDADES</span></p>
                     </div>
                   </div>
