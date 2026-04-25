@@ -9,7 +9,6 @@ import {
   Users, 
   FileText, 
   Settings,
-  Truck,
   Map as MapIcon,
   DollarSign,
   TrendingUp,
@@ -37,7 +36,7 @@ import ForecastView from '@/views/ForecastView';
 
 function App() {
   const { user, loading, signOut } = useAuth();
-  const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'transfers' | 'routing' | 'aging' | 'forecast'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'routing' | 'aging' | 'forecast'>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('nexus-theme') as 'dark' | 'light') || 'dark';
@@ -83,7 +82,6 @@ function App() {
     { name: 'Facturas', id: 'invoices', icon: FileText },
     { name: 'Recaudación', id: 'aging', icon: DollarSign },
     { name: 'Forecast', id: 'forecast', icon: TrendingUp },
-    { name: 'Traspasos', id: 'transfers', icon: Truck },
     { name: 'Routing', id: 'routing', icon: MapIcon },
     { name: 'Configuración', id: 'settings', icon: Settings },
   ] as const;  return (
@@ -245,15 +243,7 @@ function App() {
             )}
             {currentView === 'aging' && <AgingView />}
             {currentView === 'forecast' && <ForecastView />}
-            {currentView === 'transfers' && (
-              <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-                <div className="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center text-slate-700 mb-6 animate-float">
-                  <Truck size={48} />
-                </div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Módulo en Desarrollo</h2>
-                <p className="text-slate-500 mt-2 max-w-xs mx-auto">Estamos trabajando para habilitar la gestión de traspasos en la próxima actualización.</p>
-              </div>
-            )}
+
             {currentView === 'routing' && <RoutingView />}
             {currentView === 'settings' && <SettingsView />}
           </div>
