@@ -60,14 +60,19 @@ export default function AgingView() {
   });
   
   const availableYears = useMemo(() => {
-    if (invoices.length === 0) return [new Date().getFullYear()];
-    const years = invoices.map(inv => {
+    const invYears = invoices.map(inv => {
       const dateStr = inv.payment_due_date || inv.issued_at || "";
       const date = new Date(dateStr);
       return date.getFullYear();
-    }).filter(y => !isNaN(y) && y > 2000 && y < 2100);
-    return Array.from(new Set([...years, new Date().getFullYear()])).sort((a, b) => b - a);
-  }, [invoices]);
+    });
+    const payYears = payments.map(p => {
+      const date = new Date(p.payment_date);
+      return date.getFullYear();
+    });
+    
+    const allYears = [...invYears, ...payYears].filter(y => !isNaN(y) && y > 2000 && y < 2100);
+    return Array.from(new Set([...allYears, new Date().getFullYear()])).sort((a, b) => b - a);
+  }, [invoices, payments]);
 
   useEffect(() => {
     fetchData();
@@ -278,7 +283,16 @@ export default function AgingView() {
         toCollect,
         overdueCount,
         totalInvoices: monthInvoices.length,
-        invoices: monthInvoices
+        invoices: monthInvoices.map(inv => {
+          const dateStr = inv.payment_due_date || inv.issued_at;
+          const invDate = dateStr ? new Date(dateStr) : null;
+          const isFromOtherYear = invDate && (invDate.getFullYear() !== selectedYear || invDate.getMonth() !== index);
+          
+          return {
+            ...inv,
+            _isCollectionOnly: isFromOtherYear && paidInvoiceIds.has(inv.id)
+          };
+        })
       };
     });
   }, [invoices, payments, selectedYear, sortConfig]);
@@ -479,8 +493,17 @@ export default function AgingView() {
                         </td>
                         <td className="py-8">
                           <div className="space-y-1">
-                            <p className={`text-sm font-black tracking-tight ${isOverdue ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300'}`}>{formatDate(inv.payment_due_date || inv.issued_at)}</p>
-                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-700 uppercase tracking-widest">Folio #{inv.folio}</p>
+                            <p className={`text-sm font-black tracking-tight ${(inv as any)._isCollectionOnly ? 'text-emerald-500' : (isOverdue ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300')}`}>
+                              {formatDate(inv.payment_due_date || inv.issued_at)}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-[9px] font-black text-slate-400 dark:text-slate-700 uppercase tracking-widest">Folio #{inv.folio}</p>
+                              {(inv as any)._isCollectionOnly && (
+                                <span className="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md uppercase tracking-tighter animate-pulse">
+                                  Recaudado en {MONTHS[index]}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="py-8 text-lg font-black text-slate-400 dark:text-slate-500 tracking-tighter">{formatCurrency(inv.total_amount)}</td>

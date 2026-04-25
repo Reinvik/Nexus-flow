@@ -255,61 +255,61 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
 
           {/* Quick Actions & Alarms */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="glass-card p-4 rounded-2xl flex-1 relative overflow-hidden shadow-sm border border-slate-200 dark:border-white/5">
-               <h4 className="text-[7px] font-black text-slate-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                 Accesos Rápidos
+            <div className="glass-card p-5 rounded-[2rem] flex-1 relative overflow-hidden shadow-xl border-slate-200 dark:border-white/10 bg-white/40 dark:bg-white/[0.02]">
+               <h4 className="text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.4em] mb-5 flex items-center gap-2">
+                 <div className="w-1.5 h-1.5 rounded-full bg-primary" /> Accesos Rápidos
                </h4>
-               <div className="grid grid-cols-2 gap-2">
+               <div className="grid grid-cols-2 gap-3">
                  {[
-                   { label: 'POS', icon: ShoppingCart, view: 'sales', color: 'bg-cyan-500/10 text-cyan-500' },
-                   { label: 'Clientes', icon: Users, view: 'customers', color: 'bg-blue-500/10 text-blue-500' },
-                   { label: 'Facturas', icon: FileText, view: 'invoices', color: 'bg-indigo-500/10 text-indigo-500' },
-                   { label: 'Forecast', icon: Target, view: 'forecast', color: 'bg-purple-500/10 text-purple-500' },
+                   { label: 'POS', icon: ShoppingCart, view: 'sales', color: 'bg-cyan-500 text-white shadow-cyan-500/20' },
+                   { label: 'Clientes', icon: Users, view: 'customers', color: 'bg-blue-500 text-white shadow-blue-500/20' },
+                   { label: 'Facturas', icon: FileText, view: 'invoices', color: 'bg-indigo-500 text-white shadow-indigo-500/20' },
+                   { label: 'Forecast', icon: Target, view: 'forecast', color: 'bg-purple-500 text-white shadow-purple-500/20' },
                  ].map((action) => (
                     <button 
                       key={action.view}
                       onClick={() => onNavigate?.(action.view)}
-                      className="w-full h-10 bg-slate-100/50 dark:bg-white/[0.01] hover:bg-white dark:hover:bg-white/5 text-slate-500 hover:text-primary dark:hover:text-white rounded-xl border border-slate-200 dark:border-white/5 flex items-center px-4 transition-all group active:scale-95"
+                      className="w-full h-14 bg-white dark:bg-white/[0.03] hover:bg-slate-50 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 rounded-2xl border border-slate-200/60 dark:border-white/5 flex items-center px-4 transition-all group active:scale-95 shadow-sm"
                     >
-                     <div className="flex items-center gap-2">
-                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${action.color} group-hover:bg-primary group-hover:text-white`}>
-                         <action.icon size={12} />
+                     <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-lg ${action.color}`}>
+                         <action.icon size={14} />
                        </div>
-                       <span className="text-[9px] font-black uppercase tracking-tight">{action.label}</span>
+                       <span className="text-[10px] font-black uppercase tracking-tight">{action.label}</span>
                      </div>
                    </button>
                  ))}
                </div>
             </div>
 
-             <div className="glass-card p-4 rounded-2xl bg-rose-500/[0.03] dark:bg-rose-500/[0.01] border border-rose-500/10 relative overflow-hidden group">
-               <div className="flex items-center gap-2 mb-3">
-                 <div className="w-6 h-6 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500">
-                   <Activity size={12} className="animate-pulse" />
+             <div className="glass-card p-5 rounded-[2rem] bg-rose-500/[0.04] dark:bg-rose-500/[0.02] border border-rose-500/20 relative overflow-hidden group shadow-xl">
+               <div className="flex items-center gap-3 mb-4">
+                 <div className="w-8 h-8 rounded-xl bg-rose-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/30">
+                   <Activity size={14} className="animate-pulse" />
                  </div>
-                 <h4 className="text-[7px] font-black uppercase tracking-[0.3em] text-rose-500">Alertas Críticas</h4>
+                 <h4 className="text-[8px] font-black uppercase tracking-[0.4em] text-rose-500">Alertas Críticas</h4>
                </div>
                
-               <div className="space-y-2 relative z-10">
-                  <div className="flex justify-between items-center bg-slate-200/50 dark:bg-black/20 p-2 rounded-lg border border-slate-200 dark:border-white/5">
-                    <div className="space-y-0">
-                      <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest leading-none">Stock Crítico</p>
-                      <p className="text-sm font-black text-foreground tracking-tighter uppercase">{metrics.criticalStock} Un</p>
+               <div className="space-y-3 relative z-10">
+                  <div className="flex justify-between items-center bg-white dark:bg-black/40 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                    <div className="space-y-1">
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">Stock Crítico</p>
+                      <p className="text-xl font-black text-foreground dark:text-white tracking-tighter uppercase">{metrics.criticalStock} <span className="text-slate-400">UNIDADES</span></p>
                     </div>
                   </div>
                  
-                  <div className="flex justify-between items-center bg-rose-500/5 p-2 rounded-lg border border-rose-500/10">
-                    <div className="space-y-0">
-                      <p className="text-[7px] font-black text-rose-500/50 uppercase tracking-widest leading-none">Mora Detectada</p>
-                      <p className="text-sm font-black text-rose-500 tracking-tighter uppercase">{formatCurrency(metrics.overdueDebt)}</p>
+                  <div className="flex justify-between items-center bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 shadow-sm">
+                    <div className="space-y-1">
+                      <p className="text-[8px] font-black text-rose-500 uppercase tracking-widest leading-none">Mora Detectada</p>
+                      <p className="text-xl font-black text-rose-500 tracking-tighter uppercase">{formatCurrency(metrics.overdueDebt)}</p>
                     </div>
                   </div>
                  
                  <button 
                    onClick={() => onNavigate?.('aging')}
-                   className="w-full h-12 bg-rose-500 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-rose-500/10 hover:bg-rose-600 transition-all duration-700 active:scale-95 mt-1"
+                   className="w-full h-14 bg-rose-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-rose-500/30 hover:bg-rose-600 transition-all duration-700 active:scale-95 mt-2 flex items-center justify-center gap-2"
                  >
-                   Auditar Protocolos
+                   Auditar Protocolos <ArrowRight size={14} />
                  </button>
                </div>
             </div>

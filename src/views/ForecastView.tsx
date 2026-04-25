@@ -29,6 +29,7 @@ interface ClientForecast {
   avgPurchaseValue: number;
   predictedVolume: number;
   lastPurchaseDays: number;
+  ticketTrend: number;
 }
 
 export default function ForecastView() {
@@ -64,6 +65,7 @@ export default function ForecastView() {
           )
         `)
         .gte('created_at', sixMonthsAgo.toISOString())
+        .lte('created_at', new Date().toISOString())
         .order('created_at', { ascending: true });
 
       if (salesError) throw salesError;
@@ -146,17 +148,31 @@ export default function ForecastView() {
       setProductForecasts(pForecasts);
 
       const cForecasts: ClientForecast[] = Object.entries(clientStats).map(([id, stats]) => {
+        // Sort sales by date to identify the latest one
+        const sortedIndices = stats.dates
+          .map((d, i) => ({ date: d, index: i }))
+          .sort((a, b) => a.date.getTime() - b.date.getTime());
+        
+        const sortedTotals = sortedIndices.map(item => stats.totals[item.index]);
+        
         const totalVal = stats.totals.reduce((a, b) => a + b, 0);
-        const avgVal = totalVal / 6;
+        const count = stats.totals.length;
+        const avgTicket = totalVal / count;
+        
+        const lastSale = sortedTotals[sortedTotals.length - 1];
+        // Trend: compare last sale vs the average
+        const trend = count > 1 ? ((lastSale / avgTicket) - 1) * 100 : 0;
+        
         const lastDate = new Date(Math.max(...stats.dates.map(d => d.getTime())));
         const daysSinceLast = Math.floor((new Date().getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
 
         return {
           id,
           name: stats.name,
-          avgPurchaseValue: avgVal,
-          predictedVolume: avgVal * 1.05,
-          lastPurchaseDays: daysSinceLast
+          avgPurchaseValue: avgTicket,
+          predictedVolume: avgTicket * 1.05,
+          lastPurchaseDays: daysSinceLast,
+          ticketTrend: trend
         };
       }).sort((a, b) => b.predictedVolume - a.predictedVolume);
       setClientForecasts(cForecasts);
@@ -374,7 +390,17 @@ export default function ForecastView() {
                     <td className="p-8 text-xs font-bold text-slate-500 uppercase">
                       {c.lastPurchaseDays === 0 ? 'Activo Hoy' : `Hace ${c.lastPurchaseDays} Días`}
                     </td>
-                    <td className="p-8 text-sm font-black text-foreground tracking-tighter">{formatCurrency(c.avgPurchaseValue)}</td>
+                    <td className="p-8">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(c.avgPurchaseValue)}</span>
+                        {Math.abs(c.ticketTrend) > 1 && (
+                          <div className={`flex items-center gap-1 ${c.ticketTrend > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {c.ticketTrend > 0 ? <ArrowUpRight size={10} /> : <ArrowUpRight size={10} className="rotate-90" />}
+                            <span className="text-[8px] font-black">{Math.abs(Math.round(c.ticketTrend))}%</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-8 text-sm font-black text-emerald-500 tracking-tighter">{formatCurrency(c.predictedVolume)}</td>
                     <td className="p-8 pr-10 text-right">
                       <span className={`text-[9px] font-black px-4 py-2 rounded-xl uppercase border ${
