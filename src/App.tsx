@@ -39,7 +39,9 @@ function App() {
   const { user, loading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'transfers' | 'routing' | 'aging' | 'forecast'>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
-  const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    return (localStorage.getItem('nexus-theme') as 'dark' | 'light') || 'dark';
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -48,6 +50,7 @@ function App() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    localStorage.setItem('nexus-theme', theme);
   }, [theme]);
 
   if (loading) {
