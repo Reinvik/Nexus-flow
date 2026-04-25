@@ -159,7 +159,7 @@ export default function SettingsView() {
                          onChange={(e) => setNextInvoice(e.target.value)}
                          className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-cyan-500/30 outline-none transition-all uppercase tracking-widest"
                        />
-                       <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                           <span className="text-[9px] font-black text-slate-700 uppercase">Sequential</span>
                        </div>
                     </div>

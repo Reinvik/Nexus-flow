@@ -521,7 +521,7 @@ export default function AgingView() {
                           </span>
                         </td>
                         <td className="py-8 pr-4">
-                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                          <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all">
                             {inv.status !== 'Pagada' && (
                               <button 
                                 onClick={() => {

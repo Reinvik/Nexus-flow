@@ -338,7 +338,7 @@ export default function CustomersView({ onNavigate, onSelectInvoice }: Customers
                        <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-black text-foreground uppercase tracking-tight">Folio #{inv.folio}</span>
-                            <ArrowUpRight size={12} className="text-primary opacity-0 group-hover:opacity-100 transition-all -translate-y-1" />
+                            <ArrowUpRight size={12} className="text-primary opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all -translate-y-1" />
                           </div>
                           <div className="flex items-center gap-2">
                              <Calendar size={12} className="text-slate-400 dark:text-slate-700" />

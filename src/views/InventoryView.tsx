@@ -332,9 +332,9 @@ export default function InventoryView() {
                     </div>
                   </td>
                   <td className="p-8 pr-10 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
-                      <button onClick={() => handleEdit(p)} className="w-10 h-10 rounded-xl bg-slate-200/50 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-foreground transition-all"><Edit3 size={14}/></button>
-                      <button onClick={() => handleDelete(p.id)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-rose-500 transition-all"><Trash2 size={14}/></button>
+                    <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all transform lg:translate-x-4 lg:group-hover:translate-x-0">
+                      <button onClick={() => handleEdit(p)} className="w-10 h-10 rounded-xl bg-slate-200/50 dark:bg-slate-900 flex items-center justify-center text-slate-500 dark:text-white hover:text-foreground transition-all border border-slate-200 dark:border-white/10 shadow-sm"><Edit3 size={14}/></button>
+                      <button onClick={() => handleDelete(p.id)} className="w-10 h-10 rounded-xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-500 hover:text-rose-600 transition-all border border-rose-500/20 shadow-sm"><Trash2 size={14}/></button>
                     </div>
                   </td>
                 </tr>
