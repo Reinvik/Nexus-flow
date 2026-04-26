@@ -149,7 +149,7 @@ function App() {
                     w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative
                     ${isActive 
                       ? 'bg-primary shadow-[0_10px_20px_-10px_rgba(6,182,212,0.5)]' 
-                      : 'hover:bg-slate-100 dark:hover:bg-white/5 text-black'
+                      : 'hover:bg-slate-100 dark:hover:bg-white/5 text-black dark:text-white/70'
                     }
                   `}
                 >
@@ -160,7 +160,7 @@ function App() {
                   
                   {sidebarOpen && (
                     <span 
-                      className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${!isActive ? (theme === 'dark' ? 'opacity-60' : 'opacity-100') : 'opacity-100'} group-hover:opacity-100 group-hover:translate-x-1`}
+                      className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${!isActive ? (theme === 'dark' ? 'text-white/70' : 'text-black') : 'text-white'} group-hover:opacity-100 group-hover:translate-x-1`}
                       style={isActive ? { color: '#ffffff' } : {}}
                     >
                       {item.name}
