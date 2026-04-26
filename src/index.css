@@ -101,6 +101,14 @@ h1, h2, h3, h4, h5, h6 {
   .border-soft {
     border-color: rgba(255, 255, 255, 0.03);
   }
+
+  .text-ultra {
+    color: #000000 !important;
+  }
+
+  .dark .text-ultra {
+    color: #ffffff !important;
+  }
 }
 
 /* Animations */

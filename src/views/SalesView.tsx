@@ -298,11 +298,11 @@ export default function SalesView() {
                 <div className="flex-1 min-w-0 space-y-2 cursor-pointer" onClick={() => addToCart(product)}>
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${product.stock <= 0 ? 'bg-rose-500' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
-                    <h4 className="text-[13px] font-black truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none" style={{ color: '#000000' }}>{product.name}</h4>
+                    <h4 className="text-[13px] font-black truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none text-ultra">{product.name}</h4>
                   </div>
                   <div className="flex flex-col gap-1 ml-4">
-                    <span className="text-[9px] font-bold text-slate-950 dark:text-slate-500 uppercase tracking-widest">{product.sku || 'REF-N/A'}</span>
-                    <span className={`text-[9px] font-black uppercase flex items-center gap-1.5 ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-950 dark:text-slate-500'}`}>
+                    <span className="text-[9px] font-bold text-slate-950 dark:text-slate-400 uppercase tracking-widest">{product.sku || 'REF-N/A'}</span>
+                    <span className={`text-[9px] font-black uppercase flex items-center gap-1.5 ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-950 dark:text-slate-400'}`}>
                       <Package size={10} /> {product.stock} DISP
                     </span>
                   </div>
@@ -312,7 +312,7 @@ export default function SalesView() {
                   {/* Price Control - Theme Aware */}
                   <div className="relative group/price">
                     <div className="flex items-center gap-1 bg-white dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-400 dark:border-white/5 group-hover/price:border-primary transition-all shadow-sm">
-                      <span className="text-[11px] font-black" style={{ color: '#000000' }}>$</span>
+                      <span className="text-[11px] font-black text-ultra">$</span>
                       <input 
                         type="number"
                         defaultValue={product.net_price}
@@ -322,10 +322,9 @@ export default function SalesView() {
                             setCart(prev => prev.map(item => item.id === product.id ? { ...item, net_price: newPrice } : item));
                           }
                         }}
-                        className="w-20 bg-transparent text-sm font-black outline-none text-right"
-                        style={{ color: '#000000' }}
+                        className="w-20 bg-transparent text-sm font-black outline-none text-right text-ultra"
                       />
-                      <span className="text-[9px] font-black uppercase tracking-tighter ml-1" style={{ color: '#000000' }}>Neto</span>
+                      <span className="text-[9px] font-black uppercase tracking-tighter ml-1 text-ultra">Neto</span>
                     </div>
                   </div>
 
