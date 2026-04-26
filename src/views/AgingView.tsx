@@ -312,43 +312,39 @@ export default function AgingView() {
   const selectedMonthData = selectedMonth !== null ? monthlyData[selectedMonth] : null;
 
   return (
-    <div className="space-y-12 font-outfit pb-24">
+    <div className="space-y-6 font-outfit pb-24">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-end gap-10 px-4">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-             <span className="w-8 h-px bg-primary" />
-             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Financial Tracking</p>
-          </div>
-          <h2 className="text-5xl font-black tracking-tight text-foreground uppercase">Recaudación <span className="text-slate-600 dark:text-slate-500">{selectedYear}</span></h2>
-          
-          <div className="flex items-center gap-6">
-            <div className="relative group">
-              <select 
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-                className="bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-4 font-black text-primary dark:text-cyan-400 focus:outline-none appearance-none pr-14 text-xs uppercase tracking-widest hover:bg-slate-300 dark:hover:bg-white/[0.04] transition-all"
-              >
-                {availableYears.map(y => (
-                  <option key={y} value={y} className="bg-slate-100 dark:bg-[#020617]">{y}</option>
-                ))}
-              </select>
-              <CalendarDays className="absolute right-5 top-1/2 -translate-y-1/2 text-primary/50 dark:text-cyan-500/50 pointer-events-none" size={16} />
-            </div>
-            <p className="text-xs font-bold text-slate-700 dark:text-slate-400 uppercase tracking-widest max-w-[200px] leading-relaxed">Control operativo de cartera y flujos proyectados</p>
+      <div className="flex flex-col gap-4 px-4">
+        <div className="flex items-center gap-2">
+          <span className="w-6 h-px bg-primary" />
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Financial Tracking</p>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground uppercase">Recaudación <span className="text-slate-600 dark:text-slate-500">{selectedYear}</span></h2>
+          <div className="relative">
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+              className="bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-5 py-3 font-black text-primary dark:text-cyan-400 focus:outline-none appearance-none pr-10 text-xs uppercase tracking-widest"
+            >
+              {availableYears.map(y => (
+                <option key={y} value={y} className="bg-slate-100 dark:bg-[#020617]">{y}</option>
+              ))}
+            </select>
+            <CalendarDays className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50 pointer-events-none" size={14} />
           </div>
         </div>
-
-        <div className="flex gap-6">
-          <div className="glass-card p-8 rounded-[2.5rem] min-w-[280px] relative overflow-hidden group border-slate-200 dark:border-white/5">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 blur-3xl -mr-12 -mt-12 group-hover:opacity-100 opacity-50 transition-opacity" />
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Ingreso Realizado</p>
-            <h3 className="text-4xl font-black text-emerald-500 tracking-tighter">{formatCurrency(totalCollected)}</h3>
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="glass-card p-5 rounded-3xl relative overflow-hidden border-slate-200 dark:border-white/5">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 blur-2xl" />
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Ingreso Realizado</p>
+            <h3 className="text-xl sm:text-3xl font-black text-emerald-500 tracking-tighter">{formatCurrency(totalCollected)}</h3>
           </div>
-          <div className="glass-card p-8 rounded-[2.5rem] min-w-[280px] relative overflow-hidden group border-slate-200 dark:border-white/5">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 blur-3xl -mr-12 -mt-12 group-hover:opacity-100 opacity-50 transition-opacity" />
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Cartera Pendiente</p>
-            <h3 className="text-4xl font-black text-foreground tracking-tighter">{formatCurrency(totalToCollect)}</h3>
+          <div className="glass-card p-5 rounded-3xl relative overflow-hidden border-slate-200 dark:border-white/5">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/5 blur-2xl" />
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Cartera Pendiente</p>
+            <h3 className="text-xl sm:text-3xl font-black text-foreground tracking-tighter">{formatCurrency(totalToCollect)}</h3>
           </div>
         </div>
       </div>
@@ -420,129 +416,76 @@ export default function AgingView() {
         </div>
       )}
 
-      {/* Details Table */}
+      {/* Details Panel */}
       {selectedMonthData && (
-        <div className="mx-4 glass-card rounded-[3.5rem] p-12 border-slate-200 dark:border-white/10 space-y-12 animate-in slide-in-from-bottom-8 duration-700 shadow-2xl">
-          <div className="flex flex-col lg:flex-row justify-between items-end gap-8">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                 <span className="w-8 h-px bg-primary" />
-                 <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Operational Analytics</p>
+        <div className="mx-2 sm:mx-4 glass-card rounded-3xl sm:rounded-[3.5rem] p-4 sm:p-8 border-slate-200 dark:border-white/10 space-y-6 animate-in slide-in-from-bottom-8 duration-700 shadow-2xl">
+          {/* Panel Header */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-1">Detalle Operativo</p>
+                <h3 className="text-xl sm:text-3xl font-black text-foreground uppercase tracking-tighter">{selectedMonthData.name}</h3>
               </div>
-              <h3 className="text-4xl font-black text-foreground uppercase tracking-tighter">Detalle Operativo <span className="text-slate-500 dark:text-slate-700">{selectedMonthData.name}</span></h3>
+              <button onClick={() => setSelectedMonth(null)} className="w-10 h-10 flex items-center justify-center bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-rose-500 rounded-xl transition-all"><X size={18} /></button>
             </div>
-
-            <div className="flex items-center gap-4">
-              <div className="relative group">
-                <Search size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
-                <input
-                  type="text"
-                  placeholder="FILTRAR CARTERA..."
-                  value={invoiceSearch}
-                  onChange={(e) => setInvoiceSearch(e.target.value)}
-                  className="pl-14 pr-6 h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl text-[10px] font-black text-foreground focus:border-primary/30 outline-none w-80 uppercase tracking-widest placeholder:text-slate-400 dark:placeholder:text-slate-700"
-                />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type="text" placeholder="Buscar..." value={invoiceSearch} onChange={(e) => setInvoiceSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 h-11 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-xl text-[10px] font-black text-foreground focus:border-primary/30 outline-none uppercase tracking-widest placeholder:text-slate-400 dark:placeholder:text-slate-700" />
               </div>
-              <button 
-                onClick={() => setShowPaid(!showPaid)}
-                className={`h-16 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                  showPaid ? 'bg-primary text-white dark:bg-white dark:text-black shadow-lg' : 'bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground'
-                }`}
-              >
+              <button onClick={() => setShowPaid(!showPaid)}
+                className={`h-11 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                  showPaid ? 'bg-primary text-white shadow-lg' : 'bg-slate-200/50 dark:bg-white/5 text-slate-500'
+                }`}>
                 {showPaid ? 'Ocultar Pagadas' : 'Ver Historial'}
               </button>
-              <button onClick={() => setSelectedMonth(null)} className="h-16 w-16 flex items-center justify-center bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-rose-500 rounded-2xl transition-all"><X size={20} /></button>
             </div>
           </div>
 
-          <div className="overflow-x-auto no-scrollbar">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto no-scrollbar">
             <table className="w-full text-left">
               <thead>
                 <tr className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-[0.3em]">
-                  <th className="pb-8 pl-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => requestSort('client')}>Razón Social {getSortIcon('client')}</th>
-                  <th className="pb-8 cursor-pointer hover:text-foreground transition-colors" onClick={() => requestSort('due_date')}>Vencimiento {getSortIcon('due_date')}</th>
-                  <th className="pb-8 cursor-pointer hover:text-foreground transition-colors" onClick={() => requestSort('total')}>Total {getSortIcon('total')}</th>
-                  <th className="pb-8 cursor-pointer hover:text-foreground transition-colors" onClick={() => requestSort('balance')}>Saldo {getSortIcon('balance')}</th>
-                  <th className="pb-8">Estado</th>
-                  <th className="pb-8 pr-4 text-right">Acciones</th>
+                  <th className="pb-6 pl-4 cursor-pointer hover:text-foreground" onClick={() => requestSort('client')}>Razón Social {getSortIcon('client')}</th>
+                  <th className="pb-6 cursor-pointer hover:text-foreground" onClick={() => requestSort('due_date')}>Vencimiento {getSortIcon('due_date')}</th>
+                  <th className="pb-6 cursor-pointer hover:text-foreground" onClick={() => requestSort('total')}>Total {getSortIcon('total')}</th>
+                  <th className="pb-6 cursor-pointer hover:text-foreground" onClick={() => requestSort('balance')}>Saldo {getSortIcon('balance')}</th>
+                  <th className="pb-6">Estado</th>
+                  <th className="pb-6 pr-4 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-white/[0.03]">
                 {selectedMonthData.invoices
                   .filter(inv => (showPaid || inv.status !== 'Pagada'))
-                  .filter(inv => {
-                    if (!invoiceSearch) return true;
-                    const search = invoiceSearch.toLowerCase();
-                    return inv.client?.name?.toLowerCase().includes(search) || inv.client?.rut?.toLowerCase().includes(search);
-                  })
+                  .filter(inv => !invoiceSearch || inv.client?.name?.toLowerCase().includes(invoiceSearch.toLowerCase()) || inv.client?.rut?.toLowerCase().includes(invoiceSearch.toLowerCase()))
                   .map((inv) => {
                     const balance = Number(inv.total_amount) - Number(inv.paid_amount);
                     const isOverdue = inv.payment_due_date && new Date(inv.payment_due_date) < new Date() && inv.status !== 'Pagada';
                     return (
                       <tr key={inv.id} className="group hover:bg-slate-100/50 dark:hover:bg-white/[0.01] transition-all">
-                        <td className="py-8 pl-4">
-                          <div className="flex items-center gap-6">
-                             <div className="w-12 h-12 rounded-2xl bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors shadow-2xl">
-                               <User size={18} />
-                             </div>
-                             <div className="space-y-1">
-                               <p className="text-lg font-black text-foreground tracking-tighter leading-none uppercase">{inv.client?.name || 'Venta Mesón'}</p>
-                               <p className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">{inv.client?.rut || 'X.XXX.XXX-X'}</p>
-                             </div>
-                          </div>
+                        <td className="py-5 pl-4">
+                          <p className="text-sm font-black text-foreground uppercase">{inv.client?.name || 'Venta Mesón'}</p>
+                          <p className="text-[9px] text-slate-500 uppercase tracking-widest">Folio #{inv.folio}</p>
                         </td>
-                        <td className="py-8">
-                          <div className="space-y-1">
-                            <p className={`text-sm font-black tracking-tight ${(inv as any)._isCollectionOnly ? 'text-emerald-500' : (isOverdue ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300')}`}>
-                              {formatDate(inv.payment_due_date || inv.issued_at)}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-[9px] font-black text-slate-400 dark:text-slate-700 uppercase tracking-widest">Folio #{inv.folio}</p>
-                              {(inv as any)._isCollectionOnly && (
-                                <span className="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md uppercase tracking-tighter animate-pulse">
-                                  Recaudado en {selectedMonthData.name}
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                        <td className="py-5">
+                          <p className={`text-sm font-black ${ (inv as any)._isCollectionOnly ? 'text-emerald-500' : isOverdue ? 'text-rose-500' : 'text-slate-600 dark:text-slate-300'}`}>{formatDate(inv.payment_due_date || inv.issued_at)}</p>
                         </td>
-                        <td className="py-8 text-lg font-black text-slate-400 dark:text-slate-500 tracking-tighter">{formatCurrency(inv.total_amount)}</td>
-                        <td className="py-8">
-                          <span className={`text-lg font-black tracking-tighter ${balance > 0 ? 'text-foreground' : 'text-emerald-500'}`}>
-                            {formatCurrency(balance)}
-                          </span>
+                        <td className="py-5 text-sm font-black text-slate-400 tracking-tighter">{formatCurrency(inv.total_amount)}</td>
+                        <td className="py-5"><span className={`text-sm font-black tracking-tighter ${balance > 0 ? 'text-foreground' : 'text-emerald-500'}`}>{formatCurrency(balance)}</span></td>
+                        <td className="py-5">
+                          <span className={`text-[9px] font-black px-3 py-1 rounded-lg uppercase border ${
+                            inv.status === 'Pagada' ? 'border-emerald-500/20 text-emerald-500 bg-emerald-500/5' :
+                            isOverdue ? 'border-rose-500/30 text-rose-500 bg-rose-500/5' : 'border-primary/20 text-primary bg-primary/5'
+                          }`}>{inv.status === 'Pagada' ? 'Liquidada' : isOverdue ? 'Vencida' : 'Pendiente'}</span>
                         </td>
-                        <td className="py-8">
-                          <span className={`text-[9px] font-black px-4 py-1.5 rounded-xl uppercase border ${
-                            inv.status === 'Pagada' ? 'border-emerald-500/20 text-emerald-500 bg-emerald-500/5' : 
-                            (isOverdue ? 'border-rose-500/30 text-rose-500 bg-rose-500/5' : 'border-primary/20 text-primary bg-primary/5')
-                          }`}>
-                            {inv.status === 'Pagada' ? 'Liquidada' : (isOverdue ? 'Vencida' : 'Pendiente')}
-                          </span>
-                        </td>
-                        <td className="py-8 pr-4">
-                          <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all">
+                        <td className="py-5 pr-4">
+                          <div className="flex justify-end gap-2">
                             {inv.status !== 'Pagada' && (
-                              <button 
-                                onClick={() => {
-                                  setPayingInvoice(inv);
-                                  setPaymentAmount(balance.toString());
-                                }}
-                                className="w-12 h-12 bg-primary/5 text-primary rounded-2xl flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-2xl"
-                              >
-                                <DollarSign size={18} />
-                              </button>
+                              <button onClick={() => { setPayingInvoice(inv); setPaymentAmount(balance.toString()); }} className="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all"><DollarSign size={16} /></button>
                             )}
-                            <button 
-                              onClick={() => {
-                                setEditingInvoice(inv);
-                                setEditIssuedAt(inv.issued_at.split('T')[0]);
-                                setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : '');
-                              }}
-                              className="w-12 h-12 bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground rounded-2xl flex items-center justify-center transition-all"
-                            >
-                              <Edit2 size={16} />
-                            </button>
+                            <button onClick={() => { setEditingInvoice(inv); setEditIssuedAt(inv.issued_at.split('T')[0]); setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : ''); }} className="w-10 h-10 bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground rounded-xl flex items-center justify-center transition-all"><Edit2 size={14} /></button>
                           </div>
                         </td>
                       </tr>
@@ -550,6 +493,47 @@ export default function AgingView() {
                   })}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-3">
+            {selectedMonthData.invoices
+              .filter(inv => (showPaid || inv.status !== 'Pagada'))
+              .filter(inv => !invoiceSearch || inv.client?.name?.toLowerCase().includes(invoiceSearch.toLowerCase()))
+              .map((inv) => {
+                const balance = Number(inv.total_amount) - Number(inv.paid_amount);
+                const isOverdue = inv.payment_due_date && new Date(inv.payment_due_date) < new Date() && inv.status !== 'Pagada';
+                return (
+                  <div key={inv.id} className="bg-slate-100/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-black text-foreground uppercase leading-tight">{inv.client?.name || 'Venta Mesón'}</p>
+                        <p className="text-[9px] text-slate-500 uppercase tracking-widest">Folio #{inv.folio} · {formatDate(inv.payment_due_date || inv.issued_at)}</p>
+                      </div>
+                      <span className={`text-[8px] font-black px-2 py-1 rounded-lg uppercase border shrink-0 ${
+                        inv.status === 'Pagada' ? 'border-emerald-500/20 text-emerald-500 bg-emerald-500/5' :
+                        isOverdue ? 'border-rose-500/30 text-rose-500 bg-rose-500/5' : 'border-primary/20 text-primary bg-primary/5'
+                      }`}>{inv.status === 'Pagada' ? 'Liquidada' : isOverdue ? 'Vencida' : 'Pendiente'}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[9px] text-slate-500 uppercase">Total</p>
+                        <p className="text-sm font-black text-slate-400">{formatCurrency(inv.total_amount)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] text-slate-500 uppercase">Saldo</p>
+                        <p className={`text-base font-black tracking-tighter ${balance > 0 ? 'text-foreground' : 'text-emerald-500'}`}>{formatCurrency(balance)}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        {inv.status !== 'Pagada' && (
+                          <button onClick={() => { setPayingInvoice(inv); setPaymentAmount(balance.toString()); }} className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all"><DollarSign size={16} /></button>
+                        )}
+                        <button onClick={() => { setEditingInvoice(inv); setEditIssuedAt(inv.issued_at.split('T')[0]); setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : ''); }} className="w-10 h-10 bg-slate-200 dark:bg-white/5 text-slate-500 rounded-xl flex items-center justify-center"><Edit2 size={14} /></button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}
