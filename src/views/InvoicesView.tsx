@@ -36,9 +36,8 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showPaid, setShowPaid] = useState(false);
+  const [viewMode, setViewMode] = useState<'pending' | 'history' | 'weekly'>('pending');
   const [selectedCommune, setSelectedCommune] = useState<string>('Todas');
-  const [isWeeklyFilter, setIsWeeklyFilter] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<any | null>(null);
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'folio', direction: 'desc' });
@@ -52,7 +51,7 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
 
   useEffect(() => {
     fetchInvoices();
-  }, [showPaid]);
+  }, [viewMode]);
 
   useEffect(() => {
     if (initialInvoiceId && invoices.length > 0) {
@@ -78,8 +77,7 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
 
   useEffect(() => {
     if (initialFilter === 'weekly' && invoices.length > 0) {
-      setIsWeeklyFilter(true);
-      setShowPaid(false);
+      setViewMode('weekly');
       if (onClearFilter) onClearFilter();
     }
   }, [initialFilter, invoices, onClearFilter]);
@@ -94,7 +92,7 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
           client:nf_clients!nf_invoices_client_id_fkey (*)
         `);
       
-      if (!showPaid && !initialInvoiceId) {
+      if (viewMode !== 'history' && !initialInvoiceId) {
         query = query.neq('status', 'Pagada');
       }
 
@@ -159,7 +157,7 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
       const matchesCommune = selectedCommune === 'Todas' || inv.client?.commune === selectedCommune;
       
       let matchesWeekly = true;
-      if (isWeeklyFilter) {
+      if (viewMode === 'weekly') {
         const now = new Date();
         const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1);
         const startOfWeek = new Date(now.setDate(diff));
@@ -220,14 +218,20 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
         
         <div className="flex bg-slate-200/50 dark:bg-white/[0.03] p-1.5 rounded-[1.25rem] border border-slate-200 dark:border-white/5 w-full lg:w-auto shadow-2xl">
           <button 
-            onClick={() => setShowPaid(false)}
-            className={`flex-1 lg:px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${!showPaid ? 'bg-primary text-white dark:bg-white dark:text-black shadow-lg' : 'text-slate-500 hover:text-foreground'}`}
+            onClick={() => setViewMode('pending')}
+            className={`flex-1 lg:px-6 py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-500 ${viewMode === 'pending' ? 'bg-primary text-white dark:bg-white dark:text-black shadow-lg' : 'text-slate-500 hover:text-foreground'}`}
           >
             Pendientes
           </button>
           <button 
-            onClick={() => setShowPaid(true)}
-            className={`flex-1 lg:px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${showPaid ? 'bg-primary text-white dark:bg-white dark:text-black shadow-lg' : 'text-slate-500 hover:text-foreground'}`}
+            onClick={() => setViewMode('weekly')}
+            className={`flex-1 lg:px-6 py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-500 ${viewMode === 'weekly' ? 'bg-primary text-white dark:bg-white dark:text-black shadow-lg' : 'text-slate-500 hover:text-foreground'}`}
+          >
+            Próximos
+          </button>
+          <button 
+            onClick={() => setViewMode('history')}
+            className={`flex-1 lg:px-6 py-3.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-500 ${viewMode === 'history' ? 'bg-primary text-white dark:bg-white dark:text-black shadow-lg' : 'text-slate-500 hover:text-foreground'}`}
           >
             Historial
           </button>
@@ -246,16 +250,6 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
             className="flex-1 bg-transparent border-none outline-none text-foreground font-bold uppercase text-[10px] tracking-widest placeholder:text-slate-400 dark:placeholder:text-slate-700"
           />
         </div>
-
-        {isWeeklyFilter && (
-          <div className="flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-2xl animate-in zoom-in duration-300">
-            <Clock size={14} className="text-indigo-400" />
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Vencimientos Próximos</span>
-            <button onClick={() => setIsWeeklyFilter(false)} className="p-1 hover:bg-white/10 rounded-lg text-indigo-400">
-              <X size={14} />
-            </button>
-          </div>
-        )}
         
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="glass-card px-6 py-4 lg:py-5 rounded-[1.5rem] lg:rounded-3xl flex items-center justify-between gap-3 min-w-[200px] group border-slate-200 dark:border-white/5">
