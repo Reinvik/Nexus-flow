@@ -181,10 +181,10 @@ function App() {
           </nav>
 
           {/* User Profile */}
-          <div className="p-4 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20">
-            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all duration-300 group cursor-pointer tap-highlight-none">
+          <div className="p-4 border-t border-slate-100 dark:border-white/5 bg-white dark:bg-black/20">
+            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-300 group cursor-pointer tap-highlight-none">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-center text-white font-bold text-sm border border-slate-200 dark:border-white/10 group-hover:border-cyan-500/50 shadow-lg transition-all">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all">
                   <span className="text-white font-black">{user.email?.charAt(0).toUpperCase()}</span>
                 </div>
               </div>
@@ -192,22 +192,29 @@ function App() {
               {(sidebarOpen || window.innerWidth < 1024) && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground truncate">{user.email?.split('@')[0]}</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Operador</p>
                 </div>
               )}
             </div>
 
-            <div className={`mt-3 flex gap-2 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'flex-col' : 'flex-row'}`}>
+            <div className={`mt-2 flex gap-2 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'flex-col' : 'flex-row'}`}>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="flex-1 flex items-center justify-center p-2.5 rounded-lg bg-slate-200/50 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-500 hover:text-primary dark:hover:text-white transition-all duration-300 tap-highlight-none"
+                className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-cyan-50 dark:bg-white/5 hover:bg-cyan-100 dark:hover:bg-white/10 text-cyan-600 dark:text-slate-400 dark:hover:text-white transition-all duration-300 tap-highlight-none border border-cyan-100 dark:border-white/5"
               >
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+                {(sidebarOpen || window.innerWidth < 1024) && (
+                  <span className="text-[9px] font-black uppercase tracking-widest">{theme === 'dark' ? 'Día' : 'Noche'}</span>
+                )}
               </button>
               <button
                 onClick={signOut}
-                className="flex-1 flex items-center justify-center p-2.5 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-all duration-300 border border-transparent hover:border-red-500/20 tap-highlight-none"
+                className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-red-50 dark:bg-red-500/5 hover:bg-red-100 dark:hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all duration-300 border border-red-100 dark:border-red-500/10 tap-highlight-none"
               >
-                <LogOut size={16} />
+                <LogOut size={15} />
+                {(sidebarOpen || window.innerWidth < 1024) && (
+                  <span className="text-[9px] font-black uppercase tracking-widest">Salir</span>
+                )}
               </button>
             </div>
           </div>
