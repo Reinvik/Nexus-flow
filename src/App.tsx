@@ -101,7 +101,7 @@ function App() {
         className={`
           fixed lg:relative inset-y-0 left-0 z-[100] h-full bg-sidebar-bg border-r border-slate-200 dark:border-white/5 
           transition-all duration-500 ease-in-out flex flex-col
-          ${sidebarOpen ? 'w-72 translate-x-0' : 'w-24 -translate-x-full lg:translate-x-0'}
+          ${sidebarOpen ? 'w-72 translate-x-0' : 'w-24 -translate-x-full lg:translate-x-0 overflow-hidden'}
           ${!sidebarOpen && 'lg:w-24'}
         `}
       >
@@ -136,18 +136,7 @@ function App() {
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
-              const isDesktopCollapsed = !sidebarOpen;
-
-              const activeStyle = isActive ? {
-                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : '#0f172a',
-                color: '#ffffff',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-              } : {};
-
-              const inactiveClass = theme === 'dark' 
-                ? 'text-slate-500 hover:text-white hover:bg-white/5' 
-                : 'text-slate-700 hover:text-primary hover:bg-slate-50';
-
+              
               return (
                 <button
                   key={item.id}
@@ -155,18 +144,21 @@ function App() {
                     setCurrentView(item.id as any);
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative tap-highlight-none ${!isActive ? inactiveClass : ''}`}
-                  style={activeStyle}
-                  title={isDesktopCollapsed ? item.name : undefined}
+                  className={`
+                    w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative
+                    ${isActive 
+                      ? 'bg-primary shadow-[0_10px_20px_-10px_rgba(6,182,212,0.5)]' 
+                      : 'hover:bg-slate-50 dark:hover:bg-white/5 text-slate-500'
+                    }
+                  `}
                 >
-                  <Icon
-                    size={20}
-                    className={`shrink-0 transition-all duration-500 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}
-                    style={isActive ? { color: '#22d3ee', filter: 'drop-shadow(0 0 8px rgba(6,182,212,0.5))' } : {}}
+                  <Icon 
+                    size={20} 
+                    className={`shrink-0 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`} 
                   />
-
-                  {(sidebarOpen || window.innerWidth < 1024) && (
-                    <span
+                  
+                  {sidebarOpen && (
+                    <span 
                       className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${!isActive ? (theme === 'dark' ? 'opacity-60' : 'opacity-100') : 'opacity-100'} group-hover:opacity-100 group-hover:translate-x-1`}
                       style={isActive ? { color: '#ffffff' } : {}}
                     >
@@ -174,7 +166,7 @@ function App() {
                     </span>
                   )}
 
-                  {isActive && (sidebarOpen || window.innerWidth < 1024) && (
+                  {isActive && sidebarOpen && (
                     <div className="absolute left-0 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_12px_rgba(6,182,212,0.5)]" />
                   )}
                 </button>
@@ -192,7 +184,7 @@ function App() {
                 <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm" />
               </div>
 
-              {(sidebarOpen || window.innerWidth < 1024) && (
+              {sidebarOpen && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-900 dark:text-foreground truncate leading-tight">{user.email?.split('@')[0]}</p>
                   <p className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mt-0.5 opacity-80">Operador Nexus</p>
@@ -200,13 +192,13 @@ function App() {
               )}
             </div>
 
-            <div className={`mt-3 flex gap-2 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'flex-col' : 'flex-row'}`}>
+            <div className={`mt-3 flex gap-2 ${!sidebarOpen ? 'flex-col' : 'flex-row'}`}>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white dark:bg-white/5 hover:bg-cyan-50 dark:hover:bg-white/10 text-slate-500 hover:text-cyan-600 transition-all duration-300 tap-highlight-none border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-cyan-100 dark:shadow-none"
               >
                 {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-                {(sidebarOpen || window.innerWidth < 1024) && (
+                {sidebarOpen && (
                   <span className="text-[10px] font-black uppercase tracking-wider">{theme === 'dark' ? 'Modo Día' : 'Modo Noche'}</span>
                 )}
               </button>
@@ -215,7 +207,7 @@ function App() {
                 className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white dark:bg-red-500/5 hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-500 hover:text-red-500 transition-all duration-300 border border-slate-100 dark:border-red-500/10 shadow-sm hover:shadow-red-100 dark:shadow-none"
               >
                 <LogOut size={15} />
-                {(sidebarOpen || window.innerWidth < 1024) && (
+                {sidebarOpen && (
                   <span className="text-[10px] font-black uppercase tracking-wider">Cerrar Sesión</span>
                 )}
               </button>
