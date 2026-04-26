@@ -133,10 +133,18 @@ function App() {
             {sidebarOpen && (
               <div className="px-4 mb-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] opacity-30">Menú Principal</div>
             )}
-            {navigation.map((item, idx) => {
+            {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
               const isDesktopCollapsed = !sidebarOpen;
+
+              const activeStyle = isActive ? {
+                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.08)' : '#0f172a',
+                color: '#ffffff',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+              } : {};
+
+              const inactiveClass = 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5';
 
               return (
                 <button
@@ -145,38 +153,25 @@ function App() {
                     setCurrentView(item.id as any);
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
-                  className={`
-                    w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative tap-highlight-none
-                     ${isActive
-                       ? 'bg-[#020617] dark:bg-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.2)]'
-                       : 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
-                     }
-                  `}
-                  style={isActive ? { color: '#ffffff' } : {}}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative tap-highlight-none ${!isActive ? inactiveClass : ''}`}
+                  style={activeStyle}
                   title={isDesktopCollapsed ? item.name : undefined}
                 >
-                  <Icon 
-                    size={20} 
-                    className={`shrink-0 transition-all duration-500 ${
-                      isActive 
-                        ? 'text-cyan-400 scale-110 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]' 
-                        : 'group-hover:scale-110'
-                    }`} 
+                  <Icon
+                    size={20}
+                    className={`shrink-0 transition-all duration-500 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}
+                    style={isActive ? { color: '#22d3ee', filter: 'drop-shadow(0 0 8px rgba(6,182,212,0.5))' } : {}}
                   />
-                  
+
                   {(sidebarOpen || window.innerWidth < 1024) && (
                     <span
-                      style={isActive ? { color: '#ffffff' } : {}}
-                      className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${
-                        isActive 
-                          ? 'opacity-100 translate-x-0' 
-                          : 'opacity-60 group-hover:opacity-100 group-hover:translate-x-1'
-                      }`}
+                      className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${!isActive ? 'opacity-60 group-hover:opacity-100 group-hover:translate-x-1' : ''}`}
+                      style={isActive ? { color: '#ffffff', opacity: 1 } : {}}
                     >
                       {item.name}
                     </span>
                   )}
-                  
+
                   {isActive && (sidebarOpen || window.innerWidth < 1024) && (
                     <div className="absolute left-0 w-1.5 h-6 bg-primary rounded-r-full shadow-[0_0_12px_rgba(6,182,212,0.5)]" />
                   )}
