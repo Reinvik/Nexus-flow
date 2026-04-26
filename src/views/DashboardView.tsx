@@ -420,11 +420,15 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                </div>
                
                <div className="space-y-3 relative z-10">
-                  <div className="flex justify-between items-center bg-white dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm">
+                  <div 
+                    onClick={() => onNavigate?.('inventory')}
+                    className="flex justify-between items-center bg-slate-950 p-4 rounded-2xl border border-white/10 shadow-xl cursor-pointer hover:scale-[1.02] transition-all group"
+                  >
                     <div className="space-y-1">
-                      <p className="text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">Stock Crítico</p>
-                      <p className="text-xl font-black text-foreground dark:text-white tracking-tighter uppercase">{metrics.criticalStock} <span className="text-slate-400">UNIDADES</span></p>
+                      <p className="text-[8px] font-black text-white/70 uppercase tracking-widest leading-none">Stock Crítico</p>
+                      <p className="text-xl font-black text-white tracking-tighter uppercase">{metrics.criticalStock} <span className="text-white">UNIDADES</span></p>
                     </div>
+                    <ArrowUpRight size={16} className="text-white/40 group-hover:text-white transition-colors" />
                   </div>
                  
                   <div className="flex justify-between items-center bg-rose-500/10 p-4 rounded-2xl border border-rose-500/20 shadow-sm">
