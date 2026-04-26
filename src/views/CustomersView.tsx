@@ -29,9 +29,11 @@ import { formatDate, formatRUT, validateRUT, formatCurrency } from '@/lib/format
 interface CustomersProps {
   onNavigate?: (view: any) => void;
   onSelectInvoice?: (id: string) => void;
+  initialClientId?: string | null;
+  onClearClient?: () => void;
 }
 
-export default function CustomersView({ onNavigate, onSelectInvoice }: CustomersProps) {
+export default function CustomersView({ onNavigate, onSelectInvoice, initialClientId, onClearClient }: CustomersProps) {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -89,6 +91,15 @@ export default function CustomersView({ onNavigate, onSelectInvoice }: Customers
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (initialClientId && clients.length > 0) {
+      const client = clients.find(c => c.id === initialClientId);
+      if (client) {
+        setSelectedClientHistory(client);
+      }
+    }
+  }, [initialClientId, clients]);
 
   const handleSave = async () => {
     if (!name || !rut || !phone) return toast.error('Campos obligatorios faltantes');
@@ -316,7 +327,7 @@ export default function CustomersView({ onNavigate, onSelectInvoice }: Customers
                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Detalle de Operaciones</p>
                    <h3 className="text-4xl font-black text-foreground uppercase tracking-tighter leading-tight">{selectedClientHistory.name}</h3>
                 </div>
-                <button onClick={() => setSelectedClientHistory(null)} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground transition-colors"><X size={28} /></button>
+                <button onClick={() => { setSelectedClientHistory(null); onClearClient?.(); }} className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground transition-colors"><X size={28} /></button>
              </div>
 
              <div className="max-h-[400px] overflow-y-auto no-scrollbar space-y-4 pr-2">
@@ -359,7 +370,7 @@ export default function CustomersView({ onNavigate, onSelectInvoice }: Customers
                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-[0.3em]">Total Pendiente</span>
                    <p className="text-4xl font-black text-rose-500 tracking-tighter">{formatCurrency(selectedClientHistory.total_debt)}</p>
                 </div>
-                <button onClick={() => setSelectedClientHistory(null)} className="h-16 px-12 bg-slate-200/50 dark:bg-white/5 hover:bg-primary dark:hover:bg-white text-slate-500 hover:text-white dark:hover:text-black rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-500 active:scale-95">Finalizar</button>
+                <button onClick={() => { setSelectedClientHistory(null); onClearClient?.(); }} className="h-16 px-12 bg-slate-200/50 dark:bg-white/5 hover:bg-primary dark:hover:bg-white text-slate-500 hover:text-white dark:hover:text-black rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-500 active:scale-95">Finalizar</button>
              </div>
           </div>
         </div>

@@ -38,6 +38,7 @@ function App() {
   const { user, loading, signOut } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'routing' | 'aging' | 'forecast'>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('nexus-theme') as 'dark' | 'light') || 'dark';
   });
@@ -229,22 +230,24 @@ function App() {
           <h1 className="text-lg font-black tracking-tighter text-foreground">
             NEXUS <span className="text-primary">FLOW</span>
           </h1>
-          <button className="p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white transition-colors tap-highlight-none relative">
-            <Bell size={20} />
-            <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-background" />
-          </button>
+          <div className="w-10" /> {/* Spacer for centering the title */}
         </header>
 
         {/* Content Container */}
         <div className={`w-full max-w-[1700px] mx-auto transition-all duration-500 ${currentView === 'sales' ? 'p-2 md:p-3 lg:p-3' : 'p-3 md:p-4 lg:p-4'}`}>
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {currentView === 'dashboard' && <DashboardView onNavigate={setCurrentView} />}
+            {currentView === 'dashboard' && <DashboardView onNavigate={(view, params) => {
+              if (params?.clientId) setSelectedClientId(params.clientId);
+              setCurrentView(view);
+            }} />}
             {currentView === 'inventory' && <InventoryView />}
             {currentView === 'sales' && <SalesView />}
             {currentView === 'customers' && (
               <CustomersView 
                 onNavigate={setCurrentView} 
                 onSelectInvoice={(id) => setSelectedInvoiceId(id)} 
+                initialClientId={selectedClientId}
+                onClearClient={() => setSelectedClientId(null)}
               />
             )}
             {currentView === 'invoices' && (

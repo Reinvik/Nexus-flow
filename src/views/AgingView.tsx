@@ -52,6 +52,8 @@ export default function AgingView() {
   // Edit Invoice Form State
   const [editIssuedAt, setEditIssuedAt] = useState('');
   const [editDueDate, setEditDueDate] = useState('');
+  const [editTotalAmount, setEditTotalAmount] = useState('');
+  const [editPaidAmount, setEditPaidAmount] = useState('');
   
   // Sort State
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({
@@ -117,11 +119,20 @@ export default function AgingView() {
     if (!editingInvoice) return;
     
     try {
+      const total = parseFloat(editTotalAmount) || 0;
+      const paid = parseFloat(editPaidAmount) || 0;
+      
+      const isFullyPaid = paid >= total;
+      const isPartial = paid > 0 && paid < total;
+
       const { error } = await supabase
         .from('nf_invoices')
         .update({
           issued_at: editIssuedAt,
-          payment_due_date: editDueDate || null
+          payment_due_date: editDueDate || null,
+          total_amount: total,
+          paid_amount: paid,
+          status: isFullyPaid ? 'Pagada' : (isPartial ? 'Parcial' : 'Pendiente')
         })
         .eq('id', editingInvoice.id);
 
@@ -485,7 +496,13 @@ export default function AgingView() {
                             {inv.status !== 'Pagada' && (
                               <button onClick={() => { setPayingInvoice(inv); setPaymentAmount(balance.toString()); }} className="w-10 h-10 bg-primary/5 text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all"><DollarSign size={16} /></button>
                             )}
-                            <button onClick={() => { setEditingInvoice(inv); setEditIssuedAt(inv.issued_at.split('T')[0]); setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : ''); }} className="w-10 h-10 bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground rounded-xl flex items-center justify-center transition-all"><Edit2 size={14} /></button>
+                            <button onClick={() => { 
+                              setEditingInvoice(inv); 
+                              setEditIssuedAt(inv.issued_at.split('T')[0]); 
+                              setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : ''); 
+                              setEditTotalAmount(inv.total_amount.toString());
+                              setEditPaidAmount((inv.paid_amount || 0).toString());
+                            }} className="w-10 h-10 bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground rounded-xl flex items-center justify-center transition-all"><Edit2 size={14} /></button>
                           </div>
                         </td>
                       </tr>
@@ -528,7 +545,13 @@ export default function AgingView() {
                         {inv.status !== 'Pagada' && (
                           <button onClick={() => { setPayingInvoice(inv); setPaymentAmount(balance.toString()); }} className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all"><DollarSign size={16} /></button>
                         )}
-                        <button onClick={() => { setEditingInvoice(inv); setEditIssuedAt(inv.issued_at.split('T')[0]); setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : ''); }} className="w-10 h-10 bg-slate-200 dark:bg-white/5 text-slate-500 rounded-xl flex items-center justify-center"><Edit2 size={14} /></button>
+                        <button onClick={() => { 
+                          setEditingInvoice(inv); 
+                          setEditIssuedAt(inv.issued_at.split('T')[0]); 
+                          setEditDueDate(inv.payment_due_date ? inv.payment_due_date.split('T')[0] : ''); 
+                          setEditTotalAmount(inv.total_amount.toString());
+                          setEditPaidAmount((inv.paid_amount || 0).toString());
+                        }} className="w-10 h-10 bg-slate-200 dark:bg-white/5 text-slate-500 rounded-xl flex items-center justify-center"><Edit2 size={14} /></button>
                       </div>
                     </div>
                   </div>
@@ -550,24 +573,70 @@ export default function AgingView() {
               <button onClick={() => setEditingInvoice(null)} className="w-12 h-12 flex items-center justify-center bg-slate-200/50 dark:bg-white/5 text-slate-500 hover:text-foreground rounded-2xl transition-colors"><X size={28} /></button>
             </div>
             
-            <div className="space-y-10">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1">Fecha Emisión Fiscal</label>
-                <input 
-                  type="date" 
-                  value={editIssuedAt}
-                  onChange={(e) => setEditIssuedAt(e.target.value)}
-                  className="w-full h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 font-black text-foreground focus:border-primary/30 outline-none appearance-none"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1">Fecha Emisión Fiscal</label>
+                  <input 
+                    type="date" 
+                    value={editIssuedAt}
+                    onChange={(e) => setEditIssuedAt(e.target.value)}
+                    className="w-full h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 font-black text-foreground focus:border-primary/30 outline-none appearance-none"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1">Límite Vencimiento</label>
+                  <input 
+                    type="date" 
+                    value={editDueDate}
+                    onChange={(e) => setEditDueDate(e.target.value)}
+                    className="w-full h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 font-black text-foreground focus:border-primary/30 outline-none appearance-none"
+                  />
+                </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1">Límite Vencimiento</label>
-                <input 
-                  type="date" 
-                  value={editDueDate}
-                  onChange={(e) => setEditDueDate(e.target.value)}
-                  className="w-full h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 font-black text-foreground focus:border-primary/30 outline-none appearance-none"
-                />
+
+              <div className="space-y-8">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end px-1">
+                    <label className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">Valor Documento</label>
+                    <button 
+                      onClick={() => setEditTotalAmount((parseFloat(editTotalAmount) / 1000).toString())}
+                      className="text-primary text-[10px] font-black uppercase hover:opacity-70 transition-colors"
+                    >
+                      Normalizar
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-primary font-black">$</span>
+                    <input 
+                      type="number" 
+                      value={editTotalAmount}
+                      onChange={(e) => setEditTotalAmount(e.target.value)}
+                      className="w-full h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl pl-12 pr-6 font-black text-foreground focus:border-primary/30 outline-none appearance-none text-xl"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end px-1">
+                    <label className="text-[10px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest">Pago Recibido</label>
+                    <button 
+                      onClick={() => setEditPaidAmount(editTotalAmount)}
+                      className="text-emerald-500 text-[10px] font-black uppercase hover:opacity-70 transition-colors"
+                    >
+                      Liquidar Total
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500 font-black">$</span>
+                    <input 
+                      type="number" 
+                      value={editPaidAmount}
+                      onChange={(e) => setEditPaidAmount(e.target.value)}
+                      className="w-full h-16 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl pl-12 pr-6 font-black text-foreground focus:border-primary/30 outline-none appearance-none text-xl"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

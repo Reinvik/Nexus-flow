@@ -18,10 +18,10 @@ import {
   Clock
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 
 interface DashboardProps {
-  onNavigate?: (view: any) => void;
+  onNavigate?: (view: any, params?: any) => void;
 }
 
 export default function DashboardView({ onNavigate }: DashboardProps) {
@@ -33,6 +33,8 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
     weeklyExpirations: 0,
     overdueDebt: 0,
     debtByCommune: [] as { commune: string; amount: number }[],
+    topDebtors: [] as { id: string; name: string; amount: number; nextExpiration: string | null }[],
+    oldestDebts: [] as { id: string; name: string; amount: number; daysOverdue: number; folio: string }[],
     loading: true
   });
 
@@ -63,11 +65,12 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
           supabase.from('nf_products').select('*', { count: 'exact', head: true }).lte('stock', 5),
           supabase.from('nf_invoices')
             .select(`
+              folio,
               total_amount, 
               paid_amount, 
               payment_due_date,
               issued_at,
-              client:nf_clients!nf_invoices_client_id_fkey (commune)
+              client:nf_clients!nf_invoices_client_id_fkey (id, name, commune)
             `)
             .neq('status', 'Pagada')
         ]);
@@ -103,6 +106,69 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
           .map(([commune, amount]) => ({ commune, amount }))
           .sort((a, b) => b.amount - a.amount);
 
+        // Top 5 Debtors by Amount
+        const clientDebtMap: Record<string, { id: string; amount: number; nextExpiration: Date | null }> = {};
+        pendingInvoices?.forEach(inv => {
+          const clientData = inv.client as any;
+          const name = clientData?.name || 'Sin Nombre';
+          const id = clientData?.id || '';
+          const debt = Number(inv.total_amount) - Number(inv.paid_amount);
+          
+          let dueDate: Date | null = null;
+          if (inv.payment_due_date) {
+            dueDate = new Date(inv.payment_due_date);
+          } else if (inv.issued_at) {
+            dueDate = new Date(inv.issued_at);
+            dueDate.setDate(dueDate.getDate() + 30);
+          }
+
+          if (!clientDebtMap[name]) {
+            clientDebtMap[name] = { id, amount: 0, nextExpiration: null };
+          }
+          clientDebtMap[name].amount += debt;
+          
+          if (dueDate && (!clientDebtMap[name].nextExpiration || dueDate < clientDebtMap[name].nextExpiration)) {
+            clientDebtMap[name].nextExpiration = dueDate;
+          }
+        });
+
+        const topDebtors = Object.entries(clientDebtMap)
+          .map(([name, data]) => ({ 
+            id: data.id,
+            name, 
+            amount: data.amount, 
+            nextExpiration: data.nextExpiration ? data.nextExpiration.toISOString() : null 
+          }))
+          .sort((a, b) => b.amount - a.amount)
+          .slice(0, 5);
+
+        // Top 5 Oldest Debts
+        const oldestDebts = (pendingInvoices || [])
+          .map(inv => {
+            const clientData = inv.client as any;
+            let dueDate: Date | null = null;
+            if (inv.payment_due_date) {
+              dueDate = new Date(inv.payment_due_date);
+            } else if (inv.issued_at) {
+              dueDate = new Date(inv.issued_at);
+              dueDate.setDate(dueDate.getDate() + 30);
+            }
+            
+            const diffDays = dueDate ? Math.floor((todayStart.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+            
+            return {
+              id: clientData?.id || '',
+              name: clientData?.name || 'Sin Nombre',
+              amount: Number(inv.total_amount) - Number(inv.paid_amount),
+              daysOverdue: diffDays,
+              folio: inv.folio?.toString() || 'S/F',
+              isOverdue: diffDays > 0
+            };
+          })
+          .filter(inv => inv.isOverdue)
+          .sort((a, b) => b.daysOverdue - a.daysOverdue)
+          .slice(0, 5);
+
         setMetrics({
           todaySales: todayTotal,
           totalInvoices: invoicesCount || 0,
@@ -111,6 +177,8 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
           weeklyExpirations: weeklyTotal,
           overdueDebt: overdueTotal,
           debtByCommune: debtByCommune.slice(0, 8),
+          topDebtors,
+          oldestDebts,
           loading: false
         });
       } catch (error) {
@@ -207,49 +275,110 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
         {/* Main Content Areas */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Geo-Debt Analysis */}
-          <div className="lg:col-span-7 glass-card p-4 rounded-2xl relative overflow-hidden border border-slate-200 dark:border-white/5">
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/[0.02] blur-[60px] -ml-16 -mb-16 pointer-events-none" />
-            
-            <div className="flex items-center justify-between mb-4 px-2">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                   <Globe size={10} className="text-cyan-500" />
-                   <span className="text-[7px] font-black text-cyan-500 uppercase tracking-[0.3em]">Concentración</span>
+          <div className="lg:col-span-7 space-y-4">
+            {/* Geo-Debt Analysis */}
+            <div className="glass-card p-4 rounded-2xl relative overflow-hidden border border-slate-200 dark:border-white/5">
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/[0.02] blur-[60px] -ml-16 -mb-16 pointer-events-none" />
+              
+              <div className="flex items-center justify-between mb-4 px-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                     <Globe size={10} className="text-cyan-500" />
+                     <span className="text-[7px] font-black text-cyan-500 uppercase tracking-[0.3em]">Concentración</span>
+                  </div>
+                   <h3 className="text-lg font-black text-foreground tracking-tighter uppercase leading-none">Análisis Geográfico</h3>
                 </div>
-                 <h3 className="text-lg font-black text-foreground tracking-tighter uppercase leading-none">Análisis Geográfico</h3>
+              </div>
+
+              <div className="space-y-3 px-2">
+                {metrics.loading ? (
+                   [1, 2, 3].map(i => <div key={i} className="h-10 bg-slate-200/50 dark:bg-white/5 rounded-lg animate-pulse" />)
+                ) : metrics.debtByCommune.length > 0 ? (
+                  metrics.debtByCommune.slice(0, 5).map((item, idx) => {
+                    const maxDebt = metrics.debtByCommune[0].amount;
+                    const percentage = (item.amount / maxDebt) * 100;
+                    return (
+                      <div key={item.commune} className="group">
+                        <div className="flex justify-between items-end mb-1">
+                          <div className="flex items-center gap-2">
+                              <span className="text-[8px] font-black text-slate-500 dark:text-slate-600 tabular-nums">{idx + 1}</span>
+                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
+                           </div>
+                           <span className="text-sm font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">{formatCurrency(item.amount)}</span>
+                         </div>
+                         <div className="h-1 w-full bg-slate-100 dark:bg-white/[0.05] rounded-full overflow-hidden">
+                           <div 
+                             className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-[2s] ease-out shadow-[0_0_10px_rgba(34,211,238,0.3)]" 
+                             style={{ width: `${percentage}%` }}
+                           />
+                         </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-6 text-center opacity-20">
+                    <BarChart3 size={24} strokeWidth={1} className="mx-auto text-slate-400" />
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="space-y-3 px-2">
-              {metrics.loading ? (
-                 [1, 2, 3].map(i => <div key={i} className="h-10 bg-slate-200/50 dark:bg-white/5 rounded-lg animate-pulse" />)
-              ) : metrics.debtByCommune.length > 0 ? (
-                metrics.debtByCommune.slice(0, 5).map((item, idx) => {
-                  const maxDebt = metrics.debtByCommune[0].amount;
-                  const percentage = (item.amount / maxDebt) * 100;
-                  return (
-                    <div key={item.commune} className="group">
-                      <div className="flex justify-between items-end mb-1">
-                        <div className="flex items-center gap-2">
-                            <span className="text-[8px] font-black text-slate-500 dark:text-slate-600 tabular-nums">{idx + 1}</span>
-                            <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
-                         </div>
-                         <span className="text-sm font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">{formatCurrency(item.amount)}</span>
-                       </div>
-                       <div className="h-1 w-full bg-slate-100 dark:bg-white/[0.05] rounded-full overflow-hidden">
-                         <div 
-                           className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-[2s] ease-out shadow-[0_0_10px_rgba(34,211,238,0.3)]" 
-                           style={{ width: `${percentage}%` }}
-                         />
-                       </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="py-6 text-center opacity-20">
-                  <BarChart3 size={24} strokeWidth={1} className="mx-auto text-slate-400" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Top Debtors */}
+              <div className="glass-card p-5 rounded-[2rem] border border-slate-200 dark:border-white/5 bg-white/30 dark:bg-white/[0.01]">
+                <div className="flex items-center gap-2 mb-4">
+                  <Users size={12} className="text-primary" />
+                  <h4 className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-500">Ranking de Cartera</h4>
                 </div>
-              )}
+                <div className="space-y-4">
+                  {metrics.topDebtors.map((debtor, idx) => (
+                    <div 
+                      key={debtor.name} 
+                      onClick={() => onNavigate?.('customers', { clientId: debtor.id })}
+                      className="flex items-center justify-between group cursor-pointer"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black text-foreground uppercase truncate group-hover:text-primary transition-colors">{idx + 1}. {debtor.name}</p>
+                        <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">
+                          {debtor.nextExpiration ? `Prox: ${formatDate(debtor.nextExpiration)}` : 'Sin fecha'}
+                        </p>
+                      </div>
+                      <span className="text-xs font-black text-slate-800 dark:text-slate-200 tabular-nums">{formatCurrency(debtor.amount)}</span>
+                    </div>
+                  ))}
+                  {!metrics.loading && metrics.topDebtors.length === 0 && (
+                    <p className="py-4 text-center text-[8px] font-black text-slate-400 uppercase tracking-widest">Sin deudas activas</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Oldest Debts */}
+              <div className="glass-card p-5 rounded-[2rem] border border-rose-500/10 bg-rose-500/[0.02]">
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock size={12} className="text-rose-500" />
+                  <h4 className="text-[8px] font-black uppercase tracking-[0.4em] text-rose-500">Mora Crítica</h4>
+                </div>
+                <div className="space-y-4">
+                  {metrics.oldestDebts.map((debt) => (
+                    <div 
+                      key={`${debt.folio}-${debt.name}`} 
+                      onClick={() => onNavigate?.('customers', { clientId: debt.id })}
+                      className="flex items-center justify-between group cursor-pointer"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black text-rose-500 uppercase truncate group-hover:opacity-70 transition-opacity">#{debt.folio} · {debt.name}</p>
+                        <p className="text-[7px] font-black text-rose-500/60 uppercase tracking-widest animate-pulse">
+                          {debt.daysOverdue} días de atraso
+                        </p>
+                      </div>
+                      <span className="text-xs font-black text-rose-500 tabular-nums">{formatCurrency(debt.amount)}</span>
+                    </div>
+                  ))}
+                  {!metrics.loading && metrics.oldestDebts.length === 0 && (
+                    <p className="py-4 text-center text-[8px] font-black text-slate-400 uppercase tracking-widest">Sin mora detectada</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
