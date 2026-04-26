@@ -199,7 +199,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
       trend: '+12.5%'
     },
     { 
-      name: 'Vencimientos', 
+      name: 'Vencimientos Próximos', 
       value: metrics.weeklyExpirations, 
       icon: Clock, 
       color: 'text-indigo-500',
@@ -249,7 +249,13 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {stats.map((stat) => (
-            <div key={stat.name} className="glass-card p-3 rounded-xl relative overflow-hidden group hover:bg-slate-200/10 dark:hover:bg-white/[0.01] transition-all duration-700 shadow-sm border-slate-200 dark:border-white/5">
+            <div 
+              key={stat.name} 
+              onClick={() => {
+                if (stat.name === 'Vencimientos Próximos') onNavigate?.('invoices', { filter: 'weekly' });
+              }}
+              className={`glass-card p-3 rounded-xl relative overflow-hidden group hover:bg-slate-200/10 dark:hover:bg-white/[0.01] transition-all duration-700 shadow-sm border-slate-200 dark:border-white/5 ${stat.name === 'Vencimientos Próximos' ? 'cursor-pointer active:scale-95' : ''}`}
+            >
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.02] blur-[40px] -mr-12 -mt-12 pointer-events-none" />
               
               <div className="flex items-center justify-between mb-2">

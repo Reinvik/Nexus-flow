@@ -28,14 +28,17 @@ interface InvoicesProps {
   onClearInvoice?: () => void;
   initialCommune?: string | null;
   onClearCommune?: () => void;
+  initialFilter?: string | null;
+  onClearFilter?: () => void;
 }
 
-export default function InvoicesView({ initialInvoiceId, onClearInvoice, initialCommune, onClearCommune }: InvoicesProps) {
+export default function InvoicesView({ initialInvoiceId, onClearInvoice, initialCommune, onClearCommune, initialFilter, onClearFilter }: InvoicesProps) {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPaid, setShowPaid] = useState(false);
   const [selectedCommune, setSelectedCommune] = useState<string>('Todas');
+  const [isWeeklyFilter, setIsWeeklyFilter] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<any | null>(null);
   
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'folio', direction: 'desc' });
@@ -72,6 +75,14 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
       if (onClearCommune) onClearCommune();
     }
   }, [initialCommune, invoices, onClearCommune]);
+
+  useEffect(() => {
+    if (initialFilter === 'weekly' && invoices.length > 0) {
+      setIsWeeklyFilter(true);
+      setShowPaid(false);
+      if (onClearFilter) onClearFilter();
+    }
+  }, [initialFilter, invoices, onClearFilter]);
 
   const fetchInvoices = async () => {
     setLoading(true);
@@ -146,7 +157,21 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
         inv.folio?.toString().includes(searchTerm) || 
         inv.client?.name?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCommune = selectedCommune === 'Todas' || inv.client?.commune === selectedCommune;
-      return matchesSearch && matchesCommune;
+      
+      let matchesWeekly = true;
+      if (isWeeklyFilter) {
+        const now = new Date();
+        const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1);
+        const startOfWeek = new Date(now.setDate(diff));
+        startOfWeek.setHours(0,0,0,0);
+        const endOfWeek = new Date(now.setDate(diff + 6));
+        endOfWeek.setHours(23,59,59,999);
+        
+        const dueDate = inv.payment_due_date ? new Date(inv.payment_due_date) : null;
+        matchesWeekly = dueDate !== null && dueDate >= startOfWeek && dueDate <= endOfWeek;
+      }
+
+      return matchesSearch && matchesCommune && matchesWeekly;
     });
 
     if (sortConfig.key) {
@@ -221,6 +246,16 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
             className="flex-1 bg-transparent border-none outline-none text-foreground font-bold uppercase text-[10px] tracking-widest placeholder:text-slate-400 dark:placeholder:text-slate-700"
           />
         </div>
+
+        {isWeeklyFilter && (
+          <div className="flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-2xl animate-in zoom-in duration-300">
+            <Clock size={14} className="text-indigo-400" />
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Vencimientos Próximos</span>
+            <button onClick={() => setIsWeeklyFilter(false)} className="p-1 hover:bg-white/10 rounded-lg text-indigo-400">
+              <X size={14} />
+            </button>
+          </div>
+        )}
         
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="glass-card px-6 py-4 lg:py-5 rounded-[1.5rem] lg:rounded-3xl flex items-center justify-between gap-3 min-w-[200px] group border-slate-200 dark:border-white/5">

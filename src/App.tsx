@@ -40,6 +40,7 @@ function App() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedCommune, setSelectedCommune] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('nexus-theme') as 'dark' | 'light') || 'dark';
   });
@@ -240,6 +241,7 @@ function App() {
             {currentView === 'dashboard' && <DashboardView onNavigate={(view, params) => {
               if (params?.clientId) setSelectedClientId(params.clientId);
               if (params?.commune) setSelectedCommune(params.commune);
+              if (params?.filter) setSelectedFilter(params.filter);
               setCurrentView(view);
             }} />}
             {currentView === 'inventory' && <InventoryView />}
@@ -258,6 +260,8 @@ function App() {
                 onClearInvoice={() => setSelectedInvoiceId(null)} 
                 initialCommune={selectedCommune}
                 onClearCommune={() => setSelectedCommune(null)}
+                initialFilter={selectedFilter}
+                onClearFilter={() => setSelectedFilter(null)}
               />
             )}
             {currentView === 'aging' && <AgingView />}
