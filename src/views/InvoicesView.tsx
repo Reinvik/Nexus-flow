@@ -158,14 +158,25 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
       
       let matchesWeekly = true;
       if (viewMode === 'weekly') {
-        const now = new Date();
-        const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1);
-        const startOfWeek = new Date(now.setDate(diff));
-        startOfWeek.setHours(0,0,0,0);
-        const endOfWeek = new Date(now.setDate(diff + 6));
-        endOfWeek.setHours(23,59,59,999);
+        const nowSantiago = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+        const day = nowSantiago.getDay();
+        const diffToMonday = nowSantiago.getDate() - day + (day === 0 ? -6 : 1);
+        const startOfWeek = new Date(nowSantiago);
+        startOfWeek.setDate(diffToMonday);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
         
-        const dueDate = inv.payment_due_date ? new Date(inv.payment_due_date) : null;
+        // Use payment_due_date, or fallback to issued_at + 30 days
+        let dueDate: Date | null = null;
+        if (inv.payment_due_date) {
+          dueDate = new Date(inv.payment_due_date);
+        } else if (inv.issued_at) {
+          dueDate = new Date(inv.issued_at);
+          dueDate.setDate(dueDate.getDate() + 30);
+        }
+        
         matchesWeekly = dueDate !== null && dueDate >= startOfWeek && dueDate <= endOfWeek;
       }
 

@@ -40,16 +40,25 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
 
   useEffect(() => {
     async function fetchMetrics() {
-      const todayStart = new Date();
+      // Use Santiago timezone (UTC-4) for date boundaries
+      const nowSantiago = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+      
+      const todayStart = new Date(nowSantiago);
       todayStart.setHours(0, 0, 0, 0);
+      // Convert back to UTC for DB queries
+      const todayStartUTC = new Date(todayStart.getTime() + (new Date().getTimezoneOffset() * 60000));
 
-      const now = new Date();
-      const day = now.getDay();
-      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-      const startOfWeek = new Date(now.setDate(diff));
-      const endOfWeek = new Date(now.setDate(diff + 6));
+      // Fix: don't mutate the same date object for both startOfWeek and endOfWeek
+      const day = nowSantiago.getDay();
+      const diffToMonday = nowSantiago.getDate() - day + (day === 0 ? -6 : 1);
+      const startOfWeek = new Date(nowSantiago);
+      startOfWeek.setDate(diffToMonday);
       startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
       endOfWeek.setHours(23, 59, 59, 999);
+      const today = new Date(nowSantiago);
+      today.setHours(0, 0, 0, 0);
 
       try {
         const [
@@ -96,9 +105,10 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
           }
 
           if (dueDate) {
-            dueDate.setHours(0, 0, 0, 0);
-            if (dueDate >= startOfWeek && dueDate <= endOfWeek) weeklyTotal += debt;
-            if (dueDate < todayStart) overdueTotal += debt;
+            const dueDateLocal = new Date(dueDate.toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+            dueDateLocal.setHours(0, 0, 0, 0);
+            if (dueDateLocal >= startOfWeek && dueDateLocal <= endOfWeek) weeklyTotal += debt;
+            if (dueDateLocal < today) overdueTotal += debt;
           }
         });
 
