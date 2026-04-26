@@ -148,16 +148,27 @@ function App() {
                   className={`
                     w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 group relative tap-highlight-none
                      ${isActive
-                       ? 'bg-slate-900 dark:bg-white/10 text-white shadow-[0_20px_40px_rgba(0,0,0,0.2)]'
-                       : 'text-slate-500 hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                       ? 'bg-foreground dark:bg-white/10 text-white shadow-[0_20px_40px_rgba(0,0,0,0.2)]'
+                       : 'text-sidebar-text hover:text-primary dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                      }
                   `}
                   title={isDesktopCollapsed ? item.name : undefined}
                 >
-                  <Icon size={20} className={`shrink-0 transition-all duration-500 ${isActive ? 'text-white dark:text-primary dark:drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] scale-110' : 'group-hover:scale-110'}`} />
+                  <Icon 
+                    size={20} 
+                    className={`shrink-0 transition-all duration-500 ${
+                      isActive 
+                        ? 'text-primary dark:text-primary scale-110 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]' 
+                        : 'group-hover:scale-110'
+                    }`} 
+                  />
                   
                   {(sidebarOpen || window.innerWidth < 1024) && (
-                    <span className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${isActive ? 'opacity-100 translate-x-0' : 'opacity-60 group-hover:opacity-100 group-hover:translate-x-1'}`}>
+                    <span className={`font-black whitespace-nowrap text-sm tracking-wide transition-all duration-300 ${
+                      isActive 
+                        ? 'text-white opacity-100 translate-x-0' 
+                        : 'opacity-60 group-hover:opacity-100 group-hover:translate-x-1'
+                    }`}>
                       {item.name}
                     </span>
                   )}
