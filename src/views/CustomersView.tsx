@@ -174,7 +174,7 @@ export default function CustomersView({ onNavigate, onSelectInvoice }: Customers
              </div>
              <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">Gestión de Cartera</p>
           </div>
-          <h2 className="text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Clientes <span className="text-slate-500 dark:text-slate-800">Elite</span></h2>
+          <h2 className="text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Clientes</h2>
         </div>
         
         <div className="flex items-center gap-4 w-full md:w-auto">
