@@ -183,39 +183,40 @@ function App() {
           </nav>
 
           {/* User Profile */}
-          <div className="p-4 bg-white dark:bg-black/20">
-            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-300 group cursor-pointer tap-highlight-none">
+          <div className="p-4 border-t border-slate-50 dark:border-white/5 bg-white dark:bg-black/20">
+            <div className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-300 group cursor-pointer tap-highlight-none">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all">
-                  <span className="text-white font-black">{user.email?.charAt(0).toUpperCase()}</span>
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-all duration-300">
+                  <span className="text-white font-black drop-shadow-md">{user.email?.charAt(0).toUpperCase()}</span>
                 </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full shadow-sm" />
               </div>
 
               {(sidebarOpen || window.innerWidth < 1024) && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-foreground truncate">{user.email?.split('@')[0]}</p>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Operador</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-foreground truncate leading-tight">{user.email?.split('@')[0]}</p>
+                  <p className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mt-0.5 opacity-80">Operador Nexus</p>
                 </div>
               )}
             </div>
 
-            <div className={`mt-2 flex gap-2 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'flex-col' : 'flex-row'}`}>
+            <div className={`mt-3 flex gap-2 ${(!sidebarOpen && window.innerWidth >= 1024) ? 'flex-col' : 'flex-row'}`}>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-cyan-50 dark:hover:bg-white/10 text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-white transition-all duration-300 tap-highlight-none border border-slate-100 dark:border-white/5"
+                className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white dark:bg-white/5 hover:bg-cyan-50 dark:hover:bg-white/10 text-slate-500 hover:text-cyan-600 transition-all duration-300 tap-highlight-none border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-cyan-100 dark:shadow-none"
               >
                 {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
                 {(sidebarOpen || window.innerWidth < 1024) && (
-                  <span className="text-[9px] font-black uppercase tracking-widest">{theme === 'dark' ? 'Día' : 'Noche'}</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider">{theme === 'dark' ? 'Modo Día' : 'Modo Noche'}</span>
                 )}
               </button>
               <button
                 onClick={signOut}
-                className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-red-500/5 hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-all duration-300 border border-slate-100 dark:border-red-500/10 tap-highlight-none"
+                className="flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white dark:bg-red-500/5 hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-500 hover:text-red-500 transition-all duration-300 border border-slate-100 dark:border-red-500/10 shadow-sm hover:shadow-red-100 dark:shadow-none"
               >
                 <LogOut size={15} />
                 {(sidebarOpen || window.innerWidth < 1024) && (
-                  <span className="text-[9px] font-black uppercase tracking-widest">Salir</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider">Cerrar Sesión</span>
                 )}
               </button>
             </div>
