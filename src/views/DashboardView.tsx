@@ -231,12 +231,12 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                     <div key={item.commune} className="group">
                       <div className="flex justify-between items-end mb-1">
                         <div className="flex items-center gap-2">
-                            <span className="text-[8px] font-black text-slate-400 dark:text-slate-600 tabular-nums">{idx + 1}</span>
-                            <span className="text-[10px] font-black text-foreground dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
+                            <span className="text-[8px] font-black text-slate-500 dark:text-slate-600 tabular-nums">{idx + 1}</span>
+                            <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
                          </div>
-                         <span className="text-sm font-black text-foreground tracking-tighter tabular-nums">{formatCurrency(item.amount)}</span>
+                         <span className="text-sm font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">{formatCurrency(item.amount)}</span>
                        </div>
-                       <div className="h-1 w-full bg-slate-200 dark:bg-white/[0.05] rounded-full overflow-hidden">
+                       <div className="h-1 w-full bg-slate-100 dark:bg-white/[0.05] rounded-full overflow-hidden">
                          <div 
                            className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-[2s] ease-out shadow-[0_0_10px_rgba(34,211,238,0.3)]" 
                            style={{ width: `${percentage}%` }}
@@ -246,8 +246,8 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                   );
                 })
               ) : (
-                <div className="py-6 text-center opacity-10">
-                  <BarChart3 size={24} strokeWidth={1} className="mx-auto" />
+                <div className="py-6 text-center opacity-20">
+                  <BarChart3 size={24} strokeWidth={1} className="mx-auto text-slate-400" />
                 </div>
               )}
             </div>

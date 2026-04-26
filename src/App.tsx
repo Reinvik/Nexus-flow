@@ -131,7 +131,7 @@ function App() {
           {/* Nav Section */}
           <nav className="flex-1 overflow-y-auto no-scrollbar px-4 space-y-1 py-4">
             {sidebarOpen && (
-              <div className="px-4 mb-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] opacity-30">Menú Principal</div>
+              <div className="px-4 mb-4 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] opacity-60">Menú Principal</div>
             )}
             {navigation.map((item) => {
               const Icon = item.icon;
