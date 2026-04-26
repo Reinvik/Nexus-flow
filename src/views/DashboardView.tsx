@@ -301,10 +301,10 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                       <div key={item.commune} className="group">
                         <div className="flex justify-between items-end mb-1">
                           <div className="flex items-center gap-2">
-                              <span className="text-[8px] font-black text-slate-500 dark:text-slate-600 tabular-nums">{idx + 1}</span>
-                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide group-hover:text-primary transition-colors">{item.commune}</span>
+                              <span className="text-[8px] font-black text-slate-800 dark:text-slate-400 tabular-nums">{idx + 1}</span>
+                              <span className="text-[10px] font-black uppercase tracking-wide group-hover:text-primary transition-colors text-ultra">{item.commune}</span>
                            </div>
-                           <span className="text-sm font-black text-slate-900 dark:text-white tracking-tighter tabular-nums">{formatCurrency(item.amount)}</span>
+                           <span className="text-sm font-black tracking-tighter tabular-nums text-ultra">{formatCurrency(item.amount)}</span>
                          </div>
                          <div className="h-1 w-full bg-slate-100 dark:bg-white/[0.05] rounded-full overflow-hidden">
                            <div 
