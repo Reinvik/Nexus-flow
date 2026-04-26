@@ -298,11 +298,11 @@ export default function SalesView() {
                 <div className="flex-1 min-w-0 space-y-2 cursor-pointer" onClick={() => addToCart(product)}>
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${product.stock <= 0 ? 'bg-rose-500' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
-                    <h4 className="text-[11px] font-black text-foreground dark:text-slate-200 truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none">{product.name}</h4>
+                    <h4 className="text-[13px] font-black truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none" style={{ color: '#000000' }}>{product.name}</h4>
                   </div>
                   <div className="flex flex-col gap-1 ml-4">
-                    <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{product.sku || 'REF-N/A'}</span>
-                    <span className={`text-[9px] font-black uppercase flex items-center gap-1.5 ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-400 dark:text-slate-500'}`}>
+                    <span className="text-[9px] font-bold text-slate-950 dark:text-slate-500 uppercase tracking-widest">{product.sku || 'REF-N/A'}</span>
+                    <span className={`text-[9px] font-black uppercase flex items-center gap-1.5 ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-950 dark:text-slate-500'}`}>
                       <Package size={10} /> {product.stock} DISP
                     </span>
                   </div>
@@ -311,8 +311,8 @@ export default function SalesView() {
                 <div className="text-right flex flex-col justify-between items-end h-full py-1 pr-1 min-w-[140px]">
                   {/* Price Control - Theme Aware */}
                   <div className="relative group/price">
-                    <div className="flex items-center gap-1 bg-slate-50 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/5 group-hover/price:border-primary transition-all shadow-sm">
-                      <span className="text-[10px] font-black text-slate-400">$</span>
+                    <div className="flex items-center gap-1 bg-white dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-400 dark:border-white/5 group-hover/price:border-primary transition-all shadow-sm">
+                      <span className="text-[11px] font-black" style={{ color: '#000000' }}>$</span>
                       <input 
                         type="number"
                         defaultValue={product.net_price}
@@ -322,9 +322,10 @@ export default function SalesView() {
                             setCart(prev => prev.map(item => item.id === product.id ? { ...item, net_price: newPrice } : item));
                           }
                         }}
-                        className="w-20 bg-transparent text-sm font-black text-slate-700 dark:text-slate-200 outline-none text-right"
+                        className="w-20 bg-transparent text-sm font-black outline-none text-right"
+                        style={{ color: '#000000' }}
                       />
-                      <span className="text-[8px] font-black text-primary uppercase tracking-tighter ml-1">Neto</span>
+                      <span className="text-[9px] font-black uppercase tracking-tighter ml-1" style={{ color: '#000000' }}>Neto</span>
                     </div>
                   </div>
 
@@ -352,7 +353,7 @@ export default function SalesView() {
                   ) : (
                     <button 
                       onClick={() => addToCart(product)}
-                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white transition-all font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm border border-slate-100 dark:border-white/5"
+                      className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-200 dark:bg-white/5 text-black dark:text-slate-400 hover:bg-primary hover:text-white transition-all font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm border border-slate-300 dark:border-white/5"
                     >
                       <Plus size={14} /> Seleccionar
                     </button>
@@ -365,16 +366,16 @@ export default function SalesView() {
       </div>
 
       {/* Footer Checkout Summary - Theme Aware */}
-      <div className="shrink-0 z-[100] bg-white dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-100 dark:border-white/5 shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.1)]">
+      <div className="shrink-0 z-[100] bg-slate-950 backdrop-blur-xl border-t border-white/10 shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.5)]">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 pointer-events-none" />
         
         <div className="flex flex-col divide-y divide-slate-50 dark:divide-white/5">
           {/* Section: Client & Folio (UP) */}
-          <div className="px-6 py-3 bg-white dark:bg-transparent">
+          <div className="px-6 py-3 bg-transparent">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Sparkles size={12} className="text-[#00BCD4] animate-pulse" />
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Módulo de Facturación</span>
+                <span className="text-[9px] font-black text-white uppercase tracking-[0.3em]">Módulo de Facturación</span>
               </div>
               <button 
                 onClick={() => setIsNewClientModalOpen(true)} 
@@ -391,8 +392,8 @@ export default function SalesView() {
                   className="w-full bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 p-3 rounded-2xl flex items-center justify-between cursor-pointer group hover:border-primary transition-all shadow-sm"
                 >
                   <div className="flex items-center gap-3 truncate">
-                    <UserIcon size={16} className="text-slate-400 group-hover:text-primary" />
-                    <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight truncate">
+                    <UserIcon size={16} className="text-[#00BCD4] group-hover:text-primary" />
+                    <span className="text-[10px] font-black text-white uppercase tracking-tight truncate">
                       {selectedClientId ? clients.find(c => c.id === selectedClientId)?.name : 'Seleccionar Cliente'}
                     </span>
                   </div>
@@ -449,31 +450,31 @@ export default function SalesView() {
                   value={invoiceFolio}
                   onChange={e => setInvoiceFolio(e.target.value)}
                   placeholder="FOLIO"
-                  className={`w-full bg-slate-100 dark:bg-white/[0.02] border p-3 pl-9 rounded-2xl text-[10px] font-black outline-none transition-all shadow-sm ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-slate-200 dark:border-white/5 text-foreground focus:border-primary/30'}`}
+                  className={`w-full bg-white/5 border p-3 pl-9 rounded-2xl text-[10px] font-black outline-none transition-all shadow-sm ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-white/10 text-white focus:border-[#00BCD4]/50'}`}
                 />
               </div>
             </div>
           </div>
 
           {/* Section: Totals & Processing (DOWN) */}
-          <div className="px-8 py-5 flex flex-col lg:flex-row items-center justify-between gap-6 bg-white dark:bg-transparent">
+          <div className="px-8 py-5 flex flex-col lg:flex-row items-center justify-between gap-6 bg-transparent">
             <div className="flex flex-col sm:flex-row items-center gap-10 w-full lg:w-auto">
               <div className="flex flex-col w-full sm:w-auto">
-                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-2">Total a Recaudar</span>
+                <span className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none mb-2">Total a Recaudar</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-slate-800 dark:text-white tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
-                  <span className="text-[12px] font-black text-primary uppercase">CLP</span>
+                  <span className="text-5xl font-black text-white tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
+                  <span className="text-[12px] font-black text-[#00BCD4] uppercase">CLP</span>
                 </div>
               </div>
               
               <div className="flex items-center gap-8 border-l border-slate-200 dark:border-white/10 pl-8 w-full sm:w-auto">
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5">Neto</span>
-                  <p className="text-sm font-black text-slate-700 dark:text-slate-200">{formatCurrency(netSubtotal)}</p>
+                  <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1.5">Neto</span>
+                  <p className="text-sm font-black text-white">{formatCurrency(netSubtotal)}</p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5">IVA (19%)</span>
-                  <p className="text-sm font-black text-primary">{formatCurrency(iva)}</p>
+                  <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1.5">IVA (19%)</span>
+                  <p className="text-sm font-black text-[#00BCD4]">{formatCurrency(iva)}</p>
                 </div>
               </div>
             </div>
@@ -514,7 +515,7 @@ export default function SalesView() {
               {/* Left Column: Form Fields */}
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <label className="text-[9px] font-black text-slate-800 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
                     <UserIcon size={12} /> Nombre Completo / Razón Social
                   </label>
                   <input 
@@ -528,7 +529,7 @@ export default function SalesView() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1">R.U.T</label>
+                    <label className="text-[9px] font-black text-slate-800 dark:text-slate-600 uppercase tracking-widest ml-1">R.U.T</label>
                     <input 
                       value={newClient.rut}
                       onChange={e => setNewClient({...newClient, rut: formatRUT(e.target.value)})}
@@ -537,7 +538,7 @@ export default function SalesView() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <label className="text-[9px] font-black text-slate-800 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
                       <Phone size={12} /> Teléfono
                     </label>
                     <input 
@@ -550,7 +551,7 @@ export default function SalesView() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <label className="text-[9px] font-black text-slate-800 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
                     <Mail size={12} /> Email
                   </label>
                   <input 
@@ -564,7 +565,7 @@ export default function SalesView() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <label className="text-[9px] font-black text-slate-800 dark:text-slate-600 uppercase tracking-widest ml-1 flex items-center gap-2">
                       <MapPin size={12} /> Dirección
                     </label>
                     <input 
@@ -575,7 +576,7 @@ export default function SalesView() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1">Comuna</label>
+                    <label className="text-[9px] font-black text-slate-800 dark:text-slate-600 uppercase tracking-widest ml-1">Comuna</label>
                     <input 
                       value={newClient.commune}
                       onChange={e => setNewClient({...newClient, commune: e.target.value})}
@@ -596,8 +597,8 @@ export default function SalesView() {
               {/* Right Column: Map Selection */}
               <div className="flex flex-col space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black text-slate-500 dark:text-slate-600 uppercase tracking-widest ml-1">Ubicación Geográfica (Clic en el mapa)</label>
-                  <p className="text-[8px] font-bold text-slate-400 uppercase italic">Se guardará junto con la dirección ingresada</p>
+                  <label className="text-[9px] font-black text-slate-800 dark:text-slate-600 uppercase tracking-widest ml-1">Ubicación Geográfica (Clic en el mapa)</label>
+                  <p className="text-[8px] font-bold text-slate-600 uppercase italic">Se guardará junto con la dirección ingresada</p>
                 </div>
                 <div className="flex-1 min-h-[300px] lg:min-h-0 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-white/10 shadow-inner bg-slate-100 dark:bg-black/40">
                   <MapContainer 

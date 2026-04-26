@@ -132,7 +132,7 @@ function App() {
           {/* Nav Section */}
           <nav className="flex-1 overflow-y-auto no-scrollbar px-4 space-y-1 py-4">
             {sidebarOpen && (
-              <div className="px-4 mb-4 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] opacity-60">Menú Principal</div>
+              <div className="px-4 mb-4 text-[10px] font-black text-black dark:text-slate-400 uppercase tracking-[0.2em] opacity-100">Menú Principal</div>
             )}
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -149,13 +149,13 @@ function App() {
                     w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative
                     ${isActive 
                       ? 'bg-primary shadow-[0_10px_20px_-10px_rgba(6,182,212,0.5)]' 
-                      : 'hover:bg-slate-50 dark:hover:bg-white/5 text-slate-500'
+                      : 'hover:bg-slate-100 dark:hover:bg-white/5 text-black'
                     }
                   `}
                 >
                   <Icon 
                     size={20} 
-                    className={`shrink-0 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`} 
+                    className={`shrink-0 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-600 group-hover:text-primary'}`} 
                   />
                   
                   {sidebarOpen && (
@@ -188,7 +188,7 @@ function App() {
               {sidebarOpen && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-900 dark:text-foreground truncate leading-tight">{user.email?.split('@')[0]}</p>
-                  <p className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mt-0.5 opacity-80">Operador Nexus</p>
+                  <p className="text-[10px] font-black text-cyan-700 dark:text-cyan-400 uppercase tracking-widest mt-0.5 opacity-90">Operador Nexus</p>
                 </div>
               )}
             </div>
