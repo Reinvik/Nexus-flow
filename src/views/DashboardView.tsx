@@ -298,7 +298,11 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                     const maxDebt = metrics.debtByCommune[0].amount;
                     const percentage = (item.amount / maxDebt) * 100;
                     return (
-                      <div key={item.commune} className="group">
+                      <div 
+                        key={item.commune} 
+                        className="group cursor-pointer active:scale-[0.98] transition-all"
+                        onClick={() => onNavigate?.('invoices', { commune: item.commune })}
+                      >
                         <div className="flex justify-between items-end mb-1">
                           <div className="flex items-center gap-2">
                               <span className="text-[8px] font-black text-slate-800 dark:text-slate-400 tabular-nums">{idx + 1}</span>

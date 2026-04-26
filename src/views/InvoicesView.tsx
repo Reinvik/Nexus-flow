@@ -26,9 +26,11 @@ import { formatDate, formatCurrency } from '@/lib/formatters';
 interface InvoicesProps {
   initialInvoiceId?: string | null;
   onClearInvoice?: () => void;
+  initialCommune?: string | null;
+  onClearCommune?: () => void;
 }
 
-export default function InvoicesView({ initialInvoiceId, onClearInvoice }: InvoicesProps) {
+export default function InvoicesView({ initialInvoiceId, onClearInvoice, initialCommune, onClearCommune }: InvoicesProps) {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,6 +65,13 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice }: Invoi
       }
     }
   }, [initialInvoiceId, invoices, onClearInvoice]);
+  
+  useEffect(() => {
+    if (initialCommune && invoices.length > 0) {
+      setSelectedCommune(initialCommune);
+      if (onClearCommune) onClearCommune();
+    }
+  }, [initialCommune, invoices, onClearCommune]);
 
   const fetchInvoices = async () => {
     setLoading(true);

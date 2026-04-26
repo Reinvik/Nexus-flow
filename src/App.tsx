@@ -39,6 +39,7 @@ function App() {
   const [currentView, setCurrentView] = useState<'dashboard' | 'inventory' | 'sales' | 'customers' | 'invoices' | 'settings' | 'routing' | 'aging' | 'forecast'>('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [selectedCommune, setSelectedCommune] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('nexus-theme') as 'dark' | 'light') || 'dark';
   });
@@ -238,6 +239,7 @@ function App() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             {currentView === 'dashboard' && <DashboardView onNavigate={(view, params) => {
               if (params?.clientId) setSelectedClientId(params.clientId);
+              if (params?.commune) setSelectedCommune(params.commune);
               setCurrentView(view);
             }} />}
             {currentView === 'inventory' && <InventoryView />}
@@ -254,6 +256,8 @@ function App() {
               <InvoicesView 
                 initialInvoiceId={selectedInvoiceId} 
                 onClearInvoice={() => setSelectedInvoiceId(null)} 
+                initialCommune={selectedCommune}
+                onClearCommune={() => setSelectedCommune(null)}
               />
             )}
             {currentView === 'aging' && <AgingView />}
