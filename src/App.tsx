@@ -262,6 +262,10 @@ function App() {
                 onClearCommune={() => setSelectedCommune(null)}
                 initialFilter={selectedFilter}
                 onClearFilter={() => setSelectedFilter(null)}
+                onNavigateToClient={(clientId) => {
+                  setSelectedClientId(clientId);
+                  setCurrentView('customers');
+                }}
               />
             )}
             {currentView === 'aging' && <AgingView />}

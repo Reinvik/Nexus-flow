@@ -30,13 +30,14 @@ interface InvoicesProps {
   onClearCommune?: () => void;
   initialFilter?: string | null;
   onClearFilter?: () => void;
+  onNavigateToClient?: (clientId: string) => void;
 }
 
-export default function InvoicesView({ initialInvoiceId, onClearInvoice, initialCommune, onClearCommune, initialFilter, onClearFilter }: InvoicesProps) {
+export default function InvoicesView({ initialInvoiceId, onClearInvoice, initialCommune, onClearCommune, initialFilter, onClearFilter, onNavigateToClient }: InvoicesProps) {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'pending' | 'history' | 'weekly'>('pending');
+  const [viewMode, setViewMode] = useState<'pending' | 'history' | 'weekly' | 'today' | 'overdue'>('pending');
   const [selectedCommune, setSelectedCommune] = useState<string>('Todas');
   const [editingInvoice, setEditingInvoice] = useState<any | null>(null);
   
@@ -76,8 +77,10 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
   }, [initialCommune, invoices, onClearCommune]);
 
   useEffect(() => {
-    if (initialFilter === 'weekly' && invoices.length > 0) {
-      setViewMode('weekly');
+    if (initialFilter && invoices.length > 0) {
+      if (initialFilter === 'weekly') setViewMode('weekly');
+      else if (initialFilter === 'today') setViewMode('today');
+      else if (initialFilter === 'overdue') setViewMode('overdue');
       if (onClearFilter) onClearFilter();
     }
   }, [initialFilter, invoices, onClearFilter]);
@@ -92,7 +95,12 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
           client:nf_clients!nf_invoices_client_id_fkey (*)
         `);
       
-      if (viewMode !== 'history' && !initialInvoiceId) {
+      if (viewMode === 'history') {
+        // history: show all, including paid
+      } else if (viewMode === 'today' || viewMode === 'overdue') {
+        // fetch all non-paid for client-side filtering
+        query = query.neq('status', 'Pagada');
+      } else {
         query = query.neq('status', 'Pagada');
       }
 
@@ -167,8 +175,6 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         endOfWeek.setHours(23, 59, 59, 999);
-        
-        // Use payment_due_date, or fallback to issued_at + 30 days
         let dueDate: Date | null = null;
         if (inv.payment_due_date) {
           dueDate = new Date(inv.payment_due_date);
@@ -176,8 +182,25 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
           dueDate = new Date(inv.issued_at);
           dueDate.setDate(dueDate.getDate() + 30);
         }
-        
         matchesWeekly = dueDate !== null && dueDate >= startOfWeek && dueDate <= endOfWeek;
+      } else if (viewMode === 'today') {
+        const nowSantiago = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+        const todayStart = new Date(nowSantiago); todayStart.setHours(0,0,0,0);
+        const todayEnd = new Date(nowSantiago); todayEnd.setHours(23,59,59,999);
+        const issuedDate = inv.issued_at ? new Date(inv.issued_at) : null;
+        matchesWeekly = issuedDate !== null && issuedDate >= todayStart && issuedDate <= todayEnd;
+      } else if (viewMode === 'overdue') {
+        const nowSantiago = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santiago' }));
+        const today = new Date(nowSantiago); today.setHours(0,0,0,0);
+        const balance = Number(inv.total_amount) - Number(inv.paid_amount || 0);
+        let dueDate: Date | null = null;
+        if (inv.payment_due_date) {
+          dueDate = new Date(inv.payment_due_date);
+        } else if (inv.issued_at) {
+          dueDate = new Date(inv.issued_at);
+          dueDate.setDate(dueDate.getDate() + 30);
+        }
+        matchesWeekly = balance > 0 && dueDate !== null && dueDate < today;
       }
 
       return matchesSearch && matchesCommune && matchesWeekly;
@@ -328,7 +351,12 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
                     </div>
                     <div className="space-y-1.5 lg:space-y-2 min-w-0">
                       <div className="flex items-center gap-3">
-                        <h3 className="text-base lg:text-xl font-black text-foreground uppercase tracking-tight group-hover:text-primary transition-colors leading-tight truncate">{inv.client?.name || 'Venta Directa'}</h3>
+                        <h3 
+                          className={`text-base lg:text-xl font-black text-foreground uppercase tracking-tight leading-tight truncate transition-colors ${inv.client?.id ? 'cursor-pointer hover:text-primary' : ''}`}
+                          onClick={() => inv.client?.id && onNavigateToClient?.(inv.client.id)}
+                        >
+                          {inv.client?.name || 'Venta Directa'}
+                        </h3>
                         {isOverdue && (
                            <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping shrink-0" />
                         )}

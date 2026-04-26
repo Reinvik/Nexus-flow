@@ -205,32 +205,28 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
       value: metrics.todaySales, 
       icon: TrendingUp, 
       color: 'text-cyan-500',
-      label: 'Performance 24h',
-      trend: '+12.5%'
+      navigate: { view: 'invoices', params: { filter: 'today' } }
     },
     { 
       name: 'Vencimientos Próximos', 
       value: metrics.weeklyExpirations, 
       icon: Clock, 
       color: 'text-indigo-500',
-      label: 'Próximos 7 días',
-      trend: 'Preventivo'
+      navigate: { view: 'invoices', params: { filter: 'weekly' } }
     },
     { 
       name: 'Cartera Vencida', 
       value: metrics.overdueDebt, 
       icon: AlertCircle, 
       color: 'text-rose-500',
-      label: 'Riesgo Activo',
-      trend: 'Crítico'
+      navigate: { view: 'invoices', params: { filter: 'overdue' } }
     },
     { 
       name: 'Quiebre Stock', 
       value: metrics.criticalStock, 
       icon: Activity, 
       color: 'text-amber-500',
-      label: 'Reabastecimiento',
-      trend: 'Logística'
+      navigate: { view: 'inventory', params: {} }
     },
   ];
 
@@ -261,10 +257,8 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
           {stats.map((stat) => (
             <div 
               key={stat.name} 
-              onClick={() => {
-                if (stat.name === 'Vencimientos Próximos') onNavigate?.('invoices', { filter: 'weekly' });
-              }}
-              className={`glass-card p-3 rounded-xl relative overflow-hidden group hover:bg-slate-200/10 dark:hover:bg-white/[0.01] transition-all duration-700 shadow-sm border-slate-200 dark:border-white/5 ${stat.name === 'Vencimientos Próximos' ? 'cursor-pointer active:scale-95' : ''}`}
+              onClick={() => onNavigate?.(stat.navigate.view, stat.navigate.params)}
+              className="glass-card p-3 rounded-xl relative overflow-hidden group cursor-pointer active:scale-95 hover:bg-slate-200/10 dark:hover:bg-white/[0.01] transition-all duration-700 shadow-sm border-slate-200 dark:border-white/5"
             >
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.02] blur-[40px] -mr-12 -mt-12 pointer-events-none" />
               
@@ -272,6 +266,7 @@ export default function DashboardView({ onNavigate }: DashboardProps) {
                  <div className={`w-6 h-6 rounded-lg bg-slate-200/50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform duration-700`}>
                    <stat.icon size={12} />
                  </div>
+                 <ArrowUpRight size={12} className="text-slate-300 dark:text-slate-600 group-hover:text-primary group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all duration-300" />
               </div>
               
               <div className="space-y-0">
