@@ -418,32 +418,32 @@ export default function RoutingView() {
 
         {/* Legend / Info Overlay */}
         <div className="absolute top-6 left-6 z-10 hidden md:block">
-            <div className="glass-card p-6 rounded-3xl border border-slate-200 dark:border-white/10 backdrop-blur-xl shadow-2xl space-y-4 w-64">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 flex items-center gap-2">
-                    <MapPin size={12} className="text-primary" /> Referencia de Ruta
+            <div className="bg-white dark:bg-[#020617] p-6 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl space-y-4 w-64 backdrop-blur-md">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                    <MapPin size={12} className="text-primary" /> REFERENCIA DE RUTA
                 </h4>
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-foreground">Clientes Totales</span>
-                        <span className="text-sm font-black text-primary">{clients.length}</span>
+                        <span className="text-sm font-black text-ultra uppercase tracking-tight">Clientes Totales</span>
+                        <span className="text-lg font-black text-primary tabular-nums">{clients.length}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-foreground">En el Mapa</span>
-                        <span className="text-sm font-black text-emerald-500">{filteredClients.length}</span>
+                        <span className="text-sm font-black text-ultra uppercase tracking-tight">En el Mapa</span>
+                        <span className="text-lg font-black text-emerald-500 tabular-nums">{filteredClients.length}</span>
                     </div>
                 </div>
-                <div className="pt-4 border-t border-white/5 space-y-2">
+                <div className="pt-4 border-t border-slate-100 dark:border-white/5 space-y-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />
-                        <span className="text-[10px] font-bold text-slate-400">Riesgo Alto (Vencido)</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]" />
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">Riesgo Alto (Vencido)</span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                        <span className="text-[10px] font-bold text-slate-400">Atención (Semana actual)</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]" />
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">Atención (Semana actual)</span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                        <span className="text-[10px] font-bold text-slate-400">Crédito Saludable</span>
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
+                        <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">Crédito Saludable</span>
                     </div>
                 </div>
             </div>
