@@ -411,7 +411,7 @@ export default function SalesView() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Sparkles size={12} className="text-primary animate-pulse" />
-                <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em]">Módulo de Facturación</span>
+                <span className="text-[9px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-[0.3em]">Módulo de Facturación</span>
               </div>
               <button 
                 onClick={() => setIsNewClientModalOpen(true)} 
@@ -429,7 +429,7 @@ export default function SalesView() {
                 >
                   <div className="flex items-center gap-3 truncate">
                     <UserIcon size={16} className="text-primary" />
-                    <span className="text-[10px] font-black text-ultra uppercase tracking-tight truncate">
+                    <span className="text-[10px] font-black text-black dark:text-white uppercase tracking-tight truncate">
                       {selectedClientId ? clients.find(c => c.id === selectedClientId)?.name : 'Seleccionar Cliente'}
                     </span>
                   </div>
@@ -486,7 +486,7 @@ export default function SalesView() {
                   value={invoiceFolio}
                   onChange={e => setInvoiceFolio(e.target.value)}
                   placeholder="FOLIO"
-                  className={`w-full bg-slate-100 dark:bg-white/[0.02] border p-3 pl-9 rounded-2xl text-[10px] font-black outline-none transition-all shadow-sm ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-slate-300 dark:border-white/10 text-ultra focus:border-primary'}`}
+                  className={`w-full bg-slate-100 dark:bg-white/[0.05] border p-3 pl-9 rounded-2xl text-[10px] font-black outline-none transition-all shadow-sm ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-slate-300 dark:border-white/20 text-black dark:text-white focus:border-primary'}`}
                 />
               </div>
             </div>
@@ -496,20 +496,20 @@ export default function SalesView() {
           <div className="px-8 py-5 flex flex-col lg:flex-row items-center justify-between gap-6 bg-transparent">
             <div className="flex flex-col sm:flex-row items-center gap-10 w-full lg:w-auto">
               <div className="flex flex-col w-full sm:w-auto">
-                <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-2">Total a Recaudar</span>
+                <span className="text-[9px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest leading-none mb-2">Total a Recaudar</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-ultra tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
+                  <span className="text-5xl font-black text-black dark:text-white tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
                   <span className="text-[12px] font-black text-primary uppercase">CLP</span>
                 </div>
               </div>
               
-              <div className="flex items-center gap-8 border-l border-slate-200 dark:border-white/10 pl-8 w-full sm:w-auto">
+              <div className="flex items-center gap-8 border-l border-slate-200 dark:border-white/20 pl-8 w-full sm:w-auto">
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Neto</span>
-                  <p className="text-sm font-black text-ultra">{formatCurrency(netSubtotal)}</p>
+                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest mb-1.5">Neto</span>
+                  <p className="text-sm font-black text-black dark:text-white">{formatCurrency(netSubtotal)}</p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">IVA (19%)</span>
+                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest mb-1.5">IVA (19%)</span>
                   <p className="text-sm font-black text-primary">{formatCurrency(iva)}</p>
                 </div>
               </div>
