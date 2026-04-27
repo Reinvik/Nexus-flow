@@ -338,8 +338,8 @@ export default function SalesView() {
                     <h4 className="text-[13px] font-black truncate uppercase tracking-tight group-hover:text-primary transition-colors leading-none text-ultra">{product.name}</h4>
                   </div>
                   <div className="flex flex-col gap-1 ml-4">
-                    <span className="text-[9px] font-bold text-slate-950 dark:text-slate-400 uppercase tracking-widest">{product.sku || 'REF-N/A'}</span>
-                    <span className={`text-[9px] font-black uppercase flex items-center gap-1.5 ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-950 dark:text-slate-400'}`}>
+                    <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{product.sku || 'REF-N/A'}</span>
+                    <span className={`text-[9px] font-black uppercase flex items-center gap-1.5 ${product.stock <= 5 ? 'text-amber-500' : 'text-slate-500 dark:text-slate-400'}`}>
                       <Package size={10} /> {product.stock} DISP
                     </span>
                   </div>
@@ -348,7 +348,7 @@ export default function SalesView() {
                 <div className="text-right flex flex-col justify-between items-end h-full py-1 pr-1 min-w-[140px]">
                   {/* Price Control - Theme Aware */}
                   <div className="relative group/price">
-                    <div className="flex items-center gap-1 bg-white dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-400 dark:border-white/5 group-hover/price:border-primary transition-all shadow-sm">
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/[0.03] px-3 py-1.5 rounded-xl border border-slate-300 dark:border-white/5 group-hover/price:border-primary transition-all shadow-sm">
                       <span className="text-[11px] font-black text-ultra">$</span>
                       <input 
                         type="number"
@@ -361,7 +361,7 @@ export default function SalesView() {
                         }}
                         className="w-20 bg-transparent text-sm font-black outline-none text-right text-ultra"
                       />
-                      <span className="text-[9px] font-black uppercase tracking-tighter ml-1 text-ultra">Neto</span>
+                      <span className="text-[9px] font-black uppercase tracking-tighter ml-1 text-slate-500 dark:text-slate-400">Neto</span>
                     </div>
                   </div>
 
@@ -402,20 +402,20 @@ export default function SalesView() {
       </div>
 
       {/* Footer Checkout Summary - Theme Aware */}
-      <div className="shrink-0 z-[100] bg-slate-950 backdrop-blur-xl border-t border-white/10 shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.5)]">
+      <div className="shrink-0 z-[100] bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-white/10 shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_-20px_50px_-12px_rgba(0,0,0,0.5)]">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 pointer-events-none" />
         
-        <div className="flex flex-col divide-y divide-slate-50 dark:divide-white/5">
+        <div className="flex flex-col divide-y divide-slate-200 dark:divide-white/5">
           {/* Section: Client & Folio (UP) */}
           <div className="px-6 py-3 bg-transparent">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <Sparkles size={12} className="text-[#00BCD4] animate-pulse" />
-                <span className="text-[9px] font-black text-white uppercase tracking-[0.3em]">Módulo de Facturación</span>
+                <Sparkles size={12} className="text-primary animate-pulse" />
+                <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em]">Módulo de Facturación</span>
               </div>
               <button 
                 onClick={() => setIsNewClientModalOpen(true)} 
-                className="text-[#00BCD4] text-[9px] font-black uppercase flex items-center gap-2 hover:opacity-70 transition-all"
+                className="text-primary text-[9px] font-black uppercase flex items-center gap-2 hover:opacity-70 transition-all"
               >
                 <UserPlus size={14} /> Nuevo Cliente
               </button>
@@ -425,11 +425,11 @@ export default function SalesView() {
               <div className="flex-1 relative" ref={clientSearchRef}>
                 <div 
                   onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
-                  className="w-full bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 p-3 rounded-2xl flex items-center justify-between cursor-pointer group hover:border-primary transition-all shadow-sm"
+                  className="w-full bg-slate-100 dark:bg-white/[0.02] border border-slate-300 dark:border-white/10 p-3 rounded-2xl flex items-center justify-between cursor-pointer group hover:border-primary transition-all shadow-sm"
                 >
                   <div className="flex items-center gap-3 truncate">
-                    <UserIcon size={16} className="text-[#00BCD4] group-hover:text-primary" />
-                    <span className="text-[10px] font-black text-white uppercase tracking-tight truncate">
+                    <UserIcon size={16} className="text-primary" />
+                    <span className="text-[10px] font-black text-ultra uppercase tracking-tight truncate">
                       {selectedClientId ? clients.find(c => c.id === selectedClientId)?.name : 'Seleccionar Cliente'}
                     </span>
                   </div>
@@ -486,7 +486,7 @@ export default function SalesView() {
                   value={invoiceFolio}
                   onChange={e => setInvoiceFolio(e.target.value)}
                   placeholder="FOLIO"
-                  className={`w-full bg-white/5 border p-3 pl-9 rounded-2xl text-[10px] font-black outline-none transition-all shadow-sm ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-white/10 text-white focus:border-[#00BCD4]/50'}`}
+                  className={`w-full bg-slate-100 dark:bg-white/[0.02] border p-3 pl-9 rounded-2xl text-[10px] font-black outline-none transition-all shadow-sm ${folioWarning ? 'border-rose-500/50 text-rose-500' : 'border-slate-300 dark:border-white/10 text-ultra focus:border-primary'}`}
                 />
               </div>
             </div>
@@ -496,21 +496,21 @@ export default function SalesView() {
           <div className="px-8 py-5 flex flex-col lg:flex-row items-center justify-between gap-6 bg-transparent">
             <div className="flex flex-col sm:flex-row items-center gap-10 w-full lg:w-auto">
               <div className="flex flex-col w-full sm:w-auto">
-                <span className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none mb-2">Total a Recaudar</span>
+                <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mb-2">Total a Recaudar</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-white tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
-                  <span className="text-[12px] font-black text-[#00BCD4] uppercase">CLP</span>
+                  <span className="text-5xl font-black text-ultra tracking-tighter leading-none">{formatCurrency(totalWithTax)}</span>
+                  <span className="text-[12px] font-black text-primary uppercase">CLP</span>
                 </div>
               </div>
               
               <div className="flex items-center gap-8 border-l border-slate-200 dark:border-white/10 pl-8 w-full sm:w-auto">
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1.5">Neto</span>
-                  <p className="text-sm font-black text-white">{formatCurrency(netSubtotal)}</p>
+                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Neto</span>
+                  <p className="text-sm font-black text-ultra">{formatCurrency(netSubtotal)}</p>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-1.5">IVA (19%)</span>
-                  <p className="text-sm font-black text-[#00BCD4]">{formatCurrency(iva)}</p>
+                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">IVA (19%)</span>
+                  <p className="text-sm font-black text-primary">{formatCurrency(iva)}</p>
                 </div>
               </div>
             </div>
