@@ -437,7 +437,7 @@ export default function SalesView() {
                 </div>
 
                 {isClientDropdownOpen && (
-                  <div className="absolute bottom-full left-0 right-0 mb-4 z-[200] glass-card rounded-3xl overflow-hidden shadow-2xl border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-4 duration-300 backdrop-blur-3xl bg-white/95 dark:bg-black/95">
+                  <div className="absolute bottom-full left-0 right-0 mb-4 z-[200] bg-white dark:bg-slate-950 rounded-3xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-4 duration-300">
                     <div className="p-4 bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/5">
                       <div className="relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
@@ -447,7 +447,7 @@ export default function SalesView() {
                           placeholder="FILTRO INTELIGENTE (NOMBRE O R.U.T)..."
                           value={clientSearchTerm}
                           onChange={e => setClientSearchTerm(e.target.value)}
-                          className="w-full bg-white dark:bg-black/20 text-[10px] font-black text-foreground outline-none uppercase placeholder:text-slate-400 dark:placeholder:text-slate-700 pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-white/5"
+                          className="w-full bg-slate-50 dark:bg-slate-900 text-[10px] font-black text-foreground outline-none uppercase placeholder:text-slate-400 dark:placeholder:text-slate-700 pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-white/10"
                         />
                       </div>
                     </div>
