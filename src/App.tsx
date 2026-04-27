@@ -271,7 +271,12 @@ function App() {
             {currentView === 'aging' && <AgingView />}
             {currentView === 'forecast' && <ForecastView />}
 
-            {currentView === 'routing' && <RoutingView />}
+            {currentView === 'routing' && (
+              <RoutingView onNavigateToClient={(clientId) => {
+                setSelectedClientId(clientId);
+                setCurrentView('customers');
+              }} />
+            )}
             {currentView === 'settings' && <SettingsView />}
           </div>
         </div>

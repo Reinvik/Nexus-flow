@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { MessageCircle, Phone } from 'lucide-react'
+import { MessageCircle, Phone, History } from 'lucide-react'
 import { generateWhatsAppLink } from '@/lib/whatsapp'
 
 // Fix for default marker icons
@@ -29,6 +29,7 @@ interface MapProps {
     pendingInvoices?: Array<{ folio: number; balance: number }>
   }>
   onMarkerDrag?: (id: string, newLat: number, newLon: number) => void
+  onNavigateToClient?: (clientId: string) => void
 }
 
 const getMarkerIcon = (color: string) => {
@@ -56,7 +57,7 @@ function ChangeView({ center }: { center: [number, number] }) {
   return null
 }
 
-export default function DynamicMap({ clients, onMarkerDrag }: MapProps) {
+export default function DynamicMap({ clients, onMarkerDrag, onNavigateToClient }: MapProps) {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -110,31 +111,40 @@ export default function DynamicMap({ clients, onMarkerDrag }: MapProps) {
                 {client.debtInfo || 'Sin deuda'}
               </div>
               
-              {client.phone && (
-                <div className="mt-3 flex gap-2">
-                  <a 
-                    href={generateWhatsAppLink(
-                      client.phone,
-                      client.name,
-                      client.status,
-                      client.totalDebt || 0,
-                      client.pendingInvoices || []
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 no-underline"
-                  >
-                    <MessageCircle size={14} /> WhatsApp
-                  </a>
-                  <a 
-                    href={`tel:${client.phone}`}
-                    className="p-2 bg-slate-100 text-slate-600 hover:bg-primary hover:text-white rounded-lg transition-all shadow-md active:scale-95 flex items-center justify-center"
-                    title="Llamar"
-                  >
-                    <Phone size={14} />
-                  </a>
-                </div>
-              )}
+              <div className="mt-3 flex gap-2">
+                {client.phone && (
+                  <>
+                    <a 
+                      href={generateWhatsAppLink(
+                        client.phone,
+                        client.name,
+                        client.status,
+                        client.totalDebt || 0,
+                        client.pendingInvoices || []
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 no-underline"
+                    >
+                      <MessageCircle size={14} /> WhatsApp
+                    </a>
+                    <a 
+                      href={`tel:${client.phone}`}
+                      className="p-2 bg-slate-100 text-slate-600 hover:bg-primary hover:text-white rounded-lg transition-all shadow-md active:scale-95 flex items-center justify-center"
+                      title="Llamar"
+                    >
+                      <Phone size={14} />
+                    </a>
+                  </>
+                )}
+                <button 
+                  onClick={() => onNavigateToClient?.(client.id)}
+                  className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all shadow-md active:scale-95 flex items-center justify-center"
+                  title="Ver Historial"
+                >
+                  <History size={14} />
+                </button>
+              </div>
             </div>
           </Popup>
         </Marker>

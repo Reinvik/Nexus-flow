@@ -20,7 +20,11 @@ interface ClientWithStatus {
   pendingInvoices?: Array<{ folio: number; balance: number }>;
 }
 
-export default function RoutingView() {
+interface RoutingProps {
+  onNavigateToClient?: (clientId: string) => void;
+}
+
+export default function RoutingView({ onNavigateToClient }: RoutingProps) {
   const [clients, setClients] = useState<ClientWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -411,7 +415,11 @@ export default function RoutingView() {
         ) : null}
         
         <div className="absolute inset-0">
-            <DynamicMap clients={filteredClients} onMarkerDrag={handleMarkerDrag} />
+            <DynamicMap 
+              clients={filteredClients} 
+              onMarkerDrag={handleMarkerDrag} 
+              onNavigateToClient={onNavigateToClient}
+            />
         </div>
 
         {/* Legend / Info Overlay */}
