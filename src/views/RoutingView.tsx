@@ -252,15 +252,13 @@ export default function RoutingView() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 px-2">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-primary/10 rounded-lg">
-              <MapIcon className="text-primary w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-xl font-black tracking-tight text-foreground uppercase">Logística <span className="text-slate-500">& Rutas</span></h2>
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-[8px]">Geolocalización en Tiempo Real</p>
-            </div>
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+                <MapIcon size={16} className="text-white" fill="currentColor" />
+             </div>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Geo Inteligencia</p>
           </div>
+          <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Logística <span className="text-slate-500 dark:text-slate-400">& Rutas</span></h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

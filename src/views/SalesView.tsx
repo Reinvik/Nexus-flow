@@ -284,6 +284,42 @@ export default function SalesView() {
 
   return (
     <div className="flex flex-col h-full font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700 overflow-hidden bg-background">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 px-6 py-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+                <ShoppingBag size={16} className="text-white" fill="currentColor" />
+             </div>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Punto de Venta</p>
+          </div>
+          <h2 className="text-xl md:text-2xl font-black tracking-tighter text-foreground uppercase leading-none">Venta <span className="text-slate-500 dark:text-slate-400">Directa</span></h2>
+        </div>
+        
+        <div className="flex items-center gap-4">
+           {/* Summary Mini KPIs */}
+           <div className="hidden lg:flex items-center gap-6 pr-6 border-r border-slate-200 dark:border-white/5">
+              <div className="text-right">
+                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Items</p>
+                <p className="text-sm font-black text-foreground leading-none">{activeCart.length}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Total</p>
+                <p className="text-sm font-black text-primary leading-none">{formatCurrency(totalWithTax)}</p>
+              </div>
+           </div>
+
+           <button 
+             onClick={() => {
+               setCart([]);
+               toast.success('Carrito vaciado');
+             }}
+             className="p-3 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-xl text-slate-500 hover:text-rose-500 transition-all active:scale-95"
+           >
+             <Trash2 size={16} />
+           </button>
+        </div>
+      </div>
       
       {/* Product Catalog - Theme Aware */}
       <div className="flex-1 flex flex-col min-w-0 bg-background rounded-t-[2.5rem] border-x border-t border-slate-200 dark:border-white/5 overflow-hidden">

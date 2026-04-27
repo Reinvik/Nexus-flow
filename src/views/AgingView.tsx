@@ -326,12 +326,16 @@ export default function AgingView() {
     <div className="space-y-6 font-outfit pb-24">
       {/* Header */}
       <div className="flex flex-col gap-4 px-4">
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-px bg-primary" />
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Financial Tracking</p>
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+                <BarChart3 size={16} className="text-white" fill="currentColor" />
+             </div>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Análisis de Deuda</p>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Reporte <span className="text-slate-500 dark:text-slate-400">De Aging</span></h2>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground uppercase">Recaudación <span className="text-slate-600 dark:text-slate-500">{selectedYear}</span></h2>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-4 border-t border-slate-100 dark:border-white/5">
           <div className="relative">
             <select
               value={selectedYear}

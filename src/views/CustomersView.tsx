@@ -178,14 +178,14 @@ export default function CustomersView({ onNavigate, onSelectInvoice, initialClie
     <div className="space-y-6 lg:h-[calc(100vh-140px)] flex flex-col font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
-        <div className="space-y-3">
+        <div className="space-y-1">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
                 <Users size={16} className="text-white" fill="currentColor" />
              </div>
-             <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">Gestión de Cartera</p>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Directorio Comercial</p>
           </div>
-          <h2 className="text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Clientes</h2>
+          <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Base de <span className="text-slate-500 dark:text-slate-400">Clientes</span></h2>
         </div>
         
         <div className="flex items-center gap-4 w-full md:w-auto">

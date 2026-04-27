@@ -159,14 +159,14 @@ export default function InventoryView() {
     <div className="space-y-6 lg:h-[calc(100vh-180px)] flex flex-col font-outfit animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-4">
-        <div className="space-y-2">
+        <div className="space-y-1">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-white flex items-center justify-center shadow-xl shadow-primary/10">
-                <PackageSearch size={16} className="text-primary dark:text-black" fill="currentColor" />
+             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+                <PackageSearch size={16} className="text-white" fill="currentColor" />
              </div>
-             <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Logística & Stock</p>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Logística & Stock</p>
           </div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase leading-none">Inventario <span className="text-slate-400 dark:text-slate-800">Maestro</span></h2>
+          <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Inventario <span className="text-slate-500 dark:text-slate-400">Maestro</span></h2>
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">

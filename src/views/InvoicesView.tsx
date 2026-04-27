@@ -243,11 +243,13 @@ export default function InvoicesView({ initialInvoiceId, onClearInvoice, initial
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 px-4">
         <div className="space-y-1">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-foreground uppercase leading-none">Cuentas</h2>
-          <div className="flex items-center gap-2">
-             <span className="w-8 h-px bg-primary" />
-              <p className="text-[9px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-[0.4em]">Libro de Cobranzas</p>
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20">
+                <FileText size={16} className="text-white" fill="currentColor" />
+             </div>
+             <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Libro de Cobranzas</p>
           </div>
+          <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground uppercase leading-none">Cuentas <span className="text-slate-500 dark:text-slate-400">Por Cobrar</span></h2>
         </div>
         
         <div className="flex bg-slate-200/50 dark:bg-white/[0.03] p-1.5 rounded-[1.25rem] border border-slate-200 dark:border-white/5 w-full lg:w-auto shadow-2xl">
