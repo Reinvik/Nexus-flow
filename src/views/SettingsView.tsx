@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { AppSetting } from '@/types';
 import toast from 'react-hot-toast';
-import { Save, Settings as SettingsIcon, RefreshCw, Hash, Building2, Percent, ShieldCheck, Zap, Globe, HardDrive } from 'lucide-react';
+import { Save, Settings as SettingsIcon, RefreshCw, Hash, Building2, Percent, ShieldCheck, Zap, Globe, HardDrive, Shield } from 'lucide-react';
 
 export default function SettingsView() {
   const [settings, setSettings] = useState<AppSetting[]>([]);
@@ -13,6 +13,11 @@ export default function SettingsView() {
   const [nextInvoice, setNextInvoice] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [taxRate, setTaxRate] = useState('19');
+
+  // Password state
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -39,6 +44,30 @@ export default function SettingsView() {
       toast.error('Error al cargar configuraciones');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast.success('Contraseña actualizada correctamente');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      toast.error('Error al actualizar contraseña: ' + error.message);
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -202,9 +231,51 @@ export default function SettingsView() {
                  />
               </div>
            </div>
+
+           {/* Section: Seguridad */}
+           <div className="glass-card p-10 rounded-[3.5rem] border-emerald-500/10 bg-emerald-500/[0.01] space-y-10 mt-10">
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                    <Shield size={20} />
+                 </div>
+                 <h4 className="text-xl font-black text-foreground uppercase tracking-tighter">Seguridad de Acceso</h4>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Nueva Contraseña</label>
+                    <input 
+                      type="password" 
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-emerald-500/30 outline-none transition-all"
+                      placeholder="••••••••"
+                    />
+                 </div>
+
+                 <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Confirmar Contraseña</label>
+                    <div className="flex gap-4">
+                       <input 
+                         type="password" 
+                         value={confirmPassword}
+                         onChange={(e) => setConfirmPassword(e.target.value)}
+                         className="flex-1 bg-slate-200/50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl px-6 py-5 text-sm font-black text-foreground focus:border-emerald-500/30 outline-none transition-all"
+                         placeholder="••••••••"
+                       />
+                       <button
+                          onClick={handleUpdatePassword}
+                          disabled={isUpdatingPassword || !newPassword}
+                          className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-30 h-[60px]"
+                       >
+                          {isUpdatingPassword ? <RefreshCw className="animate-spin" size={16} /> : 'Actualizar'}
+                       </button>
+                    </div>
+                 </div>
+              </div>
+           </div>
         </div>
       </div>
     </div>
   );
 }
-

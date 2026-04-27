@@ -30,7 +30,7 @@ const LoginView = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#020617] relative overflow-hidden font-outfit selection:bg-cyan-500/30">
+    <div className="min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden font-outfit selection:bg-cyan-500/30">
       {/* Background Atmosphere */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[60rem] h-[60rem] bg-cyan-500/[0.03] rounded-full blur-[140px] animate-pulse duration-[10s]" />
@@ -41,7 +41,7 @@ const LoginView = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] bg-[size:40px_40px] opacity-40" />
 
       <div className="relative z-10 w-full max-w-[1000px] px-4 sm:px-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        <div className="glass-card rounded-[4rem] border-white/5 relative overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col lg:flex-row min-h-[600px]">
+        <div className="glass-card rounded-[4rem] relative overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.1)] dark:shadow-[0_50px_100px_rgba(0,0,0,0.8)] flex flex-col lg:flex-row min-h-[600px]">
           {/* Left Panel: Branding */}
           <div className="w-full lg:w-[45%] bg-white/5 p-12 sm:p-16 flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5">
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_30%,rgba(6,182,212,0.1),transparent)]" />
@@ -52,7 +52,7 @@ const LoginView = () => {
               </div>
               
               <div className="space-y-6">
-                <h1 className="text-5xl font-black text-white tracking-tight uppercase leading-none">
+                <h1 className="text-5xl font-black text-foreground tracking-tight uppercase leading-none">
                   Nexus <span className="text-cyan-500">Flow</span>
                 </h1>
                 <div className="flex items-center gap-3">
@@ -88,7 +88,7 @@ const LoginView = () => {
             
             <div className="relative z-10 space-y-12">
               <div className="space-y-2">
-                <h2 className="text-2xl font-black text-white uppercase tracking-tight">Acceso Operativo</h2>
+                <h2 className="text-2xl font-black text-foreground uppercase tracking-tight">Acceso Operativo</h2>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Ingresa tus credenciales de autorización</p>
               </div>
 
@@ -100,7 +100,7 @@ const LoginView = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-white/[0.01] border border-white/5 text-white px-7 py-6 rounded-3xl outline-none focus:border-cyan-500/30 focus:bg-white/[0.03] transition-all duration-700 placeholder:text-slate-800 text-sm font-black uppercase tracking-wider"
+                      className="w-full bg-card dark:bg-white/[0.01] border border-slate-200 dark:border-white/5 text-foreground px-7 py-6 rounded-3xl outline-none focus:border-cyan-500/30 focus:bg-white/[0.03] transition-all duration-700 placeholder:text-slate-400 text-sm font-black uppercase tracking-wider"
                       placeholder="USUARIO@NEXUS"
                       required
                     />
@@ -120,7 +120,7 @@ const LoginView = () => {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-white/[0.01] border border-white/5 text-white px-7 py-6 rounded-3xl outline-none focus:border-cyan-500/30 focus:bg-white/[0.03] transition-all duration-700 placeholder:text-slate-800 text-sm font-black"
+                      className="w-full bg-card dark:bg-white/[0.01] border border-slate-200 dark:border-white/5 text-foreground px-7 py-6 rounded-3xl outline-none focus:border-cyan-500/30 focus:bg-white/[0.03] transition-all duration-700 placeholder:text-slate-400 text-sm font-black"
                       placeholder="••••••••"
                       required
                     />
