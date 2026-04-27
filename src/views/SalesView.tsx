@@ -437,17 +437,17 @@ export default function SalesView() {
                 </div>
 
                 {isClientDropdownOpen && (
-                  <div className="absolute bottom-full left-0 right-0 mb-4 z-[200] bg-white dark:bg-slate-950 rounded-3xl overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-4 duration-300">
-                    <div className="p-4 bg-slate-50 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/5">
+                  <div className="absolute bottom-full left-0 right-0 mb-4 z-[200] bg-white dark:bg-slate-950 rounded-3xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-200 dark:border-white/10 animate-in slide-in-from-bottom-4 duration-300">
+                    <div className="p-4 bg-slate-100 dark:bg-white/[0.03] border-b border-slate-200 dark:border-white/5">
                       <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" size={14} />
                         <input 
                           autoFocus
                           type="text" 
                           placeholder="FILTRO INTELIGENTE (NOMBRE O R.U.T)..."
                           value={clientSearchTerm}
                           onChange={e => setClientSearchTerm(e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-slate-900 text-[10px] font-black text-foreground outline-none uppercase placeholder:text-slate-400 dark:placeholder:text-slate-700 pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-white/10"
+                          className="w-full bg-white dark:bg-slate-900 text-[10px] font-black text-black dark:text-white outline-none uppercase placeholder:text-slate-400 dark:placeholder:text-slate-700 pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 focus:border-primary transition-all"
                         />
                       </div>
                     </div>
@@ -464,8 +464,8 @@ export default function SalesView() {
                             className="px-6 py-3.5 hover:bg-primary/5 cursor-pointer flex items-center justify-between group border-b border-slate-50 dark:border-white/[0.01] last:border-0 transition-all"
                           >
                             <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-foreground group-hover:text-primary uppercase truncate">{client.name}</span>
-                              <span className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">{client.rut || 'Público'}</span>
+                              <span className="text-[10px] font-black text-black dark:text-white group-hover:text-primary uppercase truncate">{client.name}</span>
+                              <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase mt-0.5">{client.rut || 'Público'}</span>
                             </div>
                             {selectedClientId === client.id && <CheckCircle2 size={16} className="text-primary" />}
                           </div>
